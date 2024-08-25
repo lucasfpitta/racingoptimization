@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+<Document>
+	<name>IntSEM</name>
+	<gx:CascadingStyle kml:id="__managed_style_15C957DDEA32A80B4A3B">
+		<Style>
+			<IconStyle>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>4</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+				<displayMode>hide</displayMode>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<gx:CascadingStyle kml:id="__managed_style_2EDC8BB83032A80B4A3B">
+		<Style>
+			<IconStyle>
+				<scale>1.2</scale>
+				<Icon>
+					<href>https://earth.google.com/earth/rpc/cc/icon?color=1976d2&amp;id=2000&amp;scale=4</href>
+				</Icon>
+				<hotSpot x="64" y="128" xunits="pixels" yunits="insetPixels"/>
+			</IconStyle>
+			<LabelStyle>
+			</LabelStyle>
+			<LineStyle>
+				<color>ff2dc0fb</color>
+				<width>6</width>
+			</LineStyle>
+			<PolyStyle>
+				<color>40ffffff</color>
+			</PolyStyle>
+			<BalloonStyle>
+				<displayMode>hide</displayMode>
+			</BalloonStyle>
+		</Style>
+	</gx:CascadingStyle>
+	<StyleMap id="__managed_style_064F2ECB8432A80B4A3B">
+		<Pair>
+			<key>normal</key>
+			<styleUrl>#__managed_style_15C957DDEA32A80B4A3B</styleUrl>
+		</Pair>
+		<Pair>
+			<key>highlight</key>
+			<styleUrl>#__managed_style_2EDC8BB83032A80B4A3B</styleUrl>
+		</Pair>
+	</StyleMap>
+	<Placemark id="04AFB48AF832A80B4A3A">
+		<name>Caminho sem título</name>
+		<LookAt>
+			<longitude>-43.18592452990485</longitude>
+			<latitude>-22.89383395910133</latitude>
+			<altitude>1.602145104947361</altitude>
+			<heading>24.40241672917</heading>
+			<tilt>6.733558241048553</tilt>
+			<gx:fovy>35</gx:fovy>
+			<range>130.3305615775025</range>
+			<altitudeMode>absolute</altitudeMode>
+		</LookAt>
+		<styleUrl>#__managed_style_064F2ECB8432A80B4A3B</styleUrl>
+		<LineString>
+			<coordinates>
+				-43.18602144860817,-22.89389614858273,0 -43.18644827139588,-22.89375020381733,0 -43.18686010048239,-22.89362041994308,0 -43.18733043710489,-22.89346094486091,0 -43.18778215216092,-22.8933044091406,0 -43.18807908145788,-22.8931987587706,0 -43.1880940520353,-22.89317213233001,0 -43.18809311560194,-22.8931515663739,0 -43.18807815423082,-22.89313577086961,0 -43.18804929997286,-22.8931350374781,0 -43.1877586574246,-22.89323552033605,0 -43.18730442773207,-22.89339132887638,0 -43.18683634572169,-22.89355130744469,0 -43.18642196560702,-22.89369436145638,0 -43.18599614507438,-22.8938381117201,0 -43.18550297860644,-22.89400452156598,0 -43.18507534314771,-22.89415195517318,0 -43.18459041555191,-22.89431539474777,0 -43.18411324457117,-22.89448012715705,0 -43.18409657426682,-22.89450074637109,0 -43.18408935507735,-22.894526113441,0 -43.18410998592844,-22.89454151411174,0 -43.18414254086753,-22.89454311730468,0 -43.18461215810121,-22.89437962630897,0 -43.18510315243365,-22.89421462101659,0 -43.18553316041366,-22.89406704719437,0 
+			</coordinates>
+		</LineString>
+	</Placemark>
+</Document>
+</kml>
