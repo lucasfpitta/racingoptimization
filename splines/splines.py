@@ -11,10 +11,10 @@ def knot_points(left, right, alfas):
 def splines_and_derivatives(splpoints,N):
     t = np.linspace(0,1,num = len(splpoints[0]))
     interpol = scp.interpolate.CubicSpline(t, (splpoints[0],splpoints[1]),axis=1, bc_type='natural')
-    spline = interpol(np.linspace(0,1,num = N))
+    #spline = interpol(np.linspace(0,1,num = N))
     diff = interpol.derivative()
-    derivative = diff(np.linspace(0,1,num = N))
-    return spline, derivative
+    #derivative = diff(np.linspace(0,1,num = N))
+    return interpol, diff#spline, derivative
 
 def find_angle(derivative):
     angle = np.zeros(len(derivative[0]))
@@ -29,5 +29,5 @@ def find_angle(derivative):
 def path_info(left, right, alfas,N):
     splpoints = knot_points(left, right, alfas)
     spline, derivative = splines_and_derivatives(splpoints,N)
-    angle = find_angle(derivative)
-    return spline, angle
+    angle = find_angle(derivative(np.linspace(0,1,num = N)))
+    return spline, derivative, angle
