@@ -1,7 +1,9 @@
 import numpy as np
 
 
-
+#Calculates the time to traverse each section using the generalized velocity squared b
+#Input 1d b vector
+#Output 1d time vector
 def reconstruct(b):
     dimension = len(b)
     t=np.zeros(dimension)

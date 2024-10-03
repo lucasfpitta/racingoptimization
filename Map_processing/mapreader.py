@@ -5,8 +5,13 @@ fiona.drvsupport.supported_drivers['kml'] = 'rw'
 fiona.drvsupport.supported_drivers['KML'] = 'rw'
 
 
+
+#function to read google_earth outlines and output outline in meters
+#Inputs .kml documents
+#Outputs 2d vectors of the outlines coordid_matrix 1 and coord_matrix2
 def get_outline(doc1, doc2):
 
+    #document reader
     #gpd.io.file.fiona.drvsupport.supported_drivers['KML'] = 'rw'
     my_map1 = gpd.read_file(doc1, driver='KML')
     my_map2 = gpd.read_file(doc2, driver='KML')
@@ -15,9 +20,11 @@ def get_outline(doc1, doc2):
     #my_map1['points'] = my_map1.apply(lambda l: linestring_to_points(l['geometry']), axis=1)
     #my_map2['points'] = my_map2.apply(lambda l: linestring_to_points(l['geometry']), axis=1)
 
+    #extracting points
     my_map1['points'] = my_map1.apply(lambda x: [y for y in x['geometry'].coords], axis=1)
     my_map2['points'] = my_map2.apply(lambda x: [y for y in x['geometry'].coords], axis=1)
 
+    
     coord_matrix1 = np.zeros((3,int(len(my_map1.points[0])+1)))
     coord_matrix2 = np.zeros((3,int(len(my_map2.points[0])+1)))
 
@@ -25,6 +32,7 @@ def get_outline(doc1, doc2):
     b=6356752.3142
     e2=(a**2-b**2)/a**2
     
+    #translate latitute and longitude to meters, with coordinated in respect to the first point
     for i in range(len(coord_matrix1[0])-1):
         coord_matrix1[0,i]=(my_map1.points[0][i][0]-my_map1.points[0][0][0])*np.pi*a*np.cos(my_map1.points[0][0][0]*np.pi/180)/(180*np.sqrt(1-e2*np.sin(my_map1.points[0][0][0]*np.pi/180)))
         coord_matrix1[1,i]=(my_map1.points[0][i][1]-my_map1.points[0][0][1])*np.pi*a*(1-e2)/(180*pow(1-e2*pow(np.sin(my_map1.points[0][0][1]*np.pi/180),2),3/2))

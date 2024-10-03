@@ -1,41 +1,40 @@
 import numpy as np
 #import pygame as gm
 import matplotlib.pyplot as plt
-from shapely.geometry import Point, Polygon
-import pandas as pd
-import scipy as scp
-import random as rnd
-from Map_processing.mapreader import get_outline
 from Map_processing.choose_path import choose_path
-from Map_processing.point_reduction_and_smooting import reduce_points, smooth_moving_average
-from splines.splines import path_info
 from Physics.model1 import model1
 from Simulation.optimization import optimization
 from Simulation.reconstruct import reconstruct
 from matplotlib.animation import FuncAnimation
-n_discretization=30
 
-N_path_points=1000
+n_discretization=30 #number of path sections
+N_path_points=1000 #plotting discretization
 
-
+#choose path
 path_name = "circle"
 external = 'Map_processing/Maps_kml/extHORTO.kml'
 internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
+#create path splines and path spline derivative, assess orientation angles over the sections, define outlines 
 spline, derivative, angle, right, left = choose_path(path_name,external,internal,N_angle=n_discretization)
 spline_points = spline(np.linspace(0,1,num = N_path_points))
 
+#Define physics over the path
 R_t, M_t, C_t, A_t = model1(spline,n_discretization)
 
 
-xsi = 1
+xsi = 1 #optimization scalar
 
+#finds the optimal solution and innitial guess. Outputs generalized velocity square b, generalized acceleration a, and forces u
 decision_variables, x0 = optimization(R_t, M_t, C_t, A_t,n_discretization,xsi)
+
+#extract the forces from the flattened result array
 forcex0=x0[2*n_discretization-1:3*n_discretization-2]
 forcey0=x0[3*n_discretization-2:len(decision_variables.x)]
 forcex1=decision_variables.x[2*n_discretization-1:3*n_discretization-2]
 forcey1=decision_variables.x[3*n_discretization-2:len(decision_variables.x)]
 
+#calculated time to run each trajectory using generalized velocity square b 
 t0 = reconstruct(x0[0:n_discretization])
 t1=reconstruct(decision_variables.x[0:n_discretization])
 
@@ -54,7 +53,7 @@ print(t0,t1)
 
 
 
-
+#animation
 
 spline_points_animation = spline(np.linspace(0,1,num = n_discretization))
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(8, 8))
