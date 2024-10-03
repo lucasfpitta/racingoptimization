@@ -17,7 +17,7 @@ def model1(spline,M):
     discretization=np.linspace(deltatheta/2,1-deltatheta/2,num = M-1)
     m = 30
     mu = 1
-    R_t = np.identity(2)
+    R_t = np.tile(np.identity(2),(M-1,1,1))
     M_t = m*mass_tilde(spline.derivative(), discretization)
     C_t = m*centrifugal_tilde(spline.derivative().derivative(),discretization)
     A_t = power_tilde(spline.derivative(), discretization)
