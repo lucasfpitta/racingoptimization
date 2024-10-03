@@ -52,12 +52,13 @@ def create_constraint3(mu,mass,n_discretization):
     return constraint3
 
 def build_x0(R_t,C_t,n_discretization):
-    x0 = np.ones(n_discretization)*0.0001
+    b0=0.0005
+    x0 = np.ones(n_discretization)*b0
     x0 = np.append(x0,np.zeros(3*(n_discretization-1)))
     u1=n_discretization+n_discretization-1
     u2=n_discretization+n_discretization-1+n_discretization-1
     for i in range(n_discretization-1):
-        u = 0.0001*np.dot(np.linalg.inv(R_t[i]),C_t[i])
+        u = b0*np.dot(np.linalg.inv(R_t[i]),C_t[i])
         x0[u1+i]=u[0]
         x0[u2+i]=u[1]
     return x0

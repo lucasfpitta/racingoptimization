@@ -6,36 +6,25 @@ import pandas as pd
 import scipy as scp
 import random as rnd
 from Map_processing.mapreader import get_outline
+from Map_processing.choose_path import choose_path
 from Map_processing.point_reduction_and_smooting import reduce_points, smooth_moving_average
 from splines.splines import path_info
 from Physics.model1 import model1
 from Simulation.optimization import optimization
 from Simulation.reconstruct import reconstruct
 from matplotlib.animation import FuncAnimation
+n_discretization=30
 
-alfa = 0.01
-n_neighborhood = 16
-max_slope = 0.06
-N=1000
-
-#read the map and set the metric coordinates
-right, left,  = get_outline('Map_processing/Maps_kml/extHORTO.kml','Map_processing/Maps_kml/intHORTO.kml')
-coords= reduce_points(right,left)
-#smooth array 2 and 5 (z coordinate)
-#coords[2], coords[5] = smooth_moving_average(coords[0:3], coords[3:6],int(len(coords[0])/n_neighborhood),alfa,max_slope)
+N_path_points=1000
 
 
-"""fig = plt.figure()
-ax = plt.axes(projection='3d')
-ax.plot3D(right[0], right[1], right[2], 'gray')
-ax.plot3D(left[0], left[1], left[2], 'red')
-plt.show()"""
+path_name = "circle"
+external = 'Map_processing/Maps_kml/extHORTO.kml'
+internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
-alfas = np.random.random_sample(len(right[0]))
-alfas[-1]=alfas[0]
-spline, derivative, angle = path_info(left, right, alfas,N)
-spline_points = spline(np.linspace(0,1,num = N))
-n_discretization=50
+spline, derivative, angle, right, left = choose_path(path_name,external,internal,N_angle=n_discretization)
+spline_points = spline(np.linspace(0,1,num = N_path_points))
+
 R_t, M_t, C_t, A_t = model1(spline,n_discretization)
 
 
@@ -70,16 +59,18 @@ print(t0,t1)
 spline_points_animation = spline(np.linspace(0,1,num = n_discretization))
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(8, 8))
 
+
+animation_time = 100
 # Set limits and labels for the first subplot
-ax1.set_xlim(-100, 70)
-ax1.set_ylim(-50, 600)
+ax1.set_xlim(min(right[0]),max(right[0]))
+ax1.set_ylim(min(right[1]),max(right[1]))
 ax1.set_title('First guess constant dtheta Animation')
 ax1.set_xlabel('X')
 ax1.set_ylabel('Y')
 
 # Set limits and labels for the second subplot
-ax2.set_xlim(-100, 70)
-ax2.set_ylim(-50, 600)
+ax2.set_xlim(min(right[0]),max(right[0]))
+ax2.set_ylim(min(right[1]),max(right[1]))
 ax2.set_title('Optimized Animation')
 ax2.set_xlabel('X')
 ax2.set_ylabel('Y')
@@ -97,9 +88,10 @@ y = radius * np.sin(theta)
 # Set limits and labels for the force plot 1 (bottom-left)
 ax3.set_xlim(-30*9.81, 30*9.81)  # X-axis is time
 ax3.set_ylim(-30*9.81, 30*9.81)    # Y-axis is force
-ax3.set_title('First guess 1 Force')
+ax3.set_title('First guess Force')
 ax3.set_xlabel('Time')
 ax3.set_ylabel('Force')
+ax3.grid()
 
 # Set limits and labels for the force plot 2 (bottom-right)
 ax4.set_xlim(-30*9.81, 30*9.81)    # X-axis is time
@@ -107,6 +99,7 @@ ax4.set_ylim(-30*9.81, 30*9.81)    # Y-axis is force
 ax4.set_title('Optimized Force')
 ax4.set_xlabel('Time')
 ax4.set_ylabel('Force')
+ax4.grid()
 
 
 
@@ -170,12 +163,12 @@ def next_frame2(i):
     return update2(i)
 
 # Create the animations
-ani1 = FuncAnimation(fig, next_frame1, frames=len(t0), init_func=init1, blit=True, repeat=True, interval=(t0[1] - t0[0]) * 1000 if len(t0) > 1 else 1000)
-ani2 = FuncAnimation(fig, next_frame2, frames=len(t1), init_func=init2, blit=True, repeat=True, interval=(t1[1] - t1[0]) * 1000 if len(t1) > 1 else 1000)
+ani1 = FuncAnimation(fig, next_frame1, frames=len(t0), init_func=init1, blit=True, repeat=True, interval=(t0[1] - t0[0]) * animation_time if len(t0) > 1 else animation_time)
+ani2 = FuncAnimation(fig, next_frame2, frames=len(t1), init_func=init2, blit=True, repeat=True, interval=(t1[1] - t1[0]) * animation_time if len(t1) > 1 else animation_time)
 
 # Adjust the timing for each animation based on its time vector
-ani1.event_source.interval = np.mean(np.diff(t0)) * 1000  # Average time difference for animation 1
-ani2.event_source.interval = np.mean(np.diff(t1)) * 1000  # Average time difference for animation 2
+ani1.event_source.interval = np.mean(np.diff(t0)) * animation_time  # Average time difference for animation 1
+ani2.event_source.interval = np.mean(np.diff(t1)) * animation_time # Average time difference for animation 2
 
 # Show the animation
 plt.tight_layout()
