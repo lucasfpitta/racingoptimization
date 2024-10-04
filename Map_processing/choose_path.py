@@ -48,10 +48,26 @@ def circle(N_angle):
     spline, derivative, angle = path_info(left, right, alfas,N_angle)
     return spline, derivative, angle, right, left
 
-# def semi_circle(ext,int,alfas,N):
+def semi_circle(N_angle):
+    Radius=100
+    Delta_radius=10
+    #define track middle
+    alfas= alfas = np.ones(30)*0.5
+    theta = np.linspace(0, np.pi, int(3*len(alfas)/4))
+    line1 = np.linspace(-Radius-Delta_radius+2*(Radius+Delta_radius)/(len(alfas)-len(theta)),Radius+Delta_radius-2*(Radius+Delta_radius)/(len(alfas)-len(theta)),int(len(alfas)-len(theta)))
+    line2 = np.linspace(-Radius+Delta_radius+2*(Radius-Delta_radius)/(len(alfas)-len(theta)),Radius-Delta_radius-2*(Radius-Delta_radius)/(len(alfas)-len(theta)),int(len(alfas)-len(theta)))
+    #outer line
+    #print(np.concatenate((Radius+Delta_radius)*np.sin(theta),np.zeros(int(len(alfas)/2))))
+    right = [np.concatenate(((Radius+Delta_radius)*np.cos(theta),line1)),np.concatenate(((Radius+Delta_radius)*np.sin(theta),np.zeros(int(len(alfas)-len(theta)))))]
+    #inner line
+    left = [np.concatenate(((Radius-Delta_radius)*np.cos(theta),line2)),np.concatenate(((Radius-Delta_radius)*np.sin(theta),np.zeros(int(len(alfas)-len(theta)))))]
+    
+    #calculate the spline (scipy spline), its derivative (scipy spline), angle (array over N_angle points)
+    #left and right are the outlines and alfas is the random path
+    spline, derivative, angle = path_info(left, right, alfas,N_angle)
     
     
-#     return spline, derivative, angle, right, left
+    return spline, derivative, angle, right, left
 
 
 #chooses the type of path. Calculates the scipy spline, scipy spline derivative, assesses angles, define oulines left and right
@@ -63,6 +79,8 @@ def choose_path(path_name,external,internal,N_angle):
         spline, derivative, angle, right, left = circle(N_angle)
     elif path_name == "google_earth":      
         spline, derivative, angle, right, left = google_earth_path(external,internal,N_angle)
+    elif path_name == "semi_circle":
+        spline, derivative, angle, right, left = semi_circle(N_angle)
     else:
         print("Error: wrong path name")
         exit()

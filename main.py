@@ -4,8 +4,10 @@ import matplotlib.pyplot as plt
 from Map_processing.choose_path import choose_path
 from Physics.model1 import model1
 from Simulation.optimization import optimization
-from Simulation.reconstruct import reconstruct
+from Simulation.reconstruct import reconstruct, interpolate_u, control_system
 from matplotlib.animation import FuncAnimation
+from Physics.translate import translate_velocity, translate_acceleration
+
 
 n_discretization=30 #number of path sections
 N_path_points=1000 #plotting discretization
@@ -38,7 +40,51 @@ forcey1=decision_variables.x[3*n_discretization-2:len(decision_variables.x)]
 t0 = reconstruct(x0[0:n_discretization])
 t1=reconstruct(decision_variables.x[0:n_discretization])
 
-print(t0,t1)
+#calculate command vector if needed
+command_vector = interpolate_u(np.transpose([forcex1,forcey1]),t1,num_points=1000)
+
+#calculate initial position and velocity for innitial guess 
+x00 =[spline_points[0][0], spline_points[1][0]]
+v00 = [derivative([0])[0][0]*np.sqrt(x0[0]+x0[1]/2),derivative([0])[1][0]*np.sqrt(x0[0]+x0[1]/2)]
+
+#Calculates the real path with the control of initial guess
+controlled_path0 = control_system([forcex0, forcey0],x00,v00,t0,N_path_points)
+
+#calculate initial position and velocity for optimized trajectory 
+x10 =[spline_points[0][0], spline_points[1][0]]
+v10 = [derivative([0])[0][0]*np.sqrt(decision_variables.x[0]+decision_variables.x[1]/2),derivative([0])[1][0]*np.sqrt(decision_variables.x[0]+decision_variables.x[1]/2)]
+#Calculates the real path with the control of optimized trajectory
+controlled_path1 = control_system([forcex1, forcey1],x10,v10,t1,N_path_points)
+
+
+#calculate absolute velocity
+v = translate_velocity(derivative,decision_variables.x[0:n_discretization],n_discretization)
+#calculate absolute acceleration
+a = translate_acceleration(derivative, derivative.derivative(),decision_variables.x[0:n_discretization], decision_variables.x[n_discretization:2*n_discretization-1],n_discretization)
+
+#Theoretical Circle maximum velocity
+theoretical_v = np.ones(len(v))*np.sqrt(9.81*100)
+#Theoretical Circle maximum acceleration
+theoretical_a = 9.81*np.ones(len(v))
+
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+ax1.set_title('Velocity circular path')
+ax1.set_xlabel('Path position')
+ax1.set_ylabel('Velocity m/s')
+ax2.set_title('Acceleration circular path')
+ax2.set_xlabel('Path position')
+ax2.set_ylabel('Acceleration m/sˆ2')
+ax1.set_ylim(0,max(v)+5)
+ax2.set_ylim(0,max(a)+5)
+ax1.plot(np.linspace(0,1,n_discretization-1),v,'*r',label="Optimized velocity")
+ax1.plot(np.linspace(0,1,n_discretization-1),theoretical_v,'-b',label="Theoretical velocity")
+ax2.plot(np.linspace(0,1,n_discretization-1),a,'*r',label="Optimized acceleration")
+ax2.plot(np.linspace(0,1,n_discretization-1),theoretical_a,'-b',label="Theoretical acceleration")
+ax1.grid()
+ax2.grid()
+ax1.legend()
+ax2.legend()
+plt.show
 
 # fig = plt.figure()
 # plt.plot(spline_points[0],spline_points[1])
@@ -61,20 +107,20 @@ fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(8, 8))
 
 animation_time = 100
 # Set limits and labels for the first subplot
-ax1.set_xlim(min(right[0]),max(right[0]))
-ax1.set_ylim(min(right[1]),max(right[1]))
+ax1.set_xlim(min(min(controlled_path0[0]),min(right[0]))-10,max(max(controlled_path0[0]),max(right[0]))+10)
+ax1.set_ylim(min(min(controlled_path0[1]),min(right[1]))-10,max(max(controlled_path0[1]),max(right[1]))+10)
 ax1.set_title('First guess constant dtheta Animation')
 ax1.set_xlabel('X')
 ax1.set_ylabel('Y')
 
 # Set limits and labels for the second subplot
-ax2.set_xlim(min(right[0]),max(right[0]))
-ax2.set_ylim(min(right[1]),max(right[1]))
+ax2.set_xlim(min(min(controlled_path1[0]),min(right[0]))-10,max(max(controlled_path1[0]),max(right[0]))+10)
+ax2.set_ylim(min(min(controlled_path1[1]),min(right[1]))-10,max(max(controlled_path1[1]),max(right[1]))+10)
 ax2.set_title('Optimized Animation')
 ax2.set_xlabel('X')
 ax2.set_ylabel('Y')
 
-radius = 30 * 9.81
+radius = 85 * 9.81
 
 # Create an array of angles
 theta = np.linspace(0, 2 * np.pi, 100)
@@ -85,16 +131,16 @@ y = radius * np.sin(theta)
 
 
 # Set limits and labels for the force plot 1 (bottom-left)
-ax3.set_xlim(-30*9.81, 30*9.81)  # X-axis is time
-ax3.set_ylim(-30*9.81, 30*9.81)    # Y-axis is force
+ax3.set_xlim(-85*9.81, 85*9.81)  # X-axis is time
+ax3.set_ylim(-85*9.81, 85*9.81)    # Y-axis is force
 ax3.set_title('First guess Force')
 ax3.set_xlabel('Time')
 ax3.set_ylabel('Force')
 ax3.grid()
 
 # Set limits and labels for the force plot 2 (bottom-right)
-ax4.set_xlim(-30*9.81, 30*9.81)    # X-axis is time
-ax4.set_ylim(-30*9.81, 30*9.81)    # Y-axis is force
+ax4.set_xlim(-85*9.81, 85*9.81)    # X-axis is time
+ax4.set_ylim(-85*9.81, 85*9.81)    # Y-axis is force
 ax4.set_title('Optimized Force')
 ax4.set_xlabel('Time')
 ax4.set_ylabel('Force')
@@ -107,6 +153,8 @@ ax4.grid()
 ax1.plot(spline_points[0], spline_points[1], 'g--', label='Path')
 ax1.plot(right[0], right[1], 'gray')
 ax1.plot(left[0], left[1], 'red')
+ax1.plot(controlled_path0[0], controlled_path0[1], 'k--', label='Real path')
+ax2.plot(controlled_path1[0], controlled_path1[1], 'k--', label='Real path')
 ax2.plot(spline_points[0], spline_points[1], 'g--', label='Path')
 ax2.plot(right[0], right[1], 'gray')
 ax2.plot(left[0], left[1], 'red')

@@ -105,7 +105,7 @@ def optimization(R_t,M_t,C_t,A_t,n_discretization,xsi):
     constraint2=create_constraint2(n_discretization)
     
     mu=1 #friction coeficient
-    mass=30 #mass of the vehicle
+    mass=85 #mass of the vehicle
     
     constraint3 =create_constraint3(mu,mass,n_discretization)
     bounds = create_b_bounds(n_discretization)
@@ -122,7 +122,12 @@ def optimization(R_t,M_t,C_t,A_t,n_discretization,xsi):
     'maxiter': 1000,   # Increase the maximum number of iterations
     'ftol': 1e-6,      # Tolerance on function value changes
         }   
+    def callback_func(xk):
+        callback_func.iteration += 1
+        print(f"Iteration {callback_func.iteration}")
+
+    callback_func.iteration = 0
     
     #optimization    
-    result = scp.optimize.minimize(objective_function, x0, method='SLSQP', constraints=cons,bounds=bounds,options=options)
+    result = scp.optimize.minimize(objective_function, x0, method='SLSQP', constraints=cons,bounds=bounds,options=options, callback = callback_func)
     return  result, x0
