@@ -13,7 +13,7 @@ n_discretization=30 #number of path sections
 N_path_points=1000 #plotting discretization
 
 #choose path
-path_name = "circle"
+path_name = "google_earth"
 external = 'Map_processing/Maps_kml/extHORTO.kml'
 internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
