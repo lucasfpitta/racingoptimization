@@ -2,7 +2,8 @@ import numpy as np
 import scipy as scp
 
 #defines the objective
-#Input optimization weight scalar xsi, Power A_t (2d array with n_discretizatio vector A_t), number of discretization
+#Input optimization weight scalar xsi, Power A_t (2d array with n_discretizatio vector A_t), 
+# number of discretization
 #Output cost of the solution (scalar)
 def create_objective(xsi, A_t,n_discretization):
     #flattened vector coordinates
@@ -113,14 +114,15 @@ def optimization(R_t,M_t,C_t,A_t,n_discretization,xsi):
     cons = [
     {'type': 'eq', 'fun': constraint1},  # Equality constraint 1
     {'type': 'eq', 'fun': constraint2},  # Equality constraint 2
-    {'type': 'ineq', 'fun': constraint3},  # Inequality friction circle
+    {'type': 'ineq', 'fun': constraint3}  # Inequality friction circle
         ]
     
     #optimizer options
     options = {
     'disp': True,      # Display iteration info
     'maxiter': 1000,   # Increase the maximum number of iterations
-    'ftol': 1e-6,      # Tolerance on function value changes
+    'ftol': 1e-8,      # Tolerance on function value changes
+    'tol': 1e-9  # Tighten constraint tolerance
         }   
     def callback_func(xk):
         callback_func.iteration += 1
@@ -130,4 +132,5 @@ def optimization(R_t,M_t,C_t,A_t,n_discretization,xsi):
     
     #optimization    
     result = scp.optimize.minimize(objective_function, x0, method='SLSQP', constraints=cons,bounds=bounds,options=options, callback = callback_func)
+    print("Test friction circle", (constraint3(result.x)>= -1E-6).all())
     return  result, x0

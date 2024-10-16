@@ -1,16 +1,19 @@
 import numpy as np
 
-#Mass matrix M translated to the path - M_t. Input is a scipy path derivative and a midpoint discretization vector over [0,1]
+#Mass matrix M translated to the path - M_t. 
+# Input is a scipy path derivative and a midpoint discretization vector over [0,1]
 def mass_tilde(derivative, discretization):
     M_t = np.transpose(derivative(discretization))
     return M_t
 
-#Centrifugal matrix C translated to the path - C_t. Input is a scipy path second derivative and a midpoint discretization vector over [0,1]
+#Centrifugal matrix C translated to the path - C_t. 
+# Input is a scipy path second derivative and a midpoint discretization vector over [0,1]
 def centrifugal_tilde(secondderivative, discretization):
     C_t = np.transpose(secondderivative(discretization))
     return C_t
 
-#Power matrix A translated to the path - A_t. Input is a scipy path derivative and a midpoint discretization vector over [0,1]
+#Power matrix A translated to the path - A_t. 
+# Input is a scipy path derivative and a midpoint discretization vector over [0,1]
 def power_tilde(derivative, discretization):
     A_t = np.transpose(derivative(discretization))
     return A_t
