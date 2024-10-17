@@ -121,12 +121,11 @@ def optimization(R_t,M_t,C_t,A_t,n_discretization,xsi):
     options = {
     'disp': True,      # Display iteration info
     'maxiter': 1000,   # Increase the maximum number of iterations
-    'ftol': 1e-8,      # Tolerance on function value changes
-    'tol': 1e-9  # Tighten constraint tolerance
+    'ftol': 1e-8      # Tolerance on function value changes
         }   
     def callback_func(xk):
         callback_func.iteration += 1
-        print(f"Iteration {callback_func.iteration}")
+        #print(f"Iteration {callback_func.iteration}")
 
     callback_func.iteration = 0
     
