@@ -5,6 +5,7 @@ from Map_processing.choose_path import choose_path
 from Physics.model1 import model1
 from Simulation.optimization import optimization
 from Simulation.optimization_only_b import optimization_only_b
+from Simulation.optimization_bu import optimization_bu
 from Simulation.reconstruct import reconstruct, interpolate_u, control_system
 from matplotlib.animation import FuncAnimation
 from Physics.translate import translate_velocity, translate_acceleration
@@ -20,10 +21,9 @@ xsi = 1 #optimization scalar
 
 
 #choose path
-path_name = "semi_circle"
-external = 'Map_processing/Maps_kml/extSEM.kml'
-internal = 'Map_processing/Maps_kml/intSEM.kml'
-
+path_name = "google_earth"
+external = 'Map_processing/Maps_kml/extHORTO.kml'
+internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
 #create path splines and path spline derivative, assess orientation angles 
 #over the sections, define outlines 
@@ -69,15 +69,21 @@ t1=reconstruct(decision_variables.x[0:n_discretization])
 
 #finds the optimal solution and innitial guess. Outputs generalized 
 #velocity square b
-decision_variables_b, x0_b = optimization_only_b(R_t, M_t, C_t, A_t,n_discretization,xsi)
+decision_variables_bu, x0_bu = optimization_bu(R_t, M_t, C_t, A_t,n_discretization,xsi)
 
 #calculated time to run each trajectory using generalized velocity 
 #square b 
-t0_b = reconstruct(x0_b)
-t1_b=reconstruct(decision_variables_b.x)
+t0_bu = reconstruct(x0_bu[0:n_discretization])
+t1_bu=reconstruct(decision_variables_bu.x[0:n_discretization])
+
+#extract the forces from the flattened result array
+forcex0bu=x0_bu[2*n_discretization-1:3*n_discretization-2]
+forcey0bu=x0_bu[3*n_discretization-2:len(decision_variables.x)]
+forcex1bu=decision_variables_bu.x[n_discretization:2*n_discretization-1]
+forcey1bu=decision_variables_bu.x[2*n_discretization-1:len(decision_variables_bu.x)]
 
 
-print(f"Time abu: {t1[-1]}, Time b: {t1_b[-1]}")
+print(f"Time abu: {t1[-1]}, Time b: {t1_bu[-1]}")
 
 """
 ##################################################################
@@ -303,7 +309,7 @@ plt.show()
 v = translate_velocity(derivative,decision_variables.x[0:n_discretization],n_discretization)
 
 #Absolut velocity b method
-v_b = translate_velocity(derivative,decision_variables_b.x,n_discretization)
+v_b = translate_velocity(derivative,decision_variables_bu.x,n_discretization)
 
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
@@ -314,11 +320,11 @@ ax2.set_title('Time to traverse')
 ax2.set_xlabel('Path position')
 ax2.set_ylabel('Time')
 ax1.set_ylim(0,max(max(v),max(v_b))+5)
-ax2.set_ylim(0,max(max(t1),max(t1_b))+5)
+ax2.set_ylim(0,max(max(t1),max(t1_bu))+5)
 ax1.plot(np.linspace(0,1,n_discretization-1),v,'-r',label="Optimized velocity abu")
 ax1.plot(np.linspace(0,1,n_discretization-1),v_b,'.b',label="Optimized velocity b")
 ax2.plot(np.linspace(0,1,n_discretization),t1,'-r',label="Time abu")
-ax2.plot(np.linspace(0,1,n_discretization),t1_b,'.b',label="Time b")
+ax2.plot(np.linspace(0,1,n_discretization),t1_bu,'.b',label="Time b")
 ax1.grid()
 ax2.grid()
 ax1.legend()
