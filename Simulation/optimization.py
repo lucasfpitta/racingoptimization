@@ -5,16 +5,22 @@ import scipy as scp
 #Input optimization weight scalar xsi, Power A_t (2d array with n_discretizatio vector A_t), 
 # number of discretization
 #Output cost of the solution (scalar)
-def create_objective(xsi, A_t,n_discretization):
+def create_objective(xsi, A_t,T0,E0,n_discretization):
     #flattened vector coordinates
     u1=n_discretization+n_discretization-1
     u2=n_discretization+n_discretization-1+n_discretization-1
     def objective_function(decision_variables):
         cost=0
+        cost1=0
+        cost2=0
         #sum over the path 
         for i in range(n_discretization-1):
-            cost = cost+2*xsi/(decision_variables[i+1]**0.5+decision_variables[i]**0.5)+(1-xsi)*(decision_variables[u1+i]*A_t[i][0]+decision_variables[u2+i]*A_t[i][1])
+            cost1=cost1+2/((decision_variables[i+1]**0.5+decision_variables[i]**0.5)*T0)
+            cost2= cost2+(decision_variables[u1+i]*A_t[i][0]+decision_variables[u2+i]*A_t[i][1])/E0
+            cost = cost+(2*xsi/((decision_variables[i+1]**0.5+decision_variables[i]**0.5)*T0)+(1-xsi)*(decision_variables[u1+i]*A_t[i][0]+decision_variables[u2+i]*A_t[i][1])/E0)
+        print("Cost time: ", cost1, " Cost Energy: ", cost2)
         return cost
+    
     return objective_function
 
 
@@ -74,34 +80,36 @@ def create_constraint3(mu,mass,n_discretization):
         return remainder
     return constraint3
 
-#Helps building innitial guess of constant b
+#Helps building innitial guess of constant b and normalization T0, E0
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Centrifugal  C_t (2d array with n_discretizatio of vector C_t), number of discretization
 #Output 1d flattened vector of initial guess
-def build_x0(R_t,C_t,n_discretization):
-    #def constant b
-    b0=0.0005
+def build_x0(b0,R_t,M_t,C_t, A_t,n_discretization):
     #creates innitial guess
-    x0 = np.ones(n_discretization)*b0
+    x0 = (np.ones(n_discretization)+np.random.uniform(low=-0.5, high=0.5, size=n_discretization))*b0
     x0 = np.append(x0,np.zeros(3*(n_discretization-1)))
     #flattened vector coordinates
     u1=n_discretization+n_discretization-1
     u2=n_discretization+n_discretization-1+n_discretization-1
     #calculates forces that are necessary for constant u
     for i in range(n_discretization-1):
-        u = b0*np.dot(np.linalg.inv(R_t[i]),C_t[i])
+        a = (x0[i+1]-x0[i])/(2*1/(n_discretization-1))
+        u = a*np.linalg.inv(R_t[i])@M_t[i]+(x0[i+1]+x0[i])/2*np.linalg.inv(R_t[i])@C_t[i]
         x0[u1+i]=u[0]
         x0[u2+i]=u[1]
-    return x0
+        
+    T0 = 0
+    E0 = 0   
+    for i in range(n_discretization-1):
+        T0 = T0+2/(x0[i+1]**0.5+x0[i]**0.5)
+        E0 = E0+(x0[u1+i]*A_t[i][0]+x0[u2+i]*A_t[i][1])
+    return x0, T0, E0
 
 #Optimizer
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Power, Mass and Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
 def optimization(R_t,M_t,C_t,A_t,n_discretization,xsi):
-    #building innitial guess
-    x0 =  build_x0(R_t,C_t,n_discretization)#{"u": np.ones((n_discretization,2)), "a": np.ones(n_discretization-1), "b": np.ones(n_discretization-1) }
     
-    #creating objective and constraints
-    objective_function = create_objective(xsi, A_t,n_discretization)
+    #creating constraints
     constraint1 = create_constraint1(R_t,M_t,C_t,n_discretization)
     constraint2=create_constraint2(n_discretization)
     
@@ -125,11 +133,22 @@ def optimization(R_t,M_t,C_t,A_t,n_discretization,xsi):
         }   
     def callback_func(xk):
         callback_func.iteration += 1
-        #print(f"Iteration {callback_func.iteration}")
+        print(f"Iteration {callback_func.iteration}")
 
     callback_func.iteration = 0
     
+    b0=1
+    #building innitial guess
+    x0 , T0, E0 =  build_x0(b0,R_t,M_t,C_t,A_t,n_discretization)
+    while not ((constraint3(x0)>= -1E-6).all()):
+        b0=b0/2
+        x0, T0, E0 =  build_x0(b0,R_t,M_t,C_t,A_t,n_discretization)
+ 
+     #creating constraints
+    objective_function = create_objective(xsi, A_t,abs(T0),abs(E0),n_discretization)
+ 
     #optimization    
     result = scp.optimize.minimize(objective_function, x0, method='SLSQP', constraints=cons,bounds=bounds,options=options, callback = callback_func)
-    print("Test friction circle", (constraint3(result.x)>= -1E-6).all())
+    print("Test friction circle ", (constraint3(result.x)>= -1E-6).all())
+    print("Test friction circle initial guess ", (constraint3(x0)>= -1E-6).all())
     return  result, x0

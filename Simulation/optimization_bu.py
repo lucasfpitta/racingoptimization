@@ -64,9 +64,7 @@ def create_constraint2(mu,mass,n_discretization):
 #Helps building innitial guess of constant b
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Centrifugal  C_t (2d array with n_discretizatio of vector C_t), number of discretization
 #Output 1d flattened vector of initial guess
-def build_x0(R_t,C_t,n_discretization):
-    #def constant b
-    b0=0.0005
+def build_x0(b0, R_t,C_t,n_discretization):
     #creates innitial guess
     x0 = np.ones(n_discretization)*b0
     x0 = np.append(x0,np.zeros(2*(n_discretization-1)))
@@ -84,8 +82,6 @@ def build_x0(R_t,C_t,n_discretization):
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Power, Mass and Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
 def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi):
-    #building innitial guess
-    x0 =  build_x0(R_t,C_t,n_discretization)#{"u": np.ones((n_discretization,2)), "a": np.ones(n_discretization-1), "b": np.ones(n_discretization-1) }
     
     #creating objective and constraints
     objective_function = create_objective(xsi, A_t,n_discretization)
@@ -114,9 +110,16 @@ def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi):
 
     callback_func.iteration = 0
     
+    
+    b0 = 1
+    #building innitial guess
+    x0 =  build_x0(b0,R_t,C_t,n_discretization)
+    while not ((constraint2(x0)>= -1E-6).all()):
+        b0=b0/2
+        x0 =  build_x0(b0,R_t,C_t,n_discretization)
+    
     #optimization    
     result = scp.optimize.minimize(objective_function, x0, method='SLSQP', constraints=cons,bounds=bounds,options=options, callback = callback_func)
     print("Test friction circle", (constraint2(result.x)>= -1E-6).all())
     print("Test friction circle initial guess", (constraint2(x0)>= -1E-6).all())
-    print("Test b positive", (result.x[0:n_discretization]>= 0).all())
     return  result, x0

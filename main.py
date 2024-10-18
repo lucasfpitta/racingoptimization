@@ -18,11 +18,11 @@ from Physics.translate import translate_velocity, translate_acceleration
 
 n_discretization=20 #number of path sections
 N_path_points=1000 #plotting discretization
-xsi = 1 #optimization scalar
+xsi = 0.66 #optimization scalar
 
 
 #choose path
-path_name = "semi_circle"
+path_name = "circle"
 external = 'Map_processing/Maps_kml/extHORTO.kml'
 internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
@@ -63,7 +63,9 @@ forcey1=decision_variables.x[3*n_discretization-2:len(decision_variables.x)]
 t0 = reconstruct(x0[0:n_discretization])
 t1=reconstruct(decision_variables.x[0:n_discretization])
 
+print("Time: ",t1[-1])
 
+"""
 ##################################################################
 ###              Velocity Force optimization Model             ###
 ##################################################################
@@ -110,7 +112,7 @@ print(f"Time abu: {t1[-1]}, Time bu: {t1_bu[-1]}, Time b: {t1_b[-1]}")
 
 # print(f"Time abu: {t_compute_abu}, Time bu: {t_compute_bu}, Time b: {t_compute_b}")
 
-
+"""
 """
 ##################################################################
 ###                     Real Path Calculation                  ###
@@ -325,7 +327,7 @@ plt.tight_layout()
 plt.show()
 
 
-
+"""
 
 ##################################################################
 ###                    Comparison Methods                      ###
@@ -364,4 +366,4 @@ plt.tight_layout()
 plt.show()
 
 
-
+"""

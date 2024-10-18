@@ -107,10 +107,6 @@ def optimization_only_b(R_t,M_t,C_t,A_t,n_discretization,xsi):
     
     expansion_factor = 1E3
     
-    #def constant b
-    b0=0.0005*expansion_factor
-    #creates innitial guess
-    x0 = np.ones(n_discretization)*b0
     
     #Creating force matrices F_1t and F_2t
     F_1t, F_2t = create_F_it(R_t,M_t,C_t,n_discretization)
@@ -124,6 +120,7 @@ def optimization_only_b(R_t,M_t,C_t,A_t,n_discretization,xsi):
     
     constraint =create_constraint(mu,mass,F_1t, F_2t, n_discretization,expansion_factor)
     bounds = create_b_bounds(n_discretization)
+    
     
     cons = [
     #{'type': 'eq', 'fun': constraint1},  # Equality constraint 1
@@ -142,11 +139,18 @@ def optimization_only_b(R_t,M_t,C_t,A_t,n_discretization,xsi):
 
     callback_func.iteration = 0
     
+
+    #creates initial guess inside the friction circle 
+    x0 = np.ones(n_discretization)*expansion_factor
+    
+    # while not all sections forces inside the friction circle, reduce spline velocity in half
+    while not ((constraint(x0)>= -1E-6).all()):
+        x0=x0/2
+    
     #optimization    
     result = scp.optimize.minimize(objective_function, x0, method='SLSQP', constraints=cons,bounds=bounds,options=options, callback = callback_func)
     print("Test friction circle", (constraint(result.x)>= -1E-6).all())
     print("Test friction circle initial guess", (constraint(x0)>= -1E-6).all())
-    print("Test b positive", (result.x[0:n_discretization]>= 0).all())
     result.x = result.x/expansion_factor
     return  result, x0
 
