@@ -18,7 +18,7 @@ from Physics.translate import translate_velocity, translate_acceleration
 
 n_discretization=20 #number of path sections
 N_path_points=1000 #plotting discretization
-xsi = 0.66 #optimization scalar
+xsi = 1 #optimization scalar
 
 
 #choose path
@@ -26,10 +26,12 @@ path_name = "circle"
 external = 'Map_processing/Maps_kml/extHORTO.kml'
 internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
+
 #create path splines and path spline derivative, assess orientation angles 
 #over the sections, define outlines 
 spline, derivative, angle, right, left = choose_path(path_name,external,
 internal,N_angle=n_discretization)
+
 
 #spline points for plotting
 spline_points = spline(np.linspace(0,1,num = N_path_points))
@@ -62,7 +64,12 @@ forcey1=decision_variables.x[3*n_discretization-2:len(decision_variables.x)]
 #calculated time to run each trajectory using generalized velocity square b 
 t0 = reconstruct(x0[0:n_discretization])
 t1=reconstruct(decision_variables.x[0:n_discretization])
+Force = np.transpose(np.array([forcex1,forcey1]))
+E1 = np.zeros(n_discretization-1)
 
+
+for i in range(n_discretization-1):
+    E1[i] = Force[i]@A_t[i]
 print("Time: ",t1[-1])
 
 """
@@ -163,23 +170,30 @@ theoretical_v = np.ones(len(v))*np.sqrt(9.81*100)
 #Theoretical Circle maximum acceleration
 theoretical_a = 9.81*np.ones(len(v))
 
-fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(8, 8))
 ax1.set_title('Velocity circular path')
 ax1.set_xlabel('Path position')
 ax1.set_ylabel('Velocity m/s')
 ax2.set_title('Acceleration circular path')
 ax2.set_xlabel('Path position')
 ax2.set_ylabel('Acceleration m/sˆ2')
+ax3.set_title('Work')
+ax3.set_xlabel('Path position')
+ax3.set_ylabel('Energy J')
 ax1.set_ylim(0,max(v)+5)
 ax2.set_ylim(0,max(a)+5)
-ax1.plot(np.linspace(0,1,n_discretization-1),v,'*r',label="Optimized velocity")
+ax3.set_ylim(min(E1)-20,max(E1)+20)
+ax1.plot(np.linspace(0,1,n_discretization-1),v,'-r',label="Optimized velocity")
 ax1.plot(np.linspace(0,1,n_discretization-1),theoretical_v,'-b',label="Theoretical velocity")
 ax2.plot(np.linspace(0,1,n_discretization-1),a,'*r',label="Optimized acceleration")
 ax2.plot(np.linspace(0,1,n_discretization-1),theoretical_a,'-b',label="Theoretical acceleration")
+ax3.plot(np.linspace(0,1,n_discretization-1),E1,'-b',label="Work")
 ax1.grid()
 ax2.grid()
+ax3.grid()
 ax1.legend()
 ax2.legend()
+ax3.legend()
 plt.show
 
 
