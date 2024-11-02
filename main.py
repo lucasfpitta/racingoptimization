@@ -1,5 +1,8 @@
 import numpy as np
+import faulthandler
+faulthandler.enable()
 import timeit
+#import cvxpy as cp
 #import pygame as gm
 import matplotlib.pyplot as plt
 from Map_processing.choose_path import choose_path
@@ -7,6 +10,7 @@ from Physics.model1 import model1
 from Simulation.optimization import optimization
 from Simulation.optimization_only_b import optimization_only_b
 from Simulation.optimization_bu import optimization_bu
+#from Simulation.optimization_abu_SOCP import optimization_abu_SOCP
 from Simulation.reconstruct import reconstruct, interpolate_u, control_system
 from matplotlib.animation import FuncAnimation
 from Physics.translate import translate_velocity, translate_acceleration
@@ -14,9 +18,9 @@ from Physics.translate import translate_velocity, translate_acceleration
 ##################################################################
 ###                     Problem definition                     ###
 ##################################################################
+print("Hello World")
 
-
-n_discretization=20 #number of path sections
+n_discretization=10 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -52,6 +56,7 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization)
 #velocity square b, 
 #generalized acceleration a, and forces u
 decision_variables, x0 = optimization(R_t, M_t, C_t, A_t,n_discretization,xsi)
+print("teste", optimization_abu_SOCP(R_t, M_t, C_t, A_t,n_discretization,xsi))
 
 
 #extract the forces from the flattened result array
