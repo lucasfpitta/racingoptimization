@@ -11,21 +11,17 @@ faulthandler.enable()
 import timeit
 import matplotlib.pyplot as plt
 
-
-
 #Internal functions
 
 from Map_processing.choose_path import choose_path
 from Physics.model1 import model1
-from Simulation.optimization import optimization
-from Simulation.optimization_only_b import optimization_only_b
-from Simulation.optimization_bu import optimization_bu
-from Simulation.optimization_abu_SOCP import optimization_abu_SOCP
-from Simulation.optimization_b_SOCP import optimization_b_SOCP
-from Simulation.reconstruct import reconstruct, interpolate_u, control_system
 from matplotlib.animation import FuncAnimation
 from Physics.translate import translate_velocity, translate_acceleration
 from Visualization.print import print_separator, print_table
+from Simulation.optimization_main import *
+
+
+
 
 
 
@@ -64,122 +60,36 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization)
 
 
 
-##################################################################
-### Velocity, acceleration and force optimization Model (abu)  ###
-##################################################################
-
-print_separator("Velocity, acceleration and force optimization Model (abu)")
-
-#finds the optimal solution and innitial guess. Outputs generalized 
-#velocity square b, 
-#generalized acceleration a, and forces u
-decision_variables, x0 = optimization(R_t, M_t, C_t, A_t,n_discretization,
-                                      xsi,display=True)
-
-
-
-#extract the forces from the flattened result array
-forcex0=x0[2*n_discretization-1:3*n_discretization-2]
-forcey0=x0[3*n_discretization-2:len(decision_variables.x)]
-forcex1=decision_variables.x[2*n_discretization-1:3*n_discretization-2]
-forcey1=decision_variables.x[3*n_discretization-2:len(decision_variables.x)]
-
-
-
-#calculated time to run each trajectory using generalized velocity square b 
-t0 = reconstruct(x0[0:n_discretization])
-t1=reconstruct(decision_variables.x[0:n_discretization])
-
-
-#Calculates Force and Energy for optimal solution (for plotting)
-Force = np.transpose(np.array([forcex1,forcey1]))
-E1 = np.zeros(n_discretization-1)
-for i in range(n_discretization-1):
-    E1[i] = Force[i]@A_t[i]
-
-
-
 
 ##################################################################
-###              Velocity Force optimization Model (bu)        ###
+###                           Choose Model                     ###
 ##################################################################
 
-print_separator("Velocity Force optimization Model (bu)")
 
-#finds the optimal solution and innitial guess. Outputs generalized 
-#velocity square b
-decision_variables_bu, x0_bu = optimization_bu(R_t, M_t, C_t, A_t,
-                                        n_discretization,xsi,display=True)
+#Comment the models you dont want to compute
 
+#Model abu
+# t1_abu=init_optimization_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
 
-#calculated time to run each trajectory using generalized velocity 
-#square b 
-t0_bu = reconstruct(x0_bu[0:n_discretization])
-t1_bu=reconstruct(decision_variables_bu.x[0:n_discretization])
+#Model bu
+# t1_bu=init_optimization_bu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
 
+#Model b
+# t1_b=init_optimization_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
 
-#extract the forces from the flattened result array
-forcex0bu=x0_bu[2*n_discretization-1:3*n_discretization-2]
-forcey0bu=x0_bu[3*n_discretization-2:len(decision_variables.x)]
-forcex1bu=decision_variables_bu.x[n_discretization:2*n_discretization-1]
-forcey1bu=decision_variables_bu.x[2*n_discretization-1:
-    len(decision_variables_bu.x)]
+#Model SOCP abu
+# t1_SOCP_abu=init_optimization_SOCP_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
 
-
-
-##################################################################
-###                Velocity optimization Model (b)             ###
-##################################################################
-
-print_separator("Velocity optimization Model (b)")
-
-#finds the optimal solution and innitial guess. Outputs generalized 
-#velocity square b
-decision_variables_b, x0_b = optimization_only_b(R_t, M_t, C_t, A_t,
-                                            n_discretization,xsi,display=True)
-
-
-#calculated time to run each trajectory using generalized velocity 
-#square b 
-t0_b = reconstruct(x0_b[0:n_discretization])
-t1_b=reconstruct(decision_variables_b.x[0:n_discretization])
+#Model SOCP b
+t1_SOCP_b=init_optimization_SOCP_b(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
 
 
 
-##################################################################
-###                 Second-order Cone (abu) Model              ###
-##################################################################
-
-print_separator("Second-order Cone (abu) Model")
-
-#finds the optimal solution. Outputs vector with variables a, b, u, 
-# c, d 
-decision_variables_socp_abu = optimization_abu_SOCP(R_t, M_t, C_t, 
-                                        A_t,n_discretization,xsi,display=True)
-
-
-#calculated time to run each trajectory using generalized velocity 
-#square b 
-t1_socp_abu=reconstruct(decision_variables_socp_abu[n_discretization-1
-                                                :2*n_discretization-1])
-
-
-
-##################################################################
-###                  Second-order Cone (b) Model               ###
-##################################################################
-
-print_separator("Second-order Cone (b) Model")
-
-#finds the optimal solution. Outputs vector with variables a, b, u, 
-# c, d 
-decision_variables_socp_b = optimization_b_SOCP(R_t, M_t, C_t, 
-                                        A_t,n_discretization,xsi,display=True)
-
-
-#calculated time to run each trajectory using generalized velocity 
-#square b 
-t1_socp_b=reconstruct(decision_variables_socp_b[0:n_discretization])
 
 
 
@@ -187,67 +97,41 @@ t1_socp_b=reconstruct(decision_variables_socp_b[0:n_discretization])
 ###                 Model Performance Comparison              ###
 ##################################################################
 
-print_separator("Model Performance Comparison")
-
 #number of timeit assessments
 N_computation_average=10
 
-#Times the optimization models performance
-t_compute_abu = timeit.timeit(lambda: optimization(R_t, M_t, C_t, 
-A_t,n_discretization,xsi,display=False), number=N_computation_average)
-t_compute_bu = timeit.timeit(lambda: optimization_bu(R_t, M_t, C_t, 
-A_t,n_discretization,xsi,display=False), number=N_computation_average)
-t_compute_b = timeit.timeit(lambda: optimization_only_b(R_t, M_t, C_t, 
-A_t,n_discretization,xsi,display=False), number=N_computation_average)
-t_compute_socp_abu = timeit.timeit(lambda: optimization_abu_SOCP(R_t, M_t,
-C_t,A_t,n_discretization,xsi,display=False), number=N_computation_average)
-t_compute_socp_b = timeit.timeit(lambda: optimization_b_SOCP(R_t, M_t,
-C_t,A_t,n_discretization,xsi,display=False), number=N_computation_average)
 
-#arrays for printing a table
+#List to chose the models you do not want to time
+#"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
 
-algorithms = ["Time abu","Time bu","Time b","Time socp abu","Time socp b"]
-results = [t1[-1], t1_bu[-1],t1_b[-1],t1_socp_abu[-1],t1_socp_b[-1]]
-computation_times = [t_compute_abu, t_compute_bu,t_compute_b,
-                     t_compute_socp_abu,t_compute_socp_b]
+models = ["Time SOCP b"]
 
-print_table(algorithms,results,computation_times)
+
+#Use same order as the models above
+#t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1]
+results = [t1_SOCP_b[-1]]
+
+
+#Call the timeit
+model_performance(models,results,N_computation_average,R_t, M_t, C_t, 
+     A_t,n_discretization,xsi,display=False)
+
+
+
+
 
 
 ##################################################################
 ###                     Real Path Calculation                  ###
 ##################################################################
 
-print_separator("Real Path Calculation")
 
-#calculate command vector if needed
-command_vector = interpolate_u(np.transpose([forcex1,forcey1]),t1,
-                               num_points=1000)
-
-
-#calculate initial position and velocity for innitial guess 
-x00 =[spline_points[0][0], spline_points[1][0]]
-v00 = [derivative([0])[0][0]*np.sqrt(x0[0]+x0[1]/2),derivative([0])[1][0]
-       *np.sqrt(x0[0]+x0[1]/2)]
+#Only "Time abu" and "Time bu" available
+controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,n_discretization,
+                    xsi,spline_points,derivative,N_path_points)
 
 
-#Calculates the real path with the control of initial guess
-controlled_path0 = control_system([forcex0, forcey0],x00,v00,t0,
-                                  N_path_points)
 
-
-#calculate initial position and velocity for optimized trajectory 
-x10 =[spline_points[0][0], spline_points[1][0]]
-v10 = [derivative([0])[0][0]*np.sqrt(decision_variables.x[0]+
-decision_variables.x[1]/2),derivative([0])[1][0]*np.sqrt(
-    decision_variables.x[0]+decision_variables.x[1]/2)]
-
-
-#Calculates the real path with the control of optimized trajectory
-controlled_path1 = control_system([forcex1, forcey1],x10,v10,t1,N_path_points)
-
-
-print("Real Path calculated successfully")
 
 
 

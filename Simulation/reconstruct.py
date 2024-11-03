@@ -91,3 +91,6 @@ def control_system(u1,x0,v0,t1,n_discretization):
     # Extract solution for x and v
     x_sol = sol.y[:len(x0), :]
     return x_sol
+
+
+

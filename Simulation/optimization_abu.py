@@ -116,7 +116,7 @@ def build_x0(b0,R_t,M_t,C_t, A_t,n_discretization):
 #Optimizer
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Power, Mass and Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
-def optimization(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
+def optimization_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     
     #creating constraints
     constraint1 = create_constraint1(R_t,M_t,C_t,n_discretization)
