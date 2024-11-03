@@ -1,10 +1,14 @@
 
+#Print Separation
 
 def print_separator(title):
+    
     width = 100  # Adjust the width as needed
     separator = '=' * width
     title_str = f' {title} '
     title_line = title_str.center(width, '=')
+    
+    
     print()
     print(separator)
     print(title_line)
@@ -12,7 +16,16 @@ def print_separator(title):
     print()
     
     
+    
+    
+    
+    
+    
+#Print comparison table
+
 def print_table(algorithms, results, computation_times):
+    
+    
     # Print the table header
     print("+------------------+------------------+-------------------+")
     print("|    Algorithm     | Time to traverse |   Time to compute |")

@@ -23,6 +23,9 @@ from Visualization.print import print_separator, print_table
 
 
 
+
+
+
 ##################################################################
 ### Velocity, acceleration and force optimization Model (abu)  ###
 ##################################################################
@@ -73,6 +76,9 @@ def init_optimization_abu(R_t, M_t, C_t, A_t,n_discretization,
 
 
 
+
+
+
 ##################################################################
 ###              Velocity Force optimization Model (bu)        ###
 ##################################################################
@@ -111,6 +117,9 @@ def init_optimization_bu(R_t, M_t, C_t, A_t,n_discretization,
 
 
 
+
+
+
 ##################################################################
 ###                Velocity optimization Model (b)             ###
 ##################################################################
@@ -142,6 +151,9 @@ def init_optimization_b(R_t, M_t, C_t, A_t,n_discretization,
 
 
 
+
+
+
 ##################################################################
 ###                 Second-order Cone (abu) Model              ###
 ##################################################################
@@ -168,6 +180,10 @@ def init_optimization_SOCP_abu(R_t, M_t, C_t, A_t,n_discretization,
 
 
 
+
+
+
+
 ##################################################################
 ###                  Second-order Cone (b) Model               ###
 ##################################################################
@@ -191,6 +207,10 @@ def init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,
           return t1_SOCP_b,decision_variables_SOCP_b.x
      else:
           return t1_SOCP_b
+   
+   
+   
+   
    
 
 
@@ -232,6 +252,10 @@ def model_performance(models,results,N_computation_average,R_t, M_t, C_t,
      computation_time = [compute_times_dict[name] for name in models]
      print_table(models,results,computation_time)
      return
+
+
+
+
 
 
 

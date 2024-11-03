@@ -25,6 +25,7 @@ from Simulation.optimization_main import *
 
 
 
+
 ##################################################################
 ###                     Problem definition                     ###
 ##################################################################
@@ -61,6 +62,7 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization)
 
 
 
+
 ##################################################################
 ###                           Choose Model                     ###
 ##################################################################
@@ -69,24 +71,25 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization)
 #Comment the models you dont want to compute
 
 #Model abu
-# t1_abu=init_optimization_abu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
+t1_abu=init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
 
 #Model bu
-# t1_bu=init_optimization_bu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
+t1_bu=init_optimization_bu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
 
 #Model b
-# t1_b=init_optimization_b(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
+t1_b=init_optimization_b(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
 
 #Model SOCP abu
-# t1_SOCP_abu=init_optimization_SOCP_abu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
+t1_SOCP_abu=init_optimization_SOCP_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
 
 #Model SOCP b
 t1_SOCP_b=init_optimization_SOCP_b(
     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
+
 
 
 
@@ -104,17 +107,18 @@ N_computation_average=10
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
 
-models = ["Time SOCP b"]
+models = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
 
 
 #Use same order as the models above
 #t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1]
-results = [t1_SOCP_b[-1]]
+results = [t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1]]
 
 
 #Call the timeit
 model_performance(models,results,N_computation_average,R_t, M_t, C_t, 
      A_t,n_discretization,xsi,display=False)
+
 
 
 
@@ -129,6 +133,7 @@ model_performance(models,results,N_computation_average,R_t, M_t, C_t,
 #Only "Time abu" and "Time bu" available
 controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,n_discretization,
                     xsi,spline_points,derivative,N_path_points)
+
 
 
 
