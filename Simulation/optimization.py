@@ -61,7 +61,7 @@ def create_b_bounds(n_discretization):
     lb=[]
     ub=[]
     #lower bounds above 0 to avoid objective problems
-    lb.extend([1E-8]*n_discretization)
+    lb.extend([1E-6]*n_discretization)
     lb.extend([-np.inf]*3*(n_discretization-1))
     ub.extend([np.inf]*(4*n_discretization-3))
     bounds = scp.optimize.Bounds(lb,ub)
@@ -89,7 +89,7 @@ def build_x0(b0,R_t,M_t,C_t, A_t,n_discretization):
     #creates innitial guess
     x0 = (np.ones(n_discretization)+np.random.uniform(low=-0.5, high=0.5, size=n_discretization))*b0
     x0 = np.append(x0,np.zeros(3*(n_discretization-1)))
-    x0[0]=1E-8
+    x0[0]=1E-6
     
     #flattened vector coordinates
     u1=n_discretization+n_discretization-1
@@ -152,8 +152,10 @@ def optimization(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     while not ((constraint3(x0)>= -1E-6).all()):
         b0=b0/2
         x0, T0, E0 =  build_x0(b0,R_t,M_t,C_t,A_t,n_discretization)
-    
      #creating constraints
+
+    E0=1
+    T0=1
     objective_function = create_objective(xsi, A_t,abs(T0),abs(E0),n_discretization)
  
     #optimization    

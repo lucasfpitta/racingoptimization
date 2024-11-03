@@ -145,6 +145,7 @@ t0_b = reconstruct(x0_b[0:n_discretization])
 t1_b=reconstruct(decision_variables_b.x[0:n_discretization])
 
 
+
 ##################################################################
 ###                 Second-order Cone (abu) Model              ###
 ##################################################################
@@ -206,8 +207,8 @@ C_t,A_t,n_discretization,xsi,display=False), number=N_computation_average)
 #arrays for printing a table
 
 algorithms = ["Time abu","Time bu","Time b","Time socp abu","Time socp b"]
-results = [t1[-1], t1_bu[-1], t1_b[-1],t1_socp_abu[-1],t1_socp_b[-1]]
-computation_times = [t_compute_abu, t_compute_bu, t_compute_b,
+results = [t1[-1], t1_bu[-1],t1_b[-1],t1_socp_abu[-1],t1_socp_b[-1]]
+computation_times = [t_compute_abu, t_compute_bu,t_compute_b,
                      t_compute_socp_abu,t_compute_socp_b]
 
 print_table(algorithms,results,computation_times)
