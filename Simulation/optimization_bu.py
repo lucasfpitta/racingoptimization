@@ -81,7 +81,7 @@ def build_x0(b0, R_t,C_t,n_discretization):
 #Optimizer
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Power, Mass and Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
-def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi):
+def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     
     #creating objective and constraints
     objective_function = create_objective(xsi, A_t,n_discretization)
@@ -100,15 +100,15 @@ def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi):
     
     #optimizer options
     options = {
-    'disp': True,      # Display iteration info
+    'disp': display,      # Display iteration info
     'maxiter': 1000,   # Increase the maximum number of iterations
     'ftol': 1e-8      # Tolerance on function value changes
         }   
-    def callback_func(xk):
-        callback_func.iteration += 1
-        #print(f"Iteration {callback_func.iteration}")
-
-    callback_func.iteration = 0
+    
+    # def callback_func(xk):
+    #     callback_func.iteration += 1
+    #     #print(f"Iteration {callback_func.iteration}")
+    # callback_func.iteration = 0
     
     
     b0 = 1
@@ -119,7 +119,8 @@ def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi):
         x0 =  build_x0(b0,R_t,C_t,n_discretization)
     
     #optimization    
-    result = scp.optimize.minimize(objective_function, x0, method='SLSQP', constraints=cons,bounds=bounds,options=options, callback = callback_func)
-    print("Test friction circle", (constraint2(result.x)>= -1E-6).all())
-    print("Test friction circle initial guess", (constraint2(x0)>= -1E-6).all())
+    result = scp.optimize.minimize(objective_function, x0, method='SLSQP', constraints=cons,bounds=bounds,options=options)#, callback = callback_func
+    if display:
+        print("Test friction circle", (constraint2(result.x)>= -1E-6).all())
+        print("Test friction circle initial guess", (constraint2(x0)>= -1E-6).all())
     return  result, x0

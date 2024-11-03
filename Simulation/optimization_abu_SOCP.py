@@ -59,12 +59,11 @@ def create_b_bounds(x,n_discretization):
     
     #create soc constraint vector
     soc_constraints = []
-    
     #create all the b>=0 constraint
     for i in range(n_discretization):
         c_vec=np.zeros(2*n_discretization+4*(n_discretization-1))
         c_vec[b+i] = 1
-        soc_constraints.append(cp.SOC(c_vec[i].T @ x, 0))
+        soc_constraints.append(cp.SOC(c_vec.T@x, cp.Constant(np.zeros(2))))
     return soc_constraints
 
 
@@ -91,7 +90,7 @@ def create_b_c_cones(x,n_discretization):
         #build the cone vector b_vec, which is -1 on the second line and 0 otherwise
         b_vec = np.zeros(2)
         b_vec[1] = -1
-        soc_constraints.append(cp.SOC(c_vec[i].T @ x+1, A_matrix@x+b_vec))
+        soc_constraints.append(cp.SOC(c_vec.T @ x+cp.Constant(1), A_matrix@x+b_vec))
     return soc_constraints
 
 #creates c/d cone constraint
@@ -121,7 +120,7 @@ def create_c_d_cones(x,n_discretization):
         #build the cone vector b_vec, which is 2 on the first line and 0 otherwise
         b_vec = np.zeros(2)
         b_vec[0] = 2
-        soc_constraints.append(cp.SOC(c_vec[i].T @ x, A_matrix@x+b_vec))
+        soc_constraints.append(cp.SOC(c_vec.T @ x, A_matrix@x+cp.Constant(b_vec)))
     return soc_constraints
 
 
@@ -141,18 +140,16 @@ def create_friction_circle_cones(x,n_discretization,m,mu):
         A_matrix = np.zeros((2,2*n_discretization+4*(n_discretization-1)))
         A_matrix[0][u1+i]=1
         A_matrix[1][u2+i]=1
-        soc_constraints.append(cp.SOC(m*mu*9.81, A_matrix@x))
+        soc_constraints.append(cp.SOC(cp.Constant(m*mu*9.81), A_matrix@x))
     return soc_constraints
 
 
 #Optimizer
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Power, Mass and Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
-def optimization_abu_SOCP(R_t,M_t,C_t,A_t,n_discretization,xsi):
-    
+def optimization_abu_SOCP(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     #create the decision variables vector
     x = cp.Variable(2*n_discretization+4*(n_discretization-1))
-    
     #creating objective vector
     T0=1
     E0=1
@@ -164,22 +161,18 @@ def optimization_abu_SOCP(R_t,M_t,C_t,A_t,n_discretization,xsi):
     
     #creating cone constraints
     soc_constraints = []
-    soc_constraints.append(create_b_bounds(x,n_discretization))
-    soc_constraints.append(create_b_c_cones(x,n_discretization))
-    soc_constraints.append(create_c_d_cones(x,n_discretization))
+  
+    soc_constraints.extend(create_b_bounds(x,n_discretization))
+    soc_constraints.extend(create_b_c_cones(x,n_discretization))
+    soc_constraints.extend(create_c_d_cones(x,n_discretization))
     mu=1 #friction coeficient
     mass=85 #mass of the vehicle
-    soc_constraints.append(create_friction_circle_cones(x,n_discretization,mass,mu))
-    
+    soc_constraints.extend(create_friction_circle_cones(x,n_discretization,mass,mu))
     #set the SOCP problem
-    prob = cp.Problem(cp.Minimize(f.T@x),soc_constraints + [F @ x == g])
+    prob = cp.Problem(cp.Minimize(f.T@x),soc_constraints+[F @ x == g])#,soc_constraints+[F @ x == g]
     prob.solve()
 
     # Print result.
-    print("The optimal value is", prob.value)
-    print("A solution x is")
-    print(x.value)
-    for i in range(len(soc_constraints)):
-        print("SOC constraint %i dual variable solution" % i)
-        print(soc_constraints[i].dual_value)
+    if display:
+        print("The optimal value is", prob.value)
     return  x.value

@@ -1,24 +1,37 @@
+##################################################################
+###                            Import                          ###
+##################################################################
+
+
+#External libraries
+
 import numpy as np
 import faulthandler
 faulthandler.enable()
 import timeit
-#import cvxpy as cp
-#import pygame as gm
 import matplotlib.pyplot as plt
+
+
+
+#Internal functions
+
 from Map_processing.choose_path import choose_path
 from Physics.model1 import model1
 from Simulation.optimization import optimization
 from Simulation.optimization_only_b import optimization_only_b
 from Simulation.optimization_bu import optimization_bu
-#from Simulation.optimization_abu_SOCP import optimization_abu_SOCP
+from Simulation.optimization_abu_SOCP import optimization_abu_SOCP
 from Simulation.reconstruct import reconstruct, interpolate_u, control_system
 from matplotlib.animation import FuncAnimation
 from Physics.translate import translate_velocity, translate_acceleration
+from Visualization.print import print_separator, print_table
+
+
 
 ##################################################################
 ###                     Problem definition                     ###
 ##################################################################
-print("Hello World")
+
 
 n_discretization=10 #number of path sections
 N_path_points=1000 #plotting discretization
@@ -31,14 +44,17 @@ external = 'Map_processing/Maps_kml/extHORTO.kml'
 internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
 
+
 #create path splines and path spline derivative, assess orientation angles 
 #over the sections, define outlines 
 spline, derivative, angle, right, left = choose_path(path_name,external,
 internal,N_angle=n_discretization)
 
 
+
 #spline points for plotting
 spline_points = spline(np.linspace(0,1,num = N_path_points))
+
 
 
 #Define physics over the path
@@ -48,15 +64,17 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization)
 
 
 ##################################################################
-###  Velocity, acceleration and force optimization Model       ###
+### Velocity, acceleration and force optimization Model (abu)  ###
 ##################################################################
 
+print_separator("Velocity, acceleration and force optimization Model (abu)")
 
 #finds the optimal solution and innitial guess. Outputs generalized 
 #velocity square b, 
 #generalized acceleration a, and forces u
-decision_variables, x0 = optimization(R_t, M_t, C_t, A_t,n_discretization,xsi)
-print("teste", optimization_abu_SOCP(R_t, M_t, C_t, A_t,n_discretization,xsi))
+decision_variables, x0 = optimization(R_t, M_t, C_t, A_t,n_discretization,
+                                      xsi,display=True)
+
 
 
 #extract the forces from the flattened result array
@@ -66,47 +84,59 @@ forcex1=decision_variables.x[2*n_discretization-1:3*n_discretization-2]
 forcey1=decision_variables.x[3*n_discretization-2:len(decision_variables.x)]
 
 
+
 #calculated time to run each trajectory using generalized velocity square b 
 t0 = reconstruct(x0[0:n_discretization])
 t1=reconstruct(decision_variables.x[0:n_discretization])
+
+
+#Calculates Force and Energy for optimal solution (for plotting)
 Force = np.transpose(np.array([forcex1,forcey1]))
 E1 = np.zeros(n_discretization-1)
-
-
 for i in range(n_discretization-1):
     E1[i] = Force[i]@A_t[i]
-print("Time: ",t1[-1])
 
-"""
+
+
+
 ##################################################################
-###              Velocity Force optimization Model             ###
+###              Velocity Force optimization Model (bu)        ###
 ##################################################################
 
+print_separator("Velocity Force optimization Model (bu)")
 
 #finds the optimal solution and innitial guess. Outputs generalized 
 #velocity square b
-decision_variables_bu, x0_bu = optimization_bu(R_t, M_t, C_t, A_t,n_discretization,xsi)
+decision_variables_bu, x0_bu = optimization_bu(R_t, M_t, C_t, A_t,
+                                        n_discretization,xsi,display=True)
+
 
 #calculated time to run each trajectory using generalized velocity 
 #square b 
 t0_bu = reconstruct(x0_bu[0:n_discretization])
 t1_bu=reconstruct(decision_variables_bu.x[0:n_discretization])
 
+
 #extract the forces from the flattened result array
 forcex0bu=x0_bu[2*n_discretization-1:3*n_discretization-2]
 forcey0bu=x0_bu[3*n_discretization-2:len(decision_variables.x)]
 forcex1bu=decision_variables_bu.x[n_discretization:2*n_discretization-1]
-forcey1bu=decision_variables_bu.x[2*n_discretization-1:len(decision_variables_bu.x)]
+forcey1bu=decision_variables_bu.x[2*n_discretization-1:
+    len(decision_variables_bu.x)]
+
 
 
 ##################################################################
-###                Velocity optimization Model                 ###
+###                Velocity optimization Model (b)             ###
 ##################################################################
 
+print_separator("Velocity optimization Model (b)")
 
 #finds the optimal solution and innitial guess. Outputs generalized 
 #velocity square b
-decision_variables_b, x0_b = optimization_only_b(R_t, M_t, C_t, A_t,n_discretization,xsi)
+decision_variables_b, x0_b = optimization_only_b(R_t, M_t, C_t, A_t,
+                                            n_discretization,xsi,display=True)
+
 
 #calculated time to run each trajectory using generalized velocity 
 #square b 
@@ -114,46 +144,89 @@ t0_b = reconstruct(x0_b[0:n_discretization])
 t1_b=reconstruct(decision_variables_b.x[0:n_discretization])
 
 
+##################################################################
+###                 Second-order Cone (abu) Model              ###
+##################################################################
 
-print(f"Time abu: {t1[-1]}, Time bu: {t1_bu[-1]}, Time b: {t1_b[-1]}")
+print_separator("Second-order Cone (abu) Model")
+
+#finds the optimal solution. Outputs vector with variables a, b, u, 
+# c, d 
+decision_variables_socp_abu = optimization_abu_SOCP(R_t, M_t, C_t, 
+                                        A_t,n_discretization,xsi,display=True)
 
 
-# t_compute_abu = timeit.timeit(lambda: optimization(R_t, M_t, C_t, A_t,n_discretization,xsi), number=10)
-# t_compute_bu = timeit.timeit(lambda: optimization_bu(R_t, M_t, C_t, A_t,n_discretization,xsi), number=10)
-# t_compute_b = timeit.timeit(lambda: optimization_only_b(R_t, M_t, C_t, A_t,n_discretization,xsi), number=10)
+#calculated time to run each trajectory using generalized velocity 
+#square b 
+t1_socp_abu=reconstruct(decision_variables_socp_abu[n_discretization-1
+                                                :2*n_discretization-1])
 
-# print(f"Time abu: {t_compute_abu}, Time bu: {t_compute_bu}, Time b: {t_compute_b}")
 
-"""
-"""
+
+##################################################################
+###                 Model Performance Comparison              ###
+##################################################################
+
+print_separator("Model Performance Comparison")
+
+#number of timeit assessments
+N_computation_average=10
+
+#Times the optimization models performance
+t_compute_abu = timeit.timeit(lambda: optimization(R_t, M_t, C_t, 
+A_t,n_discretization,xsi,display=False), number=N_computation_average)
+t_compute_bu = timeit.timeit(lambda: optimization_bu(R_t, M_t, C_t, 
+A_t,n_discretization,xsi,display=False), number=N_computation_average)
+t_compute_b = timeit.timeit(lambda: optimization_only_b(R_t, M_t, C_t, 
+A_t,n_discretization,xsi,display=False), number=N_computation_average)
+t_compute_socp_abu = timeit.timeit(lambda: optimization_abu_SOCP(R_t, M_t,
+C_t,A_t,n_discretization,xsi,display=False), number=N_computation_average)
+
+
+#arrays for printing a table
+
+algorithms = ["Time abu","Time bu","Time b","Time socp abu"]
+results = [t1[-1], t1_bu[-1], t1_b[-1],t1_socp_abu[-1]]
+computation_times = [t_compute_abu, t_compute_bu, t_compute_b,
+                     t_compute_socp_abu]
+
+print_table(algorithms,results,computation_times)
+
+
 ##################################################################
 ###                     Real Path Calculation                  ###
 ##################################################################
 
+print_separator("Real Path Calculation")
 
 #calculate command vector if needed
-command_vector = interpolate_u(np.transpose([forcex1,forcey1]),t1,num_points=1000)
+command_vector = interpolate_u(np.transpose([forcex1,forcey1]),t1,
+                               num_points=1000)
 
 
 #calculate initial position and velocity for innitial guess 
 x00 =[spline_points[0][0], spline_points[1][0]]
-v00 = [derivative([0])[0][0]*np.sqrt(x0[0]+x0[1]/2),derivative([0])[1][0]*np.sqrt(x0[0]+x0[1]/2)]
+v00 = [derivative([0])[0][0]*np.sqrt(x0[0]+x0[1]/2),derivative([0])[1][0]
+       *np.sqrt(x0[0]+x0[1]/2)]
 
 
 #Calculates the real path with the control of initial guess
-controlled_path0 = control_system([forcex0, forcey0],x00,v00,t0,N_path_points)
+controlled_path0 = control_system([forcex0, forcey0],x00,v00,t0,
+                                  N_path_points)
 
 
 #calculate initial position and velocity for optimized trajectory 
 x10 =[spline_points[0][0], spline_points[1][0]]
-v10 = [derivative([0])[0][0]*np.sqrt(decision_variables.x[0]+decision_variables.x[1]/2),derivative([0])[1][0]*np.sqrt(decision_variables.x[0]+decision_variables.x[1]/2)]
+v10 = [derivative([0])[0][0]*np.sqrt(decision_variables.x[0]+
+decision_variables.x[1]/2),derivative([0])[1][0]*np.sqrt(
+    decision_variables.x[0]+decision_variables.x[1]/2)]
 
 
 #Calculates the real path with the control of optimized trajectory
 controlled_path1 = control_system([forcex1, forcey1],x10,v10,t1,N_path_points)
-"""
 
 
+print("Real Path calculated successfully")
 
 
 
@@ -165,10 +238,13 @@ controlled_path1 = control_system([forcex1, forcey1],x10,v10,t1,N_path_points)
 
 
 #calculate absolute velocity
-v = translate_velocity(derivative,decision_variables.x[0:n_discretization],n_discretization)
+v = translate_velocity(derivative,decision_variables.x[0:n_discretization],
+                       n_discretization)
 #calculate absolute acceleration
-a = translate_acceleration(derivative, derivative.derivative(),decision_variables.x[0:n_discretization],
-    decision_variables.x[n_discretization:2*n_discretization-1],n_discretization)
+a = translate_acceleration(derivative, derivative.derivative(),
+                           decision_variables.x[0:n_discretization],
+    decision_variables.x[n_discretization:2*n_discretization-1],
+    n_discretization)
 
 #Theoretical Circle maximum velocity
 theoretical_v = np.ones(len(v))*np.sqrt(9.81*100)
@@ -188,10 +264,14 @@ ax3.set_ylabel('Energy J')
 ax1.set_ylim(0,max(v)+5)
 ax2.set_ylim(0,max(a)+5)
 ax3.set_ylim(min(E1)-20,max(E1)+20)
-ax1.plot(np.linspace(0,1,n_discretization-1),v,'-r',label="Optimized velocity")
-ax1.plot(np.linspace(0,1,n_discretization-1),theoretical_v,'-b',label="Theoretical velocity")
-ax2.plot(np.linspace(0,1,n_discretization-1),a,'*r',label="Optimized acceleration")
-ax2.plot(np.linspace(0,1,n_discretization-1),theoretical_a,'-b',label="Theoretical acceleration")
+ax1.plot(np.linspace(0,1,n_discretization-1),
+         v,'-r',label="Optimized velocity")
+ax1.plot(np.linspace(0,1,n_discretization-1),
+         theoretical_v,'-b',label="Theoretical velocity")
+ax2.plot(np.linspace(0,1,n_discretization-1),
+         a,'*r',label="Optimized acceleration")
+ax2.plot(np.linspace(0,1,n_discretization-1),
+         theoretical_a,'-b',label="Theoretical acceleration")
 ax3.plot(np.linspace(0,1,n_discretization-1),E1,'-b',label="Work")
 ax1.grid()
 ax2.grid()
@@ -290,8 +370,8 @@ line1, = ax1.plot([], [], 'bo', label='Object 1')  # Blue point for object 1
 line2, = ax2.plot([], [], 'ro', label='Object 2')  # Red point for object 2
 
 # Create lines for the forces (bottom row)
-force_line1, = ax3.plot([], [], 'b.', label='Force 1')  # Blue line for object 1 force
-force_line2, = ax4.plot([], [], 'b.', label='Force 2')  # Red line for object 2 force
+force_line1, = ax3.plot([], [], 'b.', label='Force 1')  # Blue for obj 1 force
+force_line2, = ax4.plot([], [], 'b.', label='Force 2')  # Red for obj 2 force
 
 # Add legends to all axes
 ax1.legend()
@@ -313,14 +393,16 @@ def init2():
 # Update function for object animation
 def update1(frame):
     if frame < len(t0):
-        line1.set_data([spline_points_animation[0, frame]], [spline_points_animation[1, frame]])
-        force_line1.set_data(forcex0[:frame], forcey0[:frame])  # Update force data
+        line1.set_data([spline_points_animation[0, frame]], 
+                       [spline_points_animation[1, frame]])
+        force_line1.set_data(forcex0[:frame], forcey0[:frame]) #Update force data
     return line1, force_line1
 
 def update2(frame):
     if frame < len(t1):
-        line2.set_data([spline_points_animation[0, frame]], [spline_points_animation[1, frame]])
-        force_line2.set_data(forcex1[:frame], forcey1[:frame])  # Update force data
+        line2.set_data([spline_points_animation[0, frame]], 
+                    [spline_points_animation[1, frame]])
+        force_line2.set_data(forcex1[:frame], forcey1[:frame]) #Update force data
     return line2, force_line2
 
 
@@ -334,19 +416,24 @@ def next_frame2(i):
     return update2(i)
 
 # Create the animations
-ani1 = FuncAnimation(fig, next_frame1, frames=len(t0), init_func=init1, blit=True, repeat=True, interval=(t0[1] - t0[0]) * animation_time if len(t0) > 1 else animation_time)
-ani2 = FuncAnimation(fig, next_frame2, frames=len(t1), init_func=init2, blit=True, repeat=True, interval=(t1[1] - t1[0]) * animation_time if len(t1) > 1 else animation_time)
+ani1 = FuncAnimation(fig, next_frame1, frames=len(t0), init_func=init1,
+blit=True, repeat=True, interval=(t0[1] - t0[0]) * animation_time 
+if len(t0) > 1 else animation_time)
+ani2 = FuncAnimation(fig, next_frame2, frames=len(t1), init_func=init2,
+blit=True, repeat=True, interval=(t1[1] - t1[0]) * animation_time 
+if len(t1) > 1 else animation_time)
 
 # Adjust the timing for each animation based on its time vector
-ani1.event_source.interval = np.mean(np.diff(t0)) * animation_time  # Average time difference for animation 1
-ani2.event_source.interval = np.mean(np.diff(t1)) * animation_time # Average time difference for animation 2
+ # Average time difference for animation 1
+ani1.event_source.interval = np.mean(np.diff(t0)) * animation_time 
+# Average time difference for animation 2
+ani2.event_source.interval = np.mean(np.diff(t1)) * animation_time 
 
 # Show the animation
 plt.tight_layout()
 plt.show()
 
 
-"""
 
 ##################################################################
 ###                    Comparison Methods                      ###
@@ -354,13 +441,16 @@ plt.show()
 
 
 #Absolut velocity a,b,u method
-v = translate_velocity(derivative,decision_variables.x[0:n_discretization],n_discretization)
+v = translate_velocity(derivative,decision_variables.x[0:n_discretization],
+                       n_discretization)
 
 #Absolut velocity bu method
-v_bu = translate_velocity(derivative,decision_variables_bu.x[0:n_discretization],n_discretization)
+v_bu = translate_velocity(derivative,decision_variables_bu.x[0:n_discretization],
+                          n_discretization)
 
 #Absolut velocity b method
-v_b = translate_velocity(derivative,decision_variables_b.x[0:n_discretization],n_discretization)
+v_b = translate_velocity(derivative,decision_variables_b.x[0:n_discretization],
+                         n_discretization)
 
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
 ax1.set_title('Comparison Velocities')
@@ -371,9 +461,12 @@ ax2.set_xlabel('Path position')
 ax2.set_ylabel('Time')
 ax1.set_ylim(0,max(max(v),max(v_b))+5)
 ax2.set_ylim(0,max(max(t1),max(t1_bu))+5)
-ax1.plot(np.linspace(0,1,n_discretization-1),v,'-r',label="Optimized velocity abu")
-ax1.plot(np.linspace(0,1,n_discretization-1),v_bu,'*b',label="Optimized velocity bu")
-ax1.plot(np.linspace(0,1,n_discretization-1),v_b,'og',label="Optimized velocity b")
+ax1.plot(np.linspace(0,1,n_discretization-1),v,'-r',
+         label="Optimized velocity abu")
+ax1.plot(np.linspace(0,1,n_discretization-1),v_bu,'*b',
+         label="Optimized velocity bu")
+ax1.plot(np.linspace(0,1,n_discretization-1),v_b,'og',
+         label="Optimized velocity b")
 ax2.plot(np.linspace(0,1,n_discretization),t1,'-r',label="Time abu")
 ax2.plot(np.linspace(0,1,n_discretization),t1_bu,'*b',label="Time bu")
 ax2.plot(np.linspace(0,1,n_discretization),t1_b,'og',label="Time b")
@@ -384,5 +477,3 @@ ax2.legend()
 plt.tight_layout()
 plt.show()
 
-
-"""
