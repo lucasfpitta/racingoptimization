@@ -63,8 +63,7 @@ def create_b_bounds(n_discretization):
     #lower bounds above 0 to avoid objective problems
     lb.extend([1E-8]*n_discretization)
     lb.extend([-np.inf]*3*(n_discretization-1))
-    ub.extend([1E-8])
-    ub.extend([np.inf]*(4*n_discretization-4))
+    ub.extend([np.inf]*(4*n_discretization-3))
     bounds = scp.optimize.Bounds(lb,ub)
     return bounds
 

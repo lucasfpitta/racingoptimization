@@ -21,6 +21,7 @@ from Simulation.optimization import optimization
 from Simulation.optimization_only_b import optimization_only_b
 from Simulation.optimization_bu import optimization_bu
 from Simulation.optimization_abu_SOCP import optimization_abu_SOCP
+from Simulation.optimization_b_SOCP import optimization_b_SOCP
 from Simulation.reconstruct import reconstruct, interpolate_u, control_system
 from matplotlib.animation import FuncAnimation
 from Physics.translate import translate_velocity, translate_acceleration
@@ -164,6 +165,24 @@ t1_socp_abu=reconstruct(decision_variables_socp_abu[n_discretization-1
 
 
 ##################################################################
+###                  Second-order Cone (b) Model               ###
+##################################################################
+
+print_separator("Second-order Cone (b) Model")
+
+#finds the optimal solution. Outputs vector with variables a, b, u, 
+# c, d 
+decision_variables_socp_b = optimization_b_SOCP(R_t, M_t, C_t, 
+                                        A_t,n_discretization,xsi,display=True)
+
+
+#calculated time to run each trajectory using generalized velocity 
+#square b 
+t1_socp_b=reconstruct(decision_variables_socp_b[0:n_discretization])
+
+
+
+##################################################################
 ###                 Model Performance Comparison              ###
 ##################################################################
 
@@ -181,14 +200,15 @@ t_compute_b = timeit.timeit(lambda: optimization_only_b(R_t, M_t, C_t,
 A_t,n_discretization,xsi,display=False), number=N_computation_average)
 t_compute_socp_abu = timeit.timeit(lambda: optimization_abu_SOCP(R_t, M_t,
 C_t,A_t,n_discretization,xsi,display=False), number=N_computation_average)
-
+t_compute_socp_b = timeit.timeit(lambda: optimization_b_SOCP(R_t, M_t,
+C_t,A_t,n_discretization,xsi,display=False), number=N_computation_average)
 
 #arrays for printing a table
 
-algorithms = ["Time abu","Time bu","Time b","Time socp abu"]
-results = [t1[-1], t1_bu[-1], t1_b[-1],t1_socp_abu[-1]]
+algorithms = ["Time abu","Time bu","Time b","Time socp abu","Time socp b"]
+results = [t1[-1], t1_bu[-1], t1_b[-1],t1_socp_abu[-1],t1_socp_b[-1]]
 computation_times = [t_compute_abu, t_compute_bu, t_compute_b,
-                     t_compute_socp_abu]
+                     t_compute_socp_abu,t_compute_socp_b]
 
 print_table(algorithms,results,computation_times)
 
