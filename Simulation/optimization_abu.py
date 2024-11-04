@@ -171,7 +171,8 @@ def build_x0(b0,R_t,M_t,C_t, A_t,n_discretization):
     #calculates forces that are necessary for constant u
     for i in range(n_discretization-1):
         a = (x0[i+1]-x0[i])/(2*1/(n_discretization-1))
-        u = a*np.linalg.inv(R_t[i])@M_t[i]+(x0[i+1]+x0[i])/2*np.linalg.inv(R_t[i])@C_t[i]
+        u = a*np.linalg.inv(R_t[i])@M_t[i]+(x0[i+1]+x0[i])/2*\
+            np.linalg.inv(R_t[i])@C_t[i]
         x0[u1+i]=u[0]
         x0[u2+i]=u[1]
         

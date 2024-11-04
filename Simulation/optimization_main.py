@@ -61,15 +61,10 @@ def init_optimization_abu(R_t, M_t, C_t, A_t,n_discretization,
      t1_abu=reconstruct(decision_variables_abu.x[0:n_discretization])
 
 
-     #Calculates Force and Energy for optimal solution (for plotting)
-     Force = np.transpose(np.array([forcex1_abu,forcey1_abu]))
-     E1 = np.zeros(n_discretization-1)
-     for i in range(n_discretization-1):
-          E1[i] = Force[i]@A_t[i]
-     
 
      if plot:
-          return t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,decision_variables_abu.x
+          return t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,\
+               forcey1_abu,x0_abu,decision_variables_abu.x
      else:
           return t1_abu
 
@@ -110,7 +105,8 @@ def init_optimization_bu(R_t, M_t, C_t, A_t,n_discretization,
           len(decision_variables_bu.x)]
      
      if plot:
-          return t0_bu,t1_bu,forcex0_bu,forcey0_bu,forcex1_bu,forcey1_bu,x0_bu,decision_variables_bu.x
+          return t0_bu,t1_bu,forcex0_bu,forcey0_bu,forcex1_bu,\
+               forcey1_bu,x0_bu,decision_variables_bu.x
      else:
           return t1_bu
 
@@ -174,7 +170,7 @@ def init_optimization_SOCP_abu(R_t, M_t, C_t, A_t,n_discretization,
                                                        :2*n_discretization-1])
      
      if plot:
-          return t1_SOCP_abu,decision_variables_SOCP_abu.x
+          return t1_SOCP_abu,decision_variables_SOCP_abu
      else:
           return t1_SOCP_abu
 
@@ -204,7 +200,7 @@ def init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,
      t1_SOCP_b=reconstruct(decision_variables_SOCP_b[0:n_discretization])
      
      if plot:
-          return t1_SOCP_b,decision_variables_SOCP_b.x
+          return t1_SOCP_b,decision_variables_SOCP_b
      else:
           return t1_SOCP_b
    
@@ -279,8 +275,9 @@ def controlled_path(model,R_t, M_t, C_t, A_t,n_discretization,
                }
      
      if model in Models_dict:
-          t0,t1,forcex0,forcey0,forcex1,forcey1,x0,decision_variables=Models_dict[model](
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+          t0,t1,forcex0,forcey0,forcex1,forcey1,x0,decision_variables=\
+               Models_dict[model](R_t, M_t, C_t, A_t,n_discretization,xsi,\
+                    display=False,plot=True)
      else:
           print("Invalid model name")
           return
