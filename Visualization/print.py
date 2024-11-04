@@ -28,7 +28,7 @@ def print_table(algorithms, results, computation_times):
     
     # Print the table header
     print("+------------------+------------------+-------------------+")
-    print("|    Algorithm     | Time to traverse |   Time to compute |")
+    print("|       Model      | Time to traverse |   Time to compute |")
     print("+------------------+------------------+-------------------+")
     
     # Iterate through the lists and print each row

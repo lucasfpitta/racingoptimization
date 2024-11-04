@@ -103,12 +103,12 @@ N_computation_average=10
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
 
-models = []
+models = ["Time abu","Time bu"]
 
 
 #Use same order as the models above
 #t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1]
-results = []
+results = [t1_abu[-1], t1_bu[-1]]
 
 
 #Call the timeit
@@ -127,8 +127,8 @@ model_performance(models,results,N_computation_average,R_t, M_t, C_t,
 
 
 #Only "Time abu" and "Time bu" available
-controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,n_discretization,
-                    xsi,spline_points,derivative,N_path_points)
+controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,
+        n_discretization,xsi,spline_points,derivative,N_path_points)
 
 
 
@@ -155,7 +155,8 @@ t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
 circular_path_test(derivative,decision_variables_abu,n_discretization)
 
 #Animates initial guess vs optimized solution
-animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu
+animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
+            forcex1_abu,forcey1_abu
                ,t0_abu,t1_abu,n_discretization)
 
 #Solution comparison plot
