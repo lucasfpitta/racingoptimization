@@ -14,7 +14,7 @@ import numpy as np
 #Path imported by google eath. external = external outline google_earth 
 # .kml points, 
 #Inputs internal = internal outline google_earth .kml points, N_angle = 
-#numer of angle assesments over the trajectory 
+#number of angle assesments over the trajectory 
 #Output scipy spline and derivative, outlines 2d vectors left and right, 
 # 1d vector angle assessments angle.
 
@@ -65,7 +65,7 @@ def google_earth_path(external,internal,N_angle):
 
 
 #defines a circular path with the vehicle passing on the middle of the track
-# N_angle = numer of angle assesments over the trajectory 
+# N_angle = number of angle assesments over the trajectory 
 #Output scipy spline and derivative, outlines 2d vectors left and right, 
 # 1d vector angle assessments angle.
 
@@ -75,7 +75,7 @@ def circle(N_angle):
     Delta_radius=10
     
     #define track middle
-    alfas= alfas = np.ones(30)*0.5
+    alfas = np.ones(30)*0.5
     theta = np.linspace(0, 2 * np.pi, len(alfas))
     
     
@@ -106,8 +106,134 @@ def circle(N_angle):
 
 
 
+
+#defines a eight-like path 
+#N_angle = number of angle assesments over the trajectory 
+#Output scipy spline and derivative, outlines 2d vectors left and right, 
+# 1d vector angle assessments angle.
+
+def eight(N_angle):
+    
+    Radius=100
+    
+    #define track middle (just for consistency)
+    alfas= alfas = np.ones(30)*0.5
+    theta = np.linspace(0, 2 * np.pi, len(alfas))
+    
+    
+    #outer line
+    right = [Radius/2*np.sin(2*theta),Radius*np.sin(theta)]
+    
+    #inner line
+    left = [Radius/2*np.sin(2*theta),Radius*np.sin(theta)]
+    
+    #calculate the spline (scipy spline), its derivative (scipy spline), 
+    # angle (array over N_angle points)
+    #left and right are the outlines and alfas is the random path
+    spline, derivative, angle = path_info(left, right, alfas,N_angle)
+    
+    
+    return spline, derivative, angle, right, left
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#defines a oval path
+#N_angle = number of angle assesments over the trajectory 
+#Output scipy spline and derivative, outlines 2d vectors left and right, 
+# 1d vector angle assessments angle.
+def oval(N_angle):
+    
+    #defines the number of points in each of the 4 sections
+    n_section = 30
+    
+    #define track middle 
+    alfas= alfas = np.ones(4*n_section)*0.5
+    
+    #Radius turn
+    R=100
+    Delta_R =10
+
+
+    theta = np.linspace(0,np.pi,n_section)
+
+
+    #section 1
+    x_left = (R-Delta_R)*np.ones(int(n_section/2))
+    x_right = (R+Delta_R)*np.ones(int(n_section/2))
+    y_left = np.linspace(0,2*R,int(n_section/2))
+    y_right = np.linspace(0,2*R,int(n_section/2))
+
+    #section 2 - turn 
+    x_left = np.append(x_left,(R-Delta_R)*np.cos(theta))
+    x_right = np.append(x_right,(R+Delta_R)*np.cos(theta))
+    y_left = np.append(y_left,2*R+(R-Delta_R)*np.sin(theta))
+    y_right = np.append(y_right,2*R+(R+Delta_R)*np.sin(theta))
+
+
+    #section 3 - straight 
+    x_left = np.append(x_left,-(R-Delta_R)*np.ones(n_section))
+    x_right = np.append(x_right,-(R+Delta_R)*np.ones(n_section))
+    y_left = np.append(y_left,np.linspace(2*R,-2*R,n_section))
+    y_right = np.append(y_right,np.linspace(2*R,-2*R,n_section))
+
+
+    #section 4 - turn 
+    x_left = np.append(x_left,(R-Delta_R)*np.cos(np.pi+theta))
+    x_right = np.append(x_right,(R+Delta_R)*np.cos(np.pi+theta))
+    y_left = np.append(y_left,-2*R+(R-Delta_R)*np.sin(np.pi+theta))
+    y_right = np.append(y_right,-2*R+(R+Delta_R)*np.sin(np.pi+theta))
+
+
+    #section 1 - final straight 
+    x_left = np.append(x_left,(R-Delta_R)*np.ones(int(n_section/2)))
+    x_right = np.append(x_right,(R+Delta_R)*np.ones(int(n_section/2)))
+    y_left = np.append(y_left,np.linspace(-2*R,0,int(n_section/2)))
+    y_right = np.append(y_right,np.linspace(-2*R,0,int(n_section/2)))
+    
+    #outer line
+    right = [x_right,y_right]
+    
+    #inner line
+    left = [x_left,y_left]
+    
+    #calculate the spline (scipy spline), its derivative (scipy spline), 
+    # angle (array over N_angle points)
+    #left and right are the outlines and alfas is the random path
+    spline, derivative, angle = path_info(left, right, alfas,N_angle)
+    
+    
+    return spline, derivative, angle, right, left
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #defines a semi_circular path with the vehicle passing on the middle of the track
-# N_angle = numer of angle assesments over the trajectory 
+# N_angle = number of angle assesments over the trajectory 
 #Output scipy spline and derivative, outlines 2d vectors left and right, 
 # 1d vector angle assessments angle.
 
@@ -174,6 +300,13 @@ def choose_path(path_name,external,internal,N_angle):
                                                         ,internal,N_angle)
     elif path_name == "semi_circle":
         spline, derivative, angle, right, left = semi_circle(N_angle)
+        
+    elif path_name == "eight":
+        spline, derivative, angle, right, left = eight(N_angle)
+        
+    elif path_name == "oval":
+        spline, derivative, angle, right, left = oval(N_angle)
+        
     else:
         print("Error: wrong path name")
         exit()
