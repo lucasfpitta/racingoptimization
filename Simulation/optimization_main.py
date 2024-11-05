@@ -217,6 +217,9 @@ def init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,
 def model_performance(models,results,N_computation_average,R_t, M_t, C_t, 
      A_t,n_discretization,xsi,display):
      print_separator("Model Performance Comparison")
+     print(f"Number of sections: {n_discretization}")
+     
+     
      if len(models)!=len(results):
           print("There's a diferent number of models and results")
           SystemExit
@@ -247,7 +250,7 @@ def model_performance(models,results,N_computation_average,R_t, M_t, C_t,
 
      computation_time = [compute_times_dict[name] for name in models]
      print_table(models,results,computation_time)
-     return
+     return computation_time
 
 
 

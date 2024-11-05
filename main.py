@@ -15,6 +15,7 @@ from Map_processing.choose_path import choose_path
 from Physics.model1 import model1
 from Simulation.optimization_main import *
 from Visualization.plots import *
+from Comparison.Opt_models_comparison import *
 
 
 
@@ -27,7 +28,7 @@ from Visualization.plots import *
 ##################################################################
 
 
-n_discretization=30 #number of path sections
+n_discretization=10 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -63,7 +64,7 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization)
 ###                           Choose Model                     ###
 ##################################################################
 
-
+"""
 #Comment the models you dont want to compute
 
 #Model abu
@@ -112,9 +113,31 @@ results = [t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1]]
 
 
 #Call the timeit
-model_performance(models,results,N_computation_average,R_t, M_t, C_t, 
-     A_t,n_discretization,xsi,display=False)
+computation_time = model_performance(models,results,N_computation_average,
+                    R_t, M_t, C_t,A_t,n_discretization,xsi,display=False)
 
+"""
+
+##################################################################
+###                       Comparison Export                   ###
+##################################################################
+
+#number of sections to access
+discretizations = [5,10,15]
+
+#number of timeit assessments
+N_computation_average=3
+
+#chose the filename
+filename = "Comparison/Results/comparison_timeit.csv"
+
+#List to chose the models you do not want to time
+#"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
+
+models_export = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
+
+export_comparison_to_csv(models_export, discretizations,filename,
+                         N_computation_average,xsi,spline)
 
 
 
