@@ -245,7 +245,7 @@ def model_performance(models,results,N_computation_average,R_t, M_t, C_t,
           time_taken = timeit.timeit(lambda:func(R_t, M_t, C_t, 
           A_t,n_discretization,xsi,display,plot=False), 
                               number=N_computation_average)
-          compute_times_dict[name] = time_taken
+          compute_times_dict[name] = time_taken/N_computation_average
 
 
      computation_time = [compute_times_dict[name] for name in models]

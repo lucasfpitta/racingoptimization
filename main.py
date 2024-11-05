@@ -141,7 +141,7 @@ export_comparison_to_csv(models_export, discretizations,filename,
 
 """
 
-models = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
+models = ["Time SOCP abu","Time b","Time SOCP b"]
 filename = "Comparison/Results/comparison_timeit.csv"
 
 #data Dictionary
