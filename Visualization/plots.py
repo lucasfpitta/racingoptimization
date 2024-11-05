@@ -7,8 +7,6 @@ from Simulation.optimization_main import *
 
 
 
-
-
 ##################################################################
 ###                     Circular Path test                     ###
 ##################################################################
@@ -305,4 +303,53 @@ def comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi):
     ax1.legend()
     ax2.legend()
     plt.tight_layout()
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##################################################################
+###                      Model Complexity                      ###
+##################################################################
+
+
+
+def model_complexity(model_names, data_dict):
+    plt.figure(figsize=(10, 8))
+    
+    
+    for model_name in model_names:
+        # Extract data for the model
+        number_of_sections = data_dict[model_name][0]
+        log_time_to_compute = data_dict[model_name][1]
+        slope, intercept = data_dict[model_name][2]
+        
+        # Generate x-values for the fit line
+        x_fit = np.array(number_of_sections)
+        y_fit = slope * x_fit + intercept
+        
+        # Plot data points and fit line for each model
+        plt.plot(number_of_sections, log_time_to_compute, 'o', label=fr'{model_name} Data')
+        plt.plot(x_fit, y_fit, '-', label=fr'{model_name} Fit (slope: {slope:.1f})')
+    
+    # Labels and title
+    plt.xlabel(r'Log Number of Sections')
+    plt.ylabel(r'Log Time to Compute')
+    plt.title(r'Model Comparisons')
+    plt.legend()
+    plt.grid(True)
+    
+    # Display plot
     plt.show()
