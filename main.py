@@ -13,6 +13,7 @@ faulthandler.enable()
 
 from Map_processing.choose_path import choose_path
 from Physics.model1 import model1
+from Physics.model2 import model2
 from Simulation.optimization_main import *
 from Visualization.plots import *
 from Comparison.Opt_models_comparison import *
@@ -28,13 +29,16 @@ from Comparison.Opt_models_comparison import *
 ##################################################################
 
 
-n_discretization=10 #number of path sections
+n_discretization=30 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
 
 #choose path
+#options: "circle", "semi_circle", "oval", "eight", "google_earth"
 path_name = "circle"
+
+#in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
 internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
@@ -52,8 +56,14 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 
-#Define physics over the path
-R_t, M_t, C_t, A_t = model1(spline,n_discretization)
+#Define physics over the path. Uncomment the desired Physics model
+
+#Model 1, point
+#R_t, M_t, C_t, A_t = model1(spline,n_discretization)
+
+#Model 2, oriented point with drag
+R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization)
+
 
 
 
@@ -139,10 +149,7 @@ models_export = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
 export_comparison_to_csv(models_export, discretizations,filename,
                          N_computation_average,xsi,spline)
 
-"""
 
-models = ["Time SOCP abu","Time b","Time SOCP b"]
-filename = "Comparison/Results/comparison_timeit.csv"
 
 #data Dictionary
 data = read_csv_to_dict(filename)
@@ -153,15 +160,15 @@ complexity = fit_log(data)
 
 model_complexity(models,complexity)
 
-
+"""
 ##################################################################
 ###                     Real Path Calculation                  ###
 ##################################################################
 
 
 #Only "Time abu" and "Time bu" available
-controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,
-        n_discretization,xsi,spline_points,derivative,N_path_points)
+# controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,
+#         n_discretization,xsi,spline_points,derivative,N_path_points)
 
 
 
@@ -178,19 +185,19 @@ controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,
 
 #Uncomment the plots you want
 
-#solution general model
+# #solution general model
 t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
-    decision_variables_abu = init_optimization_abu(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+     decision_variables_abu = init_optimization_abu(
+           R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
 
 
-#Test if the circular path velocity is equal to the theoretical
+# #Test if the circular path velocity is equal to the theoretical
 circular_path_test(derivative,decision_variables_abu,n_discretization)
 
-#Animates initial guess vs optimized solution
-animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
-            forcex1_abu,forcey1_abu
-               ,t0_abu,t1_abu,n_discretization)
+# #Animates initial guess vs optimized solution
+# animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
+#             forcex1_abu,forcey1_abu
+#                ,t0_abu,t1_abu,n_discretization)
 
 #Solution comparison plot
-comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi)
+#comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi)

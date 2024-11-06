@@ -91,7 +91,9 @@ def path_info(left, right, alfas,N_angle):
     #fit a spline on the control points and calculate derivative
     spline, derivative = splines_and_derivatives(splpoints)
     
-    #calculates spline angles
-    angle = find_angle(derivative(np.linspace(0,1,num = N_angle)))
+    #calculates spline angles at midpoints
+    delta  = 1/(N_angle-1)
+    angle = find_angle(derivative(np.linspace(delta/2,1-delta/2,num = \
+                    (N_angle-1))))
     
     return spline, derivative, angle
