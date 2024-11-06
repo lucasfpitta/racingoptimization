@@ -64,7 +64,7 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization)
 ###                           Choose Model                     ###
 ##################################################################
 
-"""
+
 #Comment the models you dont want to compute
 
 #Model abu
@@ -123,10 +123,10 @@ computation_time = model_performance(models,results,N_computation_average,
 ##################################################################
 
 #number of sections to access
-discretizations = [10,20,30,50]
+discretizations = [10,18,32,56,100]
 
 #number of timeit assessments
-N_computation_average=2
+N_computation_average=200
 
 #chose the filename
 filename = "Comparison/Results/comparison_timeit.csv"
@@ -139,10 +139,9 @@ models_export = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
 export_comparison_to_csv(models_export, discretizations,filename,
                          N_computation_average,xsi,spline)
 
-"""
 
-models = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
-filename = "Comparison/Results/comparison_timeit.csv"
+
+
 
 #data Dictionary
 data = read_csv_to_dict(filename)

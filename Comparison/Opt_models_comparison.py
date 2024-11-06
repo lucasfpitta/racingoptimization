@@ -151,8 +151,8 @@ def fit_log(results):
         #Take the n_discretization
         n_discretization = []
         for i in range(len(results[name])):
-            log.append(np.log(results[name][i][2]))
-            n_discretization.append(np.log(results[name][i][0]))
+            log.append(np.log10(results[name][i][2]))
+            n_discretization.append(np.log10(results[name][i][0]))
         
         #fits the straight line    
         slope, intercept, r_value, p_value, std_err = \
