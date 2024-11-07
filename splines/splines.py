@@ -17,6 +17,10 @@ def knot_points(left, right, alfas):
     for i in range(len(right[0])):
         splpoints[0][i] = right[0][i]+alfas[i]*(left[0][i]-right[0][i])
         splpoints[1][i] = right[1][i]+alfas[i]*(left[1][i]-right[1][i])
+     
+    #connects the last and first points    
+    splpoints[0][-1]=splpoints[0][0]
+    splpoints[1][-1]=splpoints[1][0]
     return splpoints
 
 
@@ -33,9 +37,8 @@ def knot_points(left, right, alfas):
 def splines_and_derivatives(splpoints):
     
     t = np.linspace(0,1,num = len(splpoints[0]))
-    
     interpol = scp.interpolate.CubicSpline(t, (splpoints[0],splpoints[1]
-                                            ),axis=1, bc_type='natural')
+                                            ),axis=1, bc_type='periodic')
     
     #spline derivative
     diff = interpol.derivative()

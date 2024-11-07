@@ -29,7 +29,7 @@ from Comparison.Opt_models_comparison import *
 ##################################################################
 
 
-n_discretization=50 #number of path sections
+n_discretization=30 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 

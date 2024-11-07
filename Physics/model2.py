@@ -38,12 +38,8 @@ def mass_tilde(derivative, discretization):
 # Input is a scipy path derivative and second derivative and 
 #a midpoint discretization vector over [0,1]
 def centrifugal_tilde(derivative,secondderivative, discretization,\
-        pho_air,A0,Cx):
-    print(np.linalg.norm(pho_air*A0*Cx/2*\
-        np.transpose(derivative(discretization))*(np.linalg.norm(np.transpose(\
-            derivative(discretization)),axis=1)[:, np.newaxis]),axis=1))
-    print(np.linalg.norm(np.transpose(secondderivative(discretization)),axis=1))
-    C_t = np.transpose(secondderivative(discretization))-pho_air*A0*Cx/2*\
+        m,pho_air,A0,Cx):
+    C_t = m*np.transpose(secondderivative(discretization))-pho_air*A0*Cx/2*\
         np.transpose(derivative(discretization))*(np.linalg.norm(np.transpose(\
             derivative(discretization)),axis=1)[:, np.newaxis])
     return C_t
@@ -83,17 +79,18 @@ def model2(spline,angles,M):
     m = 85 #vehicle mass
     mu = 1 #tyre friction coeficient 
     pho_air = 1.225 #air density
-    A0 = 0.5 #frontal area of the car
-    Cx = 0.1 #Drag coeficient
-    
+    A0 = 4 #frontal area of the car
+    Cx = 1 #Drag coeficient
+    derivative = spline.derivative()
+    secondder = spline.derivative().derivative()
     
     #Force matrix R translated to the path - R_t.
     R_t = force_tilde(angles)
     
     #Other matrices
     M_t = m*mass_tilde(spline.derivative(), discretization)
-    C_t = m*centrifugal_tilde(spline.derivative(),spline.derivative().derivative(),discretization,\
-        pho_air,A0,Cx)
+    C_t = centrifugal_tilde(spline.derivative(),spline.derivative().derivative(),discretization,\
+        m,pho_air,A0,Cx)
     A_t = power_tilde(spline.derivative(),angles,discretization)
     
     return R_t, M_t, C_t, A_t
