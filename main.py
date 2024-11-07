@@ -61,7 +61,7 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 m = 85 #vehicle mass
 mu = 1 #tyre friction coeficient 
 pho_air = 1.225 #air density
-A0 = 2 #frontal area of the car
+A0 = 0.5 #frontal area of the car
 Cx = 0.5 #Drag coeficient
 
 
@@ -85,15 +85,15 @@ R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
 ##################################################################
 ###                           Choose Model                     ###
 ##################################################################
-
+"""
 
 #Comment the models you dont want to compute
 
 #Model abu
-# t1_abu=init_optimization_abu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
+t1_abu=init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
 
-"""
+
 #Model bu
 t1_bu=init_optimization_bu(
     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
@@ -121,7 +121,7 @@ t1_SOCP_b=init_optimization_SOCP_b(
 ##################################################################
 
 #number of timeit assessments
-N_computation_average=10
+N_computation_average=2
 
 
 #List to chose the models you do not want to time
@@ -146,7 +146,7 @@ computation_time = model_performance(models,results,N_computation_average,
 ##################################################################
 
 #number of sections to access
-discretizations = [10,20,30,50]
+discretizations = [5,8]
 
 #number of timeit assessments
 N_computation_average=2
@@ -160,7 +160,7 @@ filename = "Comparison/Results/comparison_timeit.csv"
 models_export = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
 
 export_comparison_to_csv(models_export, discretizations,filename,
-                         N_computation_average,xsi,spline)
+                         N_computation_average,xsi,spline,m,mu)
 
 
 
@@ -173,7 +173,7 @@ complexity = fit_log(data)
 
 model_complexity(models,complexity)
 
-"""
+
 ##################################################################
 ###                     Real Path Calculation                  ###
 ##################################################################
@@ -194,7 +194,7 @@ model_complexity(models,complexity)
 ##################################################################
 ###                            Plots                           ###
 ##################################################################
-
+"""
 
 #Uncomment the plots you want
 
@@ -214,4 +214,4 @@ animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
                ,t0_abu,t1_abu,n_discretization,m)
 
 #Solution comparison plot
-#comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi)
+# comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi)

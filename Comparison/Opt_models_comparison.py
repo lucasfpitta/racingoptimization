@@ -13,7 +13,7 @@ from scipy.stats import linregress
 #Input models name (list), discretizations (list), filename (str).
 
 def export_comparison_to_csv(models, discretizations,filename,
-                             N_computation_average,xsi,spline):
+                             N_computation_average,xsi,spline,m,mu):
     
     print_separator("Model Comparison")
     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -38,7 +38,7 @@ def export_comparison_to_csv(models, discretizations,filename,
     for i in range(len(discretizations)):
         
         #Define physics over the path
-        R_t, M_t, C_t, A_t = model1(spline,discretizations[i])   
+        R_t, M_t, C_t, A_t = model1(spline,discretizations[i],m,mu)   
         
         #Dictionary with the times traverse
         time_traverse_dict = {}

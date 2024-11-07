@@ -15,6 +15,7 @@ def circular_path_test(derivative,decision_variables,n_discretization,m,mu,\
     pho_air,A0,Cx):
     
     #calculate absolute velocity
+    #Change here the coordinates to b
     v = translate_velocity(derivative,decision_variables[0:n_discretization],
                         n_discretization)
     
@@ -96,16 +97,16 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 
 
     # Set limits and labels for the first subplot
-    ax1.set_xlim(min(right[0])-10,max(right[0])+10)
-    ax1.set_ylim(min(right[1])-10,max(right[1])+10)
+    ax1.set_xlim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
+    ax1.set_ylim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
     ax1.set_title('First guess constant dtheta Animation')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
 
 
     # Set limits and labels for the second subplot
-    ax2.set_xlim(min(right[0])-10,max(right[0])+10)
-    ax2.set_ylim(min(right[1])-10,max(right[1])+10)
+    ax2.set_xlim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
+    ax2.set_ylim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
     ax2.set_title('Optimized Animation')
     ax2.set_xlabel('X')
     ax2.set_ylabel('Y')
