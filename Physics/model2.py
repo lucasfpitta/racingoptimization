@@ -76,8 +76,6 @@ def model2(spline,angles,M,m,mu,pho_air,A0,Cx):
     discretization=np.linspace(deltatheta/2,1-deltatheta/2,num = M-1)
     
     
-    derivative = spline.derivative()
-    secondder = spline.derivative().derivative()
     
     #Force matrix R translated to the path - R_t.
     R_t = force_tilde(angles)

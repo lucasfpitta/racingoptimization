@@ -57,8 +57,6 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 
-
-
 #Vehicle info
 m = 85 #vehicle mass
 mu = 1 #tyre friction coeficient 
@@ -72,7 +70,7 @@ Cx = 0.5 #Drag coeficient
 #Define physics over the path. Uncomment the desired Physics model
 
 #Model 1, point
-R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
+#R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 #Model 2, oriented point with drag
 R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
