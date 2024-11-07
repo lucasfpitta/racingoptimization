@@ -56,13 +56,27 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 
+
+
+
+#Vehicle info
+m = 85 #vehicle mass
+mu = 1 #tyre friction coeficient 
+pho_air = 1.225 #air density
+A0 = 2 #frontal area of the car
+Cx = 0.5 #Drag coeficient
+
+
+
+
 #Define physics over the path. Uncomment the desired Physics model
 
 #Model 1, point
-#R_t, M_t, C_t, A_t = model1(spline,n_discretization)
+R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 #Model 2, oriented point with drag
-R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization)
+R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
+    pho_air,A0,Cx)
 
 
 
@@ -193,12 +207,13 @@ t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
 
 
 # #Test if the circular path velocity is equal to the theoretical
-circular_path_test(derivative,decision_variables_abu,n_discretization)
+circular_path_test(derivative,decision_variables_abu,n_discretization,m,mu,\
+    pho_air,A0,Cx)
 
 # #Animates initial guess vs optimized solution
-# animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
-#             forcex1_abu,forcey1_abu
-#                ,t0_abu,t1_abu,n_discretization)
+animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
+            forcex1_abu,forcey1_abu
+               ,t0_abu,t1_abu,n_discretization,m)
 
 #Solution comparison plot
 #comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi)

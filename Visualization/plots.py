@@ -11,7 +11,8 @@ from Simulation.optimization_main import *
 ###                     Circular Path test                     ###
 ##################################################################
 
-def circular_path_test(derivative,decision_variables,n_discretization):
+def circular_path_test(derivative,decision_variables,n_discretization,m,mu,\
+    pho_air,A0,Cx):
     
     #calculate absolute velocity
     v = translate_velocity(derivative,decision_variables[0:n_discretization],
@@ -24,8 +25,14 @@ def circular_path_test(derivative,decision_variables,n_discretization):
         n_discretization)
 
 
-    #Theoretical Circle maximum velocity
-    theoretical_v = np.ones(len(v))*np.sqrt(9.81*100)
+    #Theoretical Circle maximum velocity (no drag R=100)
+    theoretical_v_inf = np.ones(len(v))*np.sqrt(9.81*100*mu)
+    
+    
+    #Theoretical Circle maximum velocity (with drag R=100)
+    theoretical_v = theoretical_v_inf*np.sqrt(m/np.sqrt(m**2+(100*pho_air*\
+        A0*Cx/2)**2))
+    
     
     #Theoretical Circle maximum acceleration
     theoretical_a = 9.81*np.ones(len(v))
@@ -42,13 +49,15 @@ def circular_path_test(derivative,decision_variables,n_discretization):
     ax1.set_ylim(0,max(v)+5)
     ax2.set_ylim(0,max(a)+5)
     ax1.plot(np.linspace(0,1,n_discretization-1),
-            v,'-r',label="Optimized velocity")
+            v,'*r',label="Optimized velocity")
     ax1.plot(np.linspace(0,1,n_discretization-1),
-            theoretical_v,'-b',label="Theoretical velocity")
+            theoretical_v_inf,'-b',label="Theoretical v_inf R=100")
+    ax1.plot(np.linspace(0,1,n_discretization-1),
+            theoretical_v,'-g',label="Theoretical v R=100")
     ax2.plot(np.linspace(0,1,n_discretization-1),
             a,'*r',label="Optimized acceleration")
     ax2.plot(np.linspace(0,1,n_discretization-1),
-            theoretical_a,'-b',label="Theoretical acceleration")
+            theoretical_a,'-b',label="Theoretical acceleration inf")
     ax1.grid()
     ax2.grid()
     ax1.legend()
@@ -72,7 +81,7 @@ def circular_path_test(derivative,decision_variables,n_discretization):
 
 
 def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
-               ,t0,t1,n_discretization):
+               ,t0,t1,n_discretization,m):
     
     #spline discretization over sections 
     spline_points_animation = spline(np.linspace(0,1,num = n_discretization))
@@ -103,7 +112,7 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 
 
     #Set the friction circle radius
-    radius = 85 * 9.81
+    radius = m * 9.81
 
 
     # Create an array of angles for friction circle
@@ -116,8 +125,8 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 
 
     # Set limits and labels for the force plot 1 (bottom-left)
-    ax3.set_xlim(-85*9.81, 85*9.81)  # X-axis is time
-    ax3.set_ylim(-85*9.81, 85*9.81)    # Y-axis is force
+    ax3.set_xlim(-m*9.81, m*9.81)  # X-axis is time
+    ax3.set_ylim(-m*9.81, m*9.81)    # Y-axis is force
     ax3.set_title('First guess Force')
     ax3.set_xlabel('Time')
     ax3.set_ylabel('Force')
@@ -125,8 +134,8 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 
 
     # Set limits and labels for the force plot 2 (bottom-right)
-    ax4.set_xlim(-85*9.81, 85*9.81)    # X-axis is time
-    ax4.set_ylim(-85*9.81, 85*9.81)    # Y-axis is force
+    ax4.set_xlim(-m*9.81, m*9.81)    # X-axis is time
+    ax4.set_ylim(-m*9.81, m*9.81)    # Y-axis is force
     ax4.set_title('Optimized Force')
     ax4.set_xlabel('Time')
     ax4.set_ylabel('Force')

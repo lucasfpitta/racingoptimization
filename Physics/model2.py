@@ -67,7 +67,7 @@ def power_tilde(derivative,angles, discretization):
 #Defines the necessary vectors and matrix to model1
 #Input scipy spline
 #Output matrices
-def model2(spline,angles,M):
+def model2(spline,angles,M,m,mu,pho_air,A0,Cx):
     
     #discretization lenght
     deltatheta = 1/(M-1)
@@ -76,11 +76,6 @@ def model2(spline,angles,M):
     discretization=np.linspace(deltatheta/2,1-deltatheta/2,num = M-1)
     
     
-    m = 85 #vehicle mass
-    mu = 1 #tyre friction coeficient 
-    pho_air = 1.225 #air density
-    A0 = 4 #frontal area of the car
-    Cx = 1 #Drag coeficient
     derivative = spline.derivative()
     secondder = spline.derivative().derivative()
     

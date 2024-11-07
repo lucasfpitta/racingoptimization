@@ -43,17 +43,13 @@ def power_tilde(derivative, discretization):
 #Defines the necessary vectors and matrix to model1
 #Input scipy spline
 #Output matrices
-def model1(spline,M):
+def model1(spline,M,m,mu):
     
     #discretization lenght
     deltatheta = 1/(M-1)
     
     #midpoints discretization
     discretization=np.linspace(deltatheta/2,1-deltatheta/2,num = M-1)
-    
-    
-    m = 85 #vehicle mass
-    mu = 1 #tyre friction coeficient 
     
     
     #Force matrix R translated to the path - R_t.
