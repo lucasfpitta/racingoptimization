@@ -39,8 +39,13 @@ def mass_tilde(derivative, discretization):
 #a midpoint discretization vector over [0,1]
 def centrifugal_tilde(derivative,secondderivative, discretization,\
         pho_air,A0,Cx):
+    print(np.linalg.norm(pho_air*A0*Cx/2*\
+        np.transpose(derivative(discretization))*(np.linalg.norm(np.transpose(\
+            derivative(discretization)),axis=1)[:, np.newaxis]),axis=1))
+    print(np.linalg.norm(np.transpose(secondderivative(discretization)),axis=1))
     C_t = np.transpose(secondderivative(discretization))-pho_air*A0*Cx/2*\
-        np.transpose(derivative(discretization))**2
+        np.transpose(derivative(discretization))*(np.linalg.norm(np.transpose(\
+            derivative(discretization)),axis=1)[:, np.newaxis])
     return C_t
 
 
@@ -78,7 +83,7 @@ def model2(spline,angles,M):
     m = 85 #vehicle mass
     mu = 1 #tyre friction coeficient 
     pho_air = 1.225 #air density
-    A0 = 0.1 #frontal area of the car
+    A0 = 0.5 #frontal area of the car
     Cx = 0.1 #Drag coeficient
     
     

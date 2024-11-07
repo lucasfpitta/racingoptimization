@@ -29,7 +29,7 @@ from Comparison.Opt_models_comparison import *
 ##################################################################
 
 
-n_discretization=30 #number of path sections
+n_discretization=50 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -74,13 +74,14 @@ R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization)
 ###                           Choose Model                     ###
 ##################################################################
 
-"""
+
 #Comment the models you dont want to compute
 
 #Model abu
-t1_abu=init_optimization_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
+# t1_abu=init_optimization_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
 
+"""
 #Model bu
 t1_bu=init_optimization_bu(
     R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 

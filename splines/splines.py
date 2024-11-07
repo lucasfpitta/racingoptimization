@@ -64,11 +64,7 @@ def find_angle(derivative):
         if derivative[0][i] >= 0:
             angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))
         else:
-            angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))+np.pi
-            
-     #last angle is the same as the first       
-    angle[0]=angle[-1]
-    
+            angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))+np.pi    
     return angle
 
 
