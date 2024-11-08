@@ -241,25 +241,25 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 ###                    Comparison Methods                      ###
 ##################################################################
 
-def comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi):
+def comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels):
 
     #all results needed
     t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
         decision_variables_abu = init_optimization_abu(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
     
     t0_bu,t1_bu,forcex0_bu,forcey0_bu,forcex1_bu,forcey1_bu,x0_bu,\
         decision_variables_bu = init_optimization_bu(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
     
     t0_b,t1_b,x0_b,decision_variables_b = init_optimization_b(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
     
     t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
     
     t1_SOCP_b,decision_variables_SOCP_b = init_optimization_SOCP_b(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
 
 

@@ -11,11 +11,12 @@ import timeit
 
 
 #Internal functions
-from Simulation.optimization_abu import optimization_abu
-from Simulation.optimization_b import optimization_b
-from Simulation.optimization_bu import optimization_bu
-from Simulation.optimization_SOCP_abu import optimization_SOCP_abu
-from Simulation.optimization_SOCP_b import optimization_SOCP_b
+from Simulation.Model_1_2.optimization_abu import optimization_abu
+from Simulation.Model_1_2.optimization_b import optimization_b
+from Simulation.Model_1_2.optimization_bu import optimization_bu
+from Simulation.Model_1_2.optimization_SOCP_abu import optimization_SOCP_abu
+from Simulation.Model_1_2.optimization_SOCP_b import optimization_SOCP_b
+from Simulation.Model_3.optimization_abu_3 import optimization_abu_3
 from Simulation.reconstruct import reconstruct, interpolate_u, control_system
 from Visualization.print import print_separator, print_table
 
@@ -33,7 +34,7 @@ from Visualization.print import print_separator, print_table
 
 
 def init_optimization_abu(R_t, M_t, C_t, A_t,n_discretization,
-                                      xsi,display,plot):
+                                      xsi,n_wheels,display,plot):
     
      if display: 
           print_separator(
@@ -42,8 +43,8 @@ def init_optimization_abu(R_t, M_t, C_t, A_t,n_discretization,
      #finds the optimal solution and innitial guess. Outputs generalized 
      #velocity square b, 
      #generalized acceleration a, and forces u
-     decision_variables_abu, x0_abu = optimization_abu(R_t, M_t, C_t, A_t,
-                                             n_discretization,xsi,display)
+     decision_variables_abu, x0_abu = optimization_abu(R_t, M_t, C_t, A_t,\
+                                   n_discretization,xsi,n_wheels,display)
 
 
      #extract the forces from the flattened result array
@@ -80,7 +81,7 @@ def init_optimization_abu(R_t, M_t, C_t, A_t,n_discretization,
 
 
 def init_optimization_bu(R_t, M_t, C_t, A_t,n_discretization,
-                                      xsi,display,plot):
+                              xsi,n_wheels,display,plot):
     
      if display:
           print_separator("Velocity Force optimization Model (bu)")
@@ -88,7 +89,7 @@ def init_optimization_bu(R_t, M_t, C_t, A_t,n_discretization,
      #finds the optimal solution and innitial guess. Outputs generalized 
      #velocity square b
      decision_variables_bu, x0_bu = optimization_bu(R_t, M_t, C_t, A_t,
-                                             n_discretization,xsi,display)
+                                        n_discretization,xsi,n_wheels,display)
 
 
      #calculated time to run each trajectory using generalized velocity 
@@ -122,7 +123,7 @@ def init_optimization_bu(R_t, M_t, C_t, A_t,n_discretization,
 
 
 def init_optimization_b(R_t, M_t, C_t, A_t,n_discretization,
-                                      xsi,display,plot):
+                                   xsi,n_wheels,display,plot):
 
      if display:
           print_separator("Velocity optimization Model (b)")
@@ -155,14 +156,14 @@ def init_optimization_b(R_t, M_t, C_t, A_t,n_discretization,
 ##################################################################
 
 def init_optimization_SOCP_abu(R_t, M_t, C_t, A_t,n_discretization,
-                                      xsi,display,plot):
+                                      xsi,n_wheels,display,plot):
      if display:
           print_separator("Second-order Cone (abu) Model")
 
      #finds the optimal solution. Outputs vector with variables a, b, u, 
      # c, d 
      decision_variables_SOCP_abu = optimization_SOCP_abu(R_t, M_t, C_t, 
-                                             A_t,n_discretization,xsi,display)
+                              A_t,n_discretization,xsi,n_wheels,display)
 
      #calculated time to run each trajectory using generalized velocity 
      #square b 
@@ -185,7 +186,7 @@ def init_optimization_SOCP_abu(R_t, M_t, C_t, A_t,n_discretization,
 ##################################################################
 
 def init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,
-                                      xsi,display,plot):
+                                      xsi,n_wheels,display,plot):
      if display:
           print_separator("Second-order Cone (b) Model")
 
@@ -203,6 +204,49 @@ def init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,
           return t1_SOCP_b,decision_variables_SOCP_b
      else:
           return t1_SOCP_b
+     
+     
+     
+     
+     
+     
+     
+   
+##################################################################
+###                       Abu for Model3                       ###
+##################################################################
+
+def init_optimization_abu_3(R_t, M_t, C_t, A_t,n_discretization,
+                                      xsi,n_wheels,display,plot):
+     if display:
+          print_separator("Velocity, acceleration and force optimization Model 3 (abu)")
+
+     #finds the optimal solution. Outputs vector with variables a, b, u, 
+     # c, d 
+     decision_variables_abu_3, x0 = optimization_abu_3(R_t, M_t, C_t, 
+                               A_t,n_discretization,xsi,n_wheels,display)
+
+
+     #calculated time to run each trajectory using generalized velocity 
+     #square b 
+     t1_abu_3=reconstruct(decision_variables_abu_3.x[0:n_discretization])
+     
+     if plot:
+          return t1_abu_3,decision_variables_abu_3
+     else:
+          return t1_abu_3  
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
+     
    
    
    
@@ -215,7 +259,7 @@ def init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,
 ##################################################################
 
 def model_performance(models,results,N_computation_average,R_t, M_t, C_t, 
-     A_t,n_discretization,xsi,display):
+     A_t,n_discretization,xsi,n_wheels,display):
      print_separator("Model Performance Comparison")
      print(f"Number of sections: {n_discretization}")
      
@@ -243,7 +287,7 @@ def model_performance(models,results,N_computation_average,R_t, M_t, C_t,
      computation_time = []
      for name, func in Models_dict.items():
           time_taken = timeit.timeit(lambda:func(R_t, M_t, C_t, 
-          A_t,n_discretization,xsi,display,plot=False), 
+          A_t,n_discretization,xsi,n_wheels,display,plot=False), 
                               number=N_computation_average)
           compute_times_dict[name] = time_taken/N_computation_average
 
@@ -264,7 +308,7 @@ def model_performance(models,results,N_computation_average,R_t, M_t, C_t,
 
 
 def controlled_path(model,R_t, M_t, C_t, A_t,n_discretization,
-                    xsi,spline_points,derivative,N_path_points):
+                    xsi,n_wheels,spline_points,derivative,N_path_points):
      
      print_separator("Real Path Calculation")
      
@@ -280,7 +324,7 @@ def controlled_path(model,R_t, M_t, C_t, A_t,n_discretization,
      if model in Models_dict:
           t0,t1,forcex0,forcey0,forcex1,forcey1,x0,decision_variables=\
                Models_dict[model](R_t, M_t, C_t, A_t,n_discretization,xsi,\
-                    display=False,plot=True)
+                    n_wheels,display=False,plot=True)
      else:
           print("Invalid model name")
           return

@@ -30,7 +30,7 @@ from Comparison.Opt_models_comparison import *
 ##################################################################
 
 
-n_discretization=30 #number of path sections
+n_discretization=10 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -69,6 +69,8 @@ Cx = 0.5 #Drag coeficient
 width = 0.5 #car track width
 L = 1 #can wheelbase
 Wf=0.4 #position of the center of mass in relation to wheels
+ #number of wheels, 1 for model1 and model2, 4 for model3, 3 for model4
+n_wheels=4
 
 
 
@@ -76,7 +78,7 @@ Wf=0.4 #position of the center of mass in relation to wheels
 #Define physics over the path. Uncomment the desired Physics model
 
 #Model 1, point
-#R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
+# R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 #Model 2, oriented point with drag
 # R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
@@ -86,49 +88,53 @@ Wf=0.4 #position of the center of mass in relation to wheels
 #Model 3, o$ wheels with drag
 R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
     angle_sec_derivative,n_discretization,m,mu,\
-        pho_air,A0,Cx,J,width,L,Wf)
+        pho_air,A0,Cx,J,width,L,Wf,n_wheels)
 
 
 
 
 
 
-
+"""
 
 ##################################################################
 ###                           Choose Model                     ###
 ##################################################################
-"""
+
 
 #Comment the models you dont want to compute
 
 #Model abu
 t1_abu=init_optimization_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
 #Model bu
 t1_bu=init_optimization_bu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False) 
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 #Model b
 t1_b=init_optimization_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 #Model SOCP abu
 t1_SOCP_abu=init_optimization_SOCP_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 #Model SOCP b
 t1_SOCP_b=init_optimization_SOCP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,display=True,plot=False)
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+"""
 
 
+#Model abu 3
+t1_abu_3=init_optimization_abu_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
+print(t1_abu_3)
 
-
-
-
+"""
 ##################################################################
 ###                 Model Performance Comparison              ###
 ##################################################################
@@ -150,7 +156,7 @@ results = [t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1]]
 
 #Call the timeit
 computation_time = model_performance(models,results,N_computation_average,
-                    R_t, M_t, C_t,A_t,n_discretization,xsi,display=False)
+            R_t, M_t, C_t,A_t,n_discretization,xsi,n_wheels,display=False)
 
 
 
@@ -173,7 +179,7 @@ filename = "Comparison/Results/comparison_timeit.csv"
 models_export = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
 
 export_comparison_to_csv(models_export, discretizations,filename,
-                         N_computation_average,xsi,spline,m,mu)
+                         N_computation_average,xsi,n_wheels,spline,m,mu)
 
 
 
@@ -194,7 +200,7 @@ model_complexity(models,complexity)
 
 #Only "Time abu" and "Time bu" available
 # controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,
-#         n_discretization,xsi,spline_points,derivative,N_path_points)
+#         n_discretization,xsi,n_wheels,spline_points,derivative,N_path_points)
 
 
 
@@ -207,14 +213,14 @@ model_complexity(models,complexity)
 ##################################################################
 ###                            Plots                           ###
 ##################################################################
-"""
+
 
 #Uncomment the plots you want
 
 # #solution general model
 t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
      decision_variables_abu = init_optimization_abu(
-           R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
 
 # #Test if the circular path velocity is equal to the theoretical
@@ -227,4 +233,5 @@ animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
                ,t0_abu,t1_abu,n_discretization,m)
 
 #Solution comparison plot
-# comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi)
+comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
+"""

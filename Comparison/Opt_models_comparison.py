@@ -13,7 +13,7 @@ from scipy.stats import linregress
 #Input models name (list), discretizations (list), filename (str).
 
 def export_comparison_to_csv(models, discretizations,filename,
-                             N_computation_average,xsi,spline,m,mu):
+                             N_computation_average,xsi,n_wheels,spline,m,mu):
     
     print_separator("Model Comparison")
     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -45,15 +45,15 @@ def export_comparison_to_csv(models, discretizations,filename,
         
         for name, func in Models_dict.items():
             time_traverse_dict[name] = func(R_t, M_t, C_t, 
-            A_t,discretizations[i],xsi,display=False,plot=False)
+            A_t,discretizations[i],xsi,n_wheels,display=False,plot=False)
             
         #save the results 1 list
         Results1.append([time_traverse_dict[name][-1] for name in models])
 
         #Call the timeit and saves on the second list
         Results2.append(model_performance(models,Results1[i],
-            N_computation_average,R_t, M_t, C_t,A_t,discretizations[i],xsi,
-            display=False))
+            N_computation_average,R_t, M_t, C_t,A_t,discretizations[i],\
+                xsi,n_wheels,display=False))
         
 
     # Create headers with dynamic discretization triplets

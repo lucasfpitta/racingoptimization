@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 #Input angle at midpoints
 def force_tilde(angles,n_wheels,width,L,Wf):
     if n_wheels!=4:
-        print("incompatible number of wheels, check\
-            force_tilde at model3")
+        print("incompatible number of wheels, check force_tilde at model3")
         SystemExit
         
     #torque line of the matrix    
@@ -79,11 +78,8 @@ def power_tilde(derivative,angles, discretization,n_wheels):
 #Input scipy spline
 #Output matrices
 def model3(spline,angles,angle_derivative,angle_sec_derivative,\
-    M,m,mu,pho_air,A0,Cx,J,width,L,Wf):
-    
-    #defines how many wheels the model has
-    #If changed, R_t will be wrong
-    n_wheels=4
+    M,m,mu,pho_air,A0,Cx,J,width,L,Wf,n_wheels):
+
     
     #discretization lenght
     deltatheta = 1/(M-1)
