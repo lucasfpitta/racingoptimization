@@ -14,6 +14,7 @@ faulthandler.enable()
 from Map_processing.choose_path import choose_path
 from Physics.model1 import model1
 from Physics.model2 import model2
+from Physics.model3 import model3
 from Simulation.optimization_main import *
 from Visualization.plots import *
 from Comparison.Opt_models_comparison import *
@@ -46,7 +47,8 @@ internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
 #create path splines and path spline derivative, assess orientation angles 
 #over the sections, define outlines 
-spline, derivative, angle, right, left = choose_path(path_name,external,
+spline, derivative, angle, angle_derivative,angle_sec_derivative, right,\
+    left = choose_path(path_name,external,
 internal,N_angle=n_discretization)
 
 
@@ -59,10 +61,14 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 #Vehicle info
 m = 85 #vehicle mass
+J=10 #Moment of inertia
 mu = 1 #tyre friction coeficient 
 pho_air = 1.225 #air density
 A0 = 0.5 #frontal area of the car
 Cx = 0.5 #Drag coeficient
+width = 0.5 #car track width
+L = 1 #can wheelbase
+Wf=0.4 #position of the center of mass in relation to wheels
 
 
 
@@ -73,8 +79,15 @@ Cx = 0.5 #Drag coeficient
 #R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 #Model 2, oriented point with drag
-R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
-    pho_air,A0,Cx)
+# R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
+#     pho_air,A0,Cx)
+
+
+#Model 3, o$ wheels with drag
+R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
+    angle_sec_derivative,n_discretization,m,mu,\
+        pho_air,A0,Cx,J,width,L,Wf)
+
 
 
 

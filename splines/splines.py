@@ -58,17 +58,51 @@ def splines_and_derivatives(splpoints):
 #Output angle assessment vector
 
 
-def find_angle(derivative):
+def find_angle(spline,N_angle):
     
-    angle = np.zeros(len(derivative[0]))
+    #defines spline info
+    delta  = 1/(N_angle-1)
+    midpoints = np.linspace(delta/2,1-delta/2,num = \
+                    (N_angle-1))
+    
+    #spline derivatives
+    diff = spline.derivative()
+    second_diff = spline.derivative().derivative()
+    
+    #splines at the midpoints
+    spline_points = spline(midpoints)
+    derivative = diff(midpoints)
+    sec_derivative=second_diff(midpoints)
+    
+    
+    
+    #Builds the vectors
+    angle = np.zeros(len(midpoints))
+    angle_derivative = np.zeros(len(midpoints))
+    angle_sec_derivative = np.zeros(len(midpoints))
+    
     
     #calculates the angle with the spline derivative
-    for i in range(len(derivative[0])):
+    for i in range(len(midpoints)):
         if derivative[0][i] >= 0:
             angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))
         else:
-            angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))+np.pi    
-    return angle
+            angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))+np.pi
+            
+            
+    #calculates the  derivative
+    angle_derivative = (spline_points[0]*derivative[1]-spline_points[1]*derivative[0])\
+        /(spline_points[0]**2+spline_points[1]**2)
+    
+    
+    #calculates second derivative (complicated expression)
+    angle_sec_derivative = 1/(spline_points[0]**2+spline_points[1]**2)**2*\
+        ((spline_points[0]**2+spline_points[1]**2)*(spline_points[0]*\
+            sec_derivative[1]-spline_points[1]*sec_derivative[0])-\
+            (spline_points[0]*derivative[1]-spline_points[1]*derivative[0])\
+        *(2*spline_points[0]*derivative[0]+2*spline_points[1]*derivative[1]))   
+    
+    return angle, angle_derivative, angle_sec_derivative
 
 
 
@@ -91,8 +125,8 @@ def path_info(left, right, alfas,N_angle):
     spline, derivative = splines_and_derivatives(splpoints)
     
     #calculates spline angles at midpoints
-    delta  = 1/(N_angle-1)
-    angle = find_angle(derivative(np.linspace(delta/2,1-delta/2,num = \
-                    (N_angle-1))))
     
-    return spline, derivative, angle
+    angle, angle_derivative, angle_sec_derivative  = \
+        find_angle(spline,N_angle)
+    
+    return spline, derivative, angle, angle_derivative, angle_sec_derivative

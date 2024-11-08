@@ -48,8 +48,10 @@ def google_earth_path(external,internal,N_angle):
     #calculate the spline (scipy spline), its derivative (scipy spline), 
     # angle (array over N_angle points)
     #left and right are the outlines and alfas is the random path
-    spline, derivative, angle = path_info(left, right, alfas,N_angle)
-    return spline, derivative, angle, right, left
+    spline, derivative, angle, angle_derivative, angle_sec_derivative = \
+        path_info(left, right, alfas,N_angle)
+    return spline, derivative, angle, angle_derivative, \
+        angle_sec_derivative, right, left
 
 
 
@@ -90,10 +92,12 @@ def circle(N_angle):
     #calculate the spline (scipy spline), its derivative (scipy spline), 
     # angle (array over N_angle points)
     #left and right are the outlines and alfas is the random path
-    spline, derivative, angle = path_info(left, right, alfas,N_angle)
+    spline, derivative, angle, angle_derivative, angle_sec_derivative = \
+        path_info(left, right, alfas,N_angle)
     
     
-    return spline, derivative, angle, right, left
+    return spline, derivative, angle, angle_derivative, \
+        angle_sec_derivative, right, left
 
 
 
@@ -130,10 +134,12 @@ def eight(N_angle):
     #calculate the spline (scipy spline), its derivative (scipy spline), 
     # angle (array over N_angle points)
     #left and right are the outlines and alfas is the random path
-    spline, derivative, angle = path_info(left, right, alfas,N_angle)
+    spline, derivative, angle, angle_derivative, angle_sec_derivative\
+        = path_info(left, right, alfas,N_angle)
     
     
-    return spline, derivative, angle, right, left
+    return spline, derivative, angle, angle_derivative, \
+        angle_sec_derivative, right, left
 
 
 
@@ -212,10 +218,12 @@ def oval(N_angle):
     #calculate the spline (scipy spline), its derivative (scipy spline), 
     # angle (array over N_angle points)
     #left and right are the outlines and alfas is the random path
-    spline, derivative, angle = path_info(left, right, alfas,N_angle)
+    spline, derivative, angle, angle_derivative, angle_sec_derivative\
+        = path_info(left, right, alfas,N_angle)
     
     
-    return spline, derivative, angle, right, left
+    return spline, derivative, angle, angle_derivative, \
+        angle_sec_derivative, right, left
 
 
 
@@ -270,10 +278,12 @@ def semi_circle(N_angle):
     #calculate the spline (scipy spline), its derivative (scipy spline), 
     # angle (array over N_angle points)
     #left and right are the outlines and alfas is the random path
-    spline, derivative, angle = path_info(left, right, alfas,N_angle)
+    spline, derivative, angle, angle_derivative, angle_sec_derivative = \
+        path_info(left, right, alfas,N_angle)
     
     
-    return spline, derivative, angle, right, left
+    return spline, derivative, angle, angle_derivative, angle_sec_derivative,\
+        right, left
 
 
 
@@ -294,23 +304,29 @@ def semi_circle(N_angle):
 
 def choose_path(path_name,external,internal,N_angle):
     if path_name == "circle":
-        spline, derivative, angle, right, left = circle(N_angle)
+        spline, derivative, angle, angle_derivative, angle_sec_derivative, \
+            right, left = circle(N_angle)
     elif path_name == "google_earth":      
-        spline, derivative, angle, right, left = google_earth_path(external
+        spline, derivative, angle, angle_derivative, angle_sec_derivative,\
+            right, left = google_earth_path(external
                                                         ,internal,N_angle)
     elif path_name == "semi_circle":
-        spline, derivative, angle, right, left = semi_circle(N_angle)
+        spline, derivative, angle, angle_derivative, angle_sec_derivative,\
+            right, left = semi_circle(N_angle)
         
     elif path_name == "eight":
-        spline, derivative, angle, right, left = eight(N_angle)
+        spline, derivative, angle, angle_derivative, angle_sec_derivative,\
+            right, left = eight(N_angle)
         
     elif path_name == "oval":
-        spline, derivative, angle, right, left = oval(N_angle)
+        spline, derivative, angle, angle_derivative, angle_sec_derivative,\
+            right, left = oval(N_angle)
         
     else:
         print("Error: wrong path name")
         exit()
-    return spline, derivative, angle, right, left
+    return spline, derivative, angle, angle_derivative, \
+        angle_sec_derivative, right, left
         
     
 

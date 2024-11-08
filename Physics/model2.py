@@ -35,8 +35,8 @@ def mass_tilde(derivative, discretization):
 
 
 #Centrifugal matrix C translated to the path - C_t. 
-# Input is a scipy path derivative and second derivative and 
-#a midpoint discretization vector over [0,1]
+# Input is a scipy path derivative and second derivative, 
+#a midpoint discretization vector over [0,1], and vehicle info
 def centrifugal_tilde(derivative,secondderivative, discretization,\
         m,pho_air,A0,Cx):
     C_t = m*np.transpose(secondderivative(discretization))-pho_air*A0*Cx/2*\
@@ -54,8 +54,8 @@ def centrifugal_tilde(derivative,secondderivative, discretization,\
 # Input is a scipy path derivative and a midpoint discretization 
 # vector over [0,1]
 def power_tilde(derivative,angles, discretization):
-    Rotation= np.array([[[np.cos(theta), -np.sin(theta)], \
-        [np.sin(theta), np.cos(theta)]] for theta in angles])
+    Rotation= np.array([[[np.cos(theta), np.sin(theta)], \
+        [-np.sin(theta), np.cos(theta)]] for theta in angles])
     A_t = (Rotation@np.transpose(derivative(discretization))\
         [..., np.newaxis]).squeeze(-1)
     return A_t
