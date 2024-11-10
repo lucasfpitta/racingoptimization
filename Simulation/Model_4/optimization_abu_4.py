@@ -20,10 +20,10 @@ def create_objective(xsi,A_t,T0,E0,n_discretization,n_wheels):
         #sum over the path 
         for i in range(n_discretization-1):
             
-            cost = cost + 2*xsi/((decision_variables[i+1]**0.5+decision_variables[i]
+            cost = cost+2*xsi/((decision_variables[i+1]**0.5+decision_variables[i]
                     **0.5)*T0)
             
-            for j in range(2*n_wheels):
+            for j in range(3*n_wheels):
                 cost = cost+(1-xsi)*(decision_variables[\
                     u+i+j*(n_discretization-1)]*A_t[i][j])/E0
                 
@@ -54,7 +54,7 @@ def create_constraint1(R_t,M_t,C_t,n_discretization,n_wheels):
     def constraint1(decision_variables):
         
         #Remainder array tells if the constraint is respected
-        remainder = np.zeros(3*(n_discretization-1))
+        remainder = np.zeros(6*(n_discretization-1))
         
         for i in range(n_discretization-1):
             
@@ -66,12 +66,26 @@ def create_constraint1(R_t,M_t,C_t,n_discretization,n_wheels):
             remainder[n_discretization-1+i] = -M_t[i][1]*decision_variables[a+i]-(
                     C_t[i][1])*(decision_variables[i]+decision_variables[i+1])/2
             
-            #angle coordinate
-            remainder[2*(n_discretization-1)+i] = -M_t[i][2]*\
-                decision_variables[a+i]-(C_t[i][2])*(decision_variables[i]\
+            #third Cartesian coordinate
+            remainder[2*(n_discretization-1)+i] = -M_t[i][2]*decision_variables[a+i]-(
+                    C_t[i][2])*(decision_variables[i]+decision_variables[i+1])/2
+            
+            #First angle coordinate
+            remainder[3*(n_discretization-1)+i] = -M_t[i][3]*\
+                decision_variables[a+i]-(C_t[i][3])*(decision_variables[i]\
+                    +decision_variables[i+1])/2
+                
+            #Second angle coordinate
+            remainder[4*(n_discretization-1)+i] = -M_t[i][4]*\
+                decision_variables[a+i]-(C_t[i][4])*(decision_variables[i]\
+                    +decision_variables[i+1])/2
+                
+            #Third angle coordinate
+            remainder[5*(n_discretization-1)+i] = -M_t[i][5]*\
+                decision_variables[a+i]-(C_t[i][5])*(decision_variables[i]\
                     +decision_variables[i+1])/2
             
-            for j in range(2*n_wheels):
+            for j in range(3*n_wheels):
 
                 #first Cartesian coordinate 
                 remainder[i]=remainder[i]+(R_t[i][0][j]*decision_variables[\
@@ -80,10 +94,24 @@ def create_constraint1(R_t,M_t,C_t,n_discretization,n_wheels):
                 #second Cartesian coordinate
                 remainder[n_discretization-1+i]=remainder[n_discretization-1+i]+\
                     (R_t[i][1][j]*decision_variables[u+i+j*(n_discretization-1)])
+                    
+                #Third Cartesian coordinate
+                remainder[2*(n_discretization-1)+i]=remainder[2*(n_discretization-1)+i]+\
+                    (R_t[i][2][j]*decision_variables[u+i+j*(n_discretization-1)])
                         
-                #angle coordinate
-                remainder[2*(n_discretization-1)+i]=remainder[2*(\
-                    n_discretization-1)+i]+(R_t[i][2][j]*decision_variables[u+i+j\
+                #First angle coordinate
+                remainder[3*(n_discretization-1)+i]=remainder[3*(\
+                    n_discretization-1)+i]+(R_t[i][3][j]*decision_variables[u+i+j\
+                        *(n_discretization-1)])
+                
+                #Second angle coordinate
+                remainder[4*(n_discretization-1)+i]=remainder[4*(\
+                    n_discretization-1)+i]+(R_t[i][4][j]*decision_variables[u+i+j\
+                        *(n_discretization-1)])
+                    
+                #Third angle coordinate
+                remainder[5*(n_discretization-1)+i]=remainder[5*(\
+                    n_discretization-1)+i]+(R_t[i][5][j]*decision_variables[u+i+j\
                         *(n_discretization-1)])
                     
         return remainder
@@ -127,7 +155,7 @@ def create_constraint2(n_discretization):
 #creates bounds to b 
 def create_b_bounds(n_discretization,n_wheels):
     
-    length_wheels = 2*n_wheels*(n_discretization-1)
+    length_wheels = 3*n_wheels*(n_discretization-1)
     
     lb=[]
     ub=[]
@@ -164,9 +192,10 @@ def create_constraint3(mu,mass,n_discretization,n_wheels):
             #for every wheel
             for j in range(n_wheels):
                 remainder[i+j*(n_discretization-1)] = -(\
-                    decision_variables[u+i+2*j*(n_discretization-1)]**2\
-                        +decision_variables[u+i+(2*j+1)*(n_discretization-1)]
-                             **2)**0.5+mu*mass*9.81/n_wheels
+                    decision_variables[u+i+3*j*(n_discretization-1)]**2\
+                        +decision_variables[u+i+(3*j+1)*(n_discretization-1)]
+                             **2)**0.5+mu*decision_variables[u+i+(3*j+2)*(
+                                 n_discretization-1)]
             
         return remainder
     return constraint3
@@ -187,12 +216,15 @@ def build_x0(b0,R_t,M_t,C_t,A_t,n_discretization,n_wheels):
     
     #creates innitial guess
     x0 = (np.ones(n_discretization))*b0
-    x0 = np.append(x0,np.zeros((1+2*n_wheels)*(n_discretization-1)))
+    x0 = np.append(x0,np.zeros((1+3*n_wheels)*(n_discretization-1)))
     
     #flattened vector coordinates first 3 forces
     u1=n_discretization+n_discretization-1
     u2=u1+n_discretization-1
     u3=u2+n_discretization-1
+    u4=u3+n_discretization-1
+    u5=u4+n_discretization-1
+    u6=u5+n_discretization-1
     
     #calculates forces that are necessary for constant u
     for i in range(n_discretization-1):
@@ -203,6 +235,9 @@ def build_x0(b0,R_t,M_t,C_t,A_t,n_discretization,n_wheels):
         x0[u1+i]=u[0]
         x0[u2+i]=u[1]
         x0[u3+i]=u[2]
+        x0[u4+i]=u[3]
+        x0[u5+i]=u[4]
+        x0[u6+i]=u[5]
         
     #Calculates the normalization factors
     T0=0
@@ -228,9 +263,9 @@ def build_x0(b0,R_t,M_t,C_t,A_t,n_discretization,n_wheels):
 # and Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors 
 # A_t, M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
-def optimization_abu_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
-    if n_wheels != 4:
-        print("Wrong optimization model. This one is specific for model3 (4 wheels)")
+def optimization_abu_4(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
+    if n_wheels != 3:
+        print("Wrong optimization model. This one is specific for model4 (3 wheels)")
         SystemExit
     
     #creating constraints
@@ -256,10 +291,10 @@ def optimization_abu_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
     'ftol': 1e-8      # Tolerance on function value changes
         }   
     
-    # def callback_func(xk):
-    #     callback_func.iteration += 1
-    #     #print(f"Iteration {callback_func.iteration}")
-    # callback_func.iteration = 0
+    def callback_func(xk):
+        callback_func.iteration += 1
+        print(f"Iteration {callback_func.iteration}")
+    callback_func.iteration = 0
     
     b0=1
     #building innitial guess
@@ -276,7 +311,7 @@ def optimization_abu_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
  
     #optimization    
     result = scp.optimize.minimize(objective_function, x0, method='SLSQP'
-                        , constraints=cons,bounds=bounds,options=options)#, callback = callback_func
+                        , constraints=cons,bounds=bounds,options=options, callback = callback_func)#
     
     
     if display:

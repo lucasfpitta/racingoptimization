@@ -19,11 +19,18 @@ def circular_path_test(derivative,decision_variables,n_discretization,m,mu,\
     v = translate_velocity(derivative,decision_variables[0:n_discretization],
                         n_discretization)
     
+    
+    #building acceleration vector
+    delta_theta = 1/(n_discretization-1)
+    a_opt = np.zeros(n_discretization-1)
+    
+    for i in range(n_discretization-1):
+        a_opt[i]=(decision_variables[i+1]-decision_variables[i])/(2*delta_theta)
+    
     #calculate absolute acceleration
     a = translate_acceleration(derivative, derivative.derivative(),
                             decision_variables[0:n_discretization],
-        decision_variables[n_discretization:2*n_discretization-1],
-        n_discretization)
+        a_opt,n_discretization)
 
 
     #Theoretical Circle maximum velocity (no drag R=100)

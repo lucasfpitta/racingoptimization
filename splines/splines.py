@@ -106,6 +106,34 @@ def find_angle(spline,N_angle):
 
 
 
+#defines the front and rear wheels angles in the trajectory
+def model4_extra_angles(spline_derivative,spline_sec_derivative,\
+    n_discretization,Wf,L,w):
+    
+    #midpoints
+    delta = 1/(n_discretization-1)
+    discretization = np.linspace(delta/2,1-delta/2,num=n_discretization-1)
+    
+    #Cg instantaneous radius
+    Rc = (spline_derivative(discretization)[0]**2+spline_derivative(\
+        discretization)[1]**2)**(3/2)/(spline_derivative(discretization)[0]*\
+        spline_sec_derivative(discretization)[1]-spline_sec_derivative(\
+            discretization)[0]*spline_derivative(discretization)[1])
+        
+    #Rear axel instantaneus radious    
+    Rr = Rc/np.abs(Rc)*np.sqrt(Rc**2-((1-Wf)*L*np.ones(len(discretization))\
+        )**2)
+    
+    #rear wheel angle
+    theta_r = np.arcsin((1-Wf)*L/Rc)
+    
+    #front wheel angles
+    theta_f0 = np.arctan(L/(Rr-w/2))-theta_r
+    theta_f1 = np.arctan(L/(Rr+w/2))-theta_r
+    
+    return theta_r,theta_f0,theta_f1
+    
+
 
 
 
