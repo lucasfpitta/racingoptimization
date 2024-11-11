@@ -30,7 +30,7 @@ from splines.splines import model4_extra_angles
 ##################################################################
 
 
-n_discretization=10 #number of path sections
+n_discretization=20 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -142,19 +142,19 @@ t1_SOCP_b=init_optimization_SOCP_b(
 
 
 #Model abu 3
-t1_SOCP_abu_4,decision_variables_SOCP_abu_4=init_optimization_b_4(
+t1_SOCP_abu_4,decision_variables_SOCP_abu_4=init_optimization_SOCP_b_4(
     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=True) 
 
 print(t1_SOCP_abu_4)
 
 for i in range(n_wheels):   
-    print("lon",decision_variables_SOCP_abu_4.x[n_discretization+(3*i)*(n_discretization-1):2*n_discretization-1+(3*i)*(n_discretization-1)])
+    print("lon",decision_variables_SOCP_abu_4[n_discretization+(3*i)*(n_discretization-1):2*n_discretization-1+(3*i)*(n_discretization-1)])
     
 for i in range(n_wheels):   
-    print("lat",decision_variables_SOCP_abu_4.x[n_discretization+(3*i+1)*(n_discretization-1):2*n_discretization-1+(3*i+1)*(n_discretization-1)])
+    print("lat",decision_variables_SOCP_abu_4[n_discretization+(3*i+1)*(n_discretization-1):2*n_discretization-1+(3*i+1)*(n_discretization-1)])
 
 for i in range(n_wheels):   
-    print("vert", decision_variables_SOCP_abu_4.x[n_discretization+(3*i+2)*(n_discretization-1):2*n_discretization-1+(3*i+2)*(n_discretization-1)])
+    print("vert", decision_variables_SOCP_abu_4[n_discretization+(3*i+2)*(n_discretization-1):2*n_discretization-1+(3*i+2)*(n_discretization-1)])
     
 
 
@@ -248,7 +248,7 @@ model_complexity(models,complexity)
 
 
 # #Test if the circular path velocity is equal to the theoretical
-circular_path_test(derivative,decision_variables_SOCP_abu_4.x[0:n_discretization],n_discretization,m,mu,\
+circular_path_test(derivative,decision_variables_SOCP_abu_4[0:n_discretization],n_discretization,m,mu,\
     pho_air,A0,Cx)
 
 # #Animates initial guess vs optimized solution
