@@ -3,8 +3,12 @@ import os
 from Visualization.print import print_separator
 from Simulation.optimization_main import *
 from Physics.model1 import model1
+from Physics.model2 import model2
+from Physics.model3 import model3
+from Physics.model4 import model4
 import numpy as np
 from scipy.stats import linregress
+from splines.splines import model4_extra_angles
 
 
 
@@ -12,8 +16,9 @@ from scipy.stats import linregress
 #Exports model results to a CSV file with specified discretizations.
 #Input models name (list), discretizations (list), filename (str).
 
-def export_comparison_to_csv(models, discretizations,filename,
-                             N_computation_average,xsi,n_wheels,spline,m,mu):
+def export_comparison_to_csv(Physical_model,models, discretizations,filename,
+    N_computation_average,xsi,spline,angle,angle_derivative,\
+    angle_sec_derivative,m,mu,pho_air,A0,Cx,J,width,L,Wf,h):
     
     print_separator("Model Comparison")
     os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -22,38 +27,123 @@ def export_comparison_to_csv(models, discretizations,filename,
     
      
     
-     # Dictionary of Models
-    Models_dict = {
-        "Time abu": init_optimization_abu,
-        "Time bu": init_optimization_bu,
-        "Time b": init_optimization_b,
-        "Time SOCP abu": init_optimization_SOCP_abu,
-        "Time SOCP b": init_optimization_SOCP_b
-        }
+    # Dictionary of Models
+     
+    if Physical_model == 1 or Physical_model == 2:
+        Models_dict = {
+               "Time abu": init_optimization_abu,
+               "Time bu": init_optimization_bu,
+               "Time b": init_optimization_b,
+               "Time SOCP abu": init_optimization_SOCP_abu,
+               "Time SOCP b": init_optimization_SOCP_b
+               }
+        
+    elif Physical_model == 3:
+        Models_dict = {
+               "Time abu": init_optimization_abu_3,
+               "Time bu": init_optimization_bu_3,
+               "Time b": init_optimization_b_3,
+               "Time SOCP abu": init_optimization_SOCP_abu_3,
+               "Time SOCP b": init_optimization_SOCP_b_3
+               }
+        
+    elif Physical_model == 4:
+        Models_dict = {
+               "Time abu": init_optimization_abu_4,
+               "Time bu": init_optimization_bu_4,
+               "Time b": init_optimization_b_4,
+               "Time SOCP abu": init_optimization_SOCP_abu_4,
+               "Time SOCP b": init_optimization_SOCP_b_4
+               }
+        
+    else:
+        print("Wrong Physical Model")
     
     
     Results1 = []
     Results2 = []
+    Results3 = []
     
     for i in range(len(discretizations)):
-        
-        #Define physics over the path
-        R_t, M_t, C_t, A_t = model1(spline,discretizations[i],m,mu)   
         
         #Dictionary with the times traverse
         time_traverse_dict = {}
         
-        for name, func in Models_dict.items():
-            time_traverse_dict[name] = func(R_t, M_t, C_t, 
-            A_t,discretizations[i],xsi,n_wheels,display=False,plot=False)
+        
+        if Physical_model == 1:
+            #Define physics over the path
+            R_t, M_t, C_t, A_t = model1(spline,discretizations[i],m,mu)   
+            
+            for name, func in Models_dict.items():
+                time_traverse_dict[name] = func(R_t, M_t, C_t, 
+                A_t,discretizations[i],xsi,n_wheels=1,display=False,plot=False)
+            
+            #Call the timeit and saves on the second list
+            d_t=0
+            mean,std = model_performance(Physical_model,models,Results1[i],\
+                N_computation_average,R_t, M_t, C_t,d_t,A_t,discretizations[i],\
+                xsi,n_wheels=1,display=False)
+                
+                
+                
+        if Physical_model == 2:
+            #Define physics over the path
+            R_t, M_t, C_t, A_t = model2(spline,angle,discretizations[i],m,mu,\
+                pho_air,A0,Cx)   
+            
+            for name, func in Models_dict.items():
+                time_traverse_dict[name] = func(R_t, M_t, C_t, 
+                A_t,discretizations[i],xsi,n_wheels=1,display=False,plot=False)
+            
+            #Call the timeit and saves on the second list
+            d_t=0
+            mean,std = model_performance(Physical_model,models,Results1[i],
+            N_computation_average,R_t, M_t, C_t,d_t,A_t,discretizations[i],\
+                xsi,n_wheels=1,display=False)
+                
+                
+        if Physical_model == 3:
+            #Define physics over the path
+            R_t, M_t, C_t, A_t=model3(spline,angle,angle_derivative,\
+                angle_sec_derivative,discretizations[i],m,mu,\
+                pho_air,A0,Cx,J,width,L,Wf,n_wheels=4)   
+            
+            for name, func in Models_dict.items():
+                time_traverse_dict[name] = func(R_t, M_t, C_t, A_t,\
+                discretizations[i],xsi,n_wheels=4,display=False,plot=False)
+            
+            #Call the timeit and saves on the second list
+            d_t=0
+            mean,std = model_performance(Physical_model,models,Results1[i],
+            N_computation_average,R_t, M_t, C_t,d_t,A_t,discretizations[i],\
+                xsi,n_wheels=4,display=False)
+                
+        if Physical_model == 4:
+            #defines the wheels angles
+            theta_r,theta_f0,theta_f1 = model4_extra_angles(spline.derivative(),\
+                spline.derivative().derivative(),discretizations[i],Wf,L,width)
+
+            #defines the model's matrices
+            R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
+                angle_sec_derivative,theta_r,theta_f0,theta_f1,discretizations[i],\
+                    m,mu,pho_air,A0,Cx,J,width,L,Wf,h,n_wheels=3)
+            
+            for name, func in Models_dict.items():
+                time_traverse_dict[name] = func(R_t, M_t, C_t,d_t, 
+                A_t,discretizations[i],xsi,n_wheels=3,display=False,plot=False)
+            
+            #Call the timeit and saves on the second list
+            mean,std = model_performance(Physical_model,models,Results1[i],
+            N_computation_average,R_t, M_t, C_t,d_t,A_t,discretizations[i],\
+                xsi,n_wheels=3,display=False)
+            
+            
+        
             
         #save the results 1 list
         Results1.append([time_traverse_dict[name][-1] for name in models])
-
-        #Call the timeit and saves on the second list
-        Results2.append(model_performance(models,Results1[i],
-            N_computation_average,R_t, M_t, C_t,A_t,discretizations[i],\
-                xsi,n_wheels,display=False))
+        Results2.append(mean)
+        Results3.append(std)
         
 
     # Create headers with dynamic discretization triplets
@@ -61,7 +151,7 @@ def export_comparison_to_csv(models, discretizations,filename,
     
     for d in discretizations:
         headers.extend([f"N = {d}", f"Time Traverse N = {d}", 
-                        f"Time Compute N= {d}"])
+                        f"Time Compute N= {d}", f"Std Compute N= {d}"])
 
     # Write to CSV
     with open(filename, mode="w", newline="") as file:
@@ -70,7 +160,7 @@ def export_comparison_to_csv(models, discretizations,filename,
         for i in range(len(models)):
             row = [models[i]]
             for d in range(len(discretizations)):
-                row.extend([discretizations[d], Results1[d][i], Results2[d][i]])
+                row.extend([discretizations[d],Results1[d][i],Results2[d][i],Results3[d][i]])
             writer.writerow(row)
             
     print()
@@ -110,10 +200,10 @@ def read_csv_to_dict(filename):
             
             # Group remaining columns in triplets
             values = []
-            for i in range(1, len(row), 3):
+            for i in range(1, len(row), 4):
                 # Get a group of three columns
-                triplet = [float(row[i]), float(row[i+1]), float(row[i+2])]  
-                values.append(triplet)
+                quadruplet = [float(row[i]), float(row[i+1]), float(row[i+2]), float(row[i+3])]  
+                values.append(quadruplet)
                 
             # Add to dictionary
             data_dict[key] = values

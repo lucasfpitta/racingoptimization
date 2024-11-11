@@ -23,17 +23,17 @@ def print_separator(title):
     
 #Print comparison table
 
-def print_table(algorithms, results, computation_times):
+def print_table(algorithms, results, computation_times,computation_std):
     
     
     # Print the table header
-    print("+------------------+------------------+-------------------+")
-    print("|       Model      | Time to traverse |   Time to compute |")
-    print("+------------------+------------------+-------------------+")
+    print("+-----------+------------------+-----------------+-------------+")
+    print("|   Model   | Time to traverse | Time to compute | Std compute |")
+    print("+-----------+------------------+-----------------+-------------+")
     
     # Iterate through the lists and print each row
     for algorithm, result, time in zip(algorithms, results, computation_times):
-        print(f"| {algorithm:<16} | {result:<16.4f} | {time:<17.4f} |")
+        print(f"| {algorithm:<13} | {result:<16.4f} | {time:<16.4f} | {time:<15.4f} |")
     
     # Print the bottom line
-    print("+------------------+------------------+-------------------+")
+    print("+-----------+------------------+-----------------+-------------+")

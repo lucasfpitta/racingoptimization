@@ -506,6 +506,12 @@ def init_optimization_bu_4(R_t, M_t, C_t, d_t, A_t,n_discretization,
 
 
     
+    
+    
+    
+    
+    
+    
 ##################################################################
 ###                       B for Model4                       ###
 ##################################################################
@@ -532,16 +538,7 @@ def init_optimization_b_4(R_t, M_t, C_t, d_t, A_t,n_discretization,
      
      
      
-     
-     
-     
-     
-     
-     
-     
-     
-     
-     
+
      
      
      
@@ -585,6 +582,17 @@ def init_optimization_SOCP_abu_4(R_t, M_t, C_t, d_t, A_t,n_discretization,
           return t1_SOCP_abu_4,decision_variables_SOCP_abu_4
      else:
           return t1_SOCP_abu_4       
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -633,7 +641,7 @@ def init_optimization_SOCP_b_4(R_t, M_t, C_t, d_t, A_t,n_discretization,
 ###                 Model Performance Comparison              ###
 ##################################################################
 
-def model_performance(models,results,N_computation_average,R_t, M_t, C_t, 
+def model_performance(Physical_model, models,results,N_computation_average,R_t, M_t, C_t,d_t,
      A_t,n_discretization,xsi,n_wheels,display):
      print_separator("Model Performance Comparison")
      print(f"Number of sections: {n_discretization}")
@@ -648,28 +656,73 @@ def model_performance(models,results,N_computation_average,R_t, M_t, C_t,
      
      
      # Dictionary of Models
-     Models_dict = {
-          "Time abu": init_optimization_abu,
-          "Time bu": init_optimization_bu,
-          "Time b": init_optimization_b,
-          "Time SOCP abu": init_optimization_SOCP_abu,
-          "Time SOCP b": init_optimization_SOCP_b
-          }
+     
+     if Physical_model == 1 or Physical_model == 2:
+          Models_dict = {
+               "Time abu": init_optimization_abu,
+               "Time bu": init_optimization_bu,
+               "Time b": init_optimization_b,
+               "Time SOCP abu": init_optimization_SOCP_abu,
+               "Time SOCP b": init_optimization_SOCP_b
+               }
+     elif Physical_model == 3:
+          Models_dict = {
+               "Time abu": init_optimization_abu_3,
+               "Time bu": init_optimization_bu_3,
+               "Time b": init_optimization_b_3,
+               "Time SOCP abu": init_optimization_SOCP_abu_3,
+               "Time SOCP b": init_optimization_SOCP_b_3
+               }
+     elif Physical_model == 4:
+          Models_dict = {
+               "Time abu": init_optimization_abu_4,
+               "Time bu": init_optimization_bu_4,
+               "Time b": init_optimization_b_4,
+               "Time SOCP abu": init_optimization_SOCP_abu_4,
+               "Time SOCP b": init_optimization_SOCP_b_4
+               }
+     else:
+          print("Wrong Physical Model")
      
      #Dictionary with the times to compute
      compute_times_dict = {}
+     compute_std_dict = {}
      
      computation_time = []
+     computation_std = []
+     
      for name, func in Models_dict.items():
-          time_taken = timeit.timeit(lambda:func(R_t, M_t, C_t, 
-          A_t,n_discretization,xsi,n_wheels,display,plot=False), 
-                              number=N_computation_average)
-          compute_times_dict[name] = time_taken/N_computation_average
+          time_taken = np.zeros(N_computation_average)
+          
+          
+          if Physical_model == 1 or Physical_model == 2:
+               for i in range(N_computation_average):
+                    time_taken[i] = timeit.timeit(lambda:func(R_t, M_t, C_t, 
+                    A_t,n_discretization,xsi,n_wheels,display,plot=False), 
+                                        number=1)
+          
+          if Physical_model == 3:
+               for i in range(N_computation_average):
+                    time_taken[i] = timeit.timeit(lambda:func(R_t, M_t, C_t,\
+                    A_t,n_discretization,xsi,n_wheels,display,plot=False), 
+                                        number=1)
+          
+          if Physical_model == 4:
+               for i in range(N_computation_average):
+                    time_taken[i] = timeit.timeit(lambda:func(R_t, M_t, C_t,d_t, 
+                    A_t,n_discretization,xsi,n_wheels,display,plot=False), 
+                                        number=1)
+               
+               
+               
+          compute_times_dict[name] = np.average(time_taken)
+          compute_std_dict[name] = np.std(time_taken)
 
 
      computation_time = [compute_times_dict[name] for name in models]
-     print_table(models,results,computation_time)
-     return computation_time
+     computation_std = [compute_std_dict[name] for name in models]
+     print_table(models,results,computation_time,computation_std)
+     return computation_time,computation_std
 
 
 
