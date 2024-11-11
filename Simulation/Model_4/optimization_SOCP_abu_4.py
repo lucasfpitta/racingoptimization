@@ -119,6 +119,28 @@ def create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization,n_wheels):
 
 
 
+#Creates the independent forces vector
+#input, independent forces vector d_t
+def create_independent_forces(d_t,n_discretization):
+    g = np.zeros(7*(n_discretization-1))
+    for i in range(n_discretization-1):
+        #number of dynamic dimensions
+        for j in range(6):
+            g[j*(n_discretization-1)+i]=d_t[i][j]
+    return g
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #creates bounds to b 
 def create_b_bounds(x,n_discretization,n_wheels):
@@ -135,6 +157,34 @@ def create_b_bounds(x,n_discretization,n_wheels):
         
         soc_constraints.append(cp.SOC(c_vec.T@x, cp.Constant(np.zeros(2))))
         
+    return soc_constraints
+
+
+
+
+
+
+
+
+
+#creates bounds to front wheels
+def create_F_bounds(x,n_discretization,n_wheels):
+    #flattened vector coordinates
+    u1 = 2*n_discretization-1
+    
+    #create soc constraint vector
+    soc_constraints = []
+    #create all the F_lon<=0 constraint
+    for i in range(n_discretization-1):
+        c_vec=np.zeros(2*n_discretization+(2+3*n_wheels)*(n_discretization-1))
+        c_vec[u1+i] = -1
+        soc_constraints.append(cp.SOC(c_vec.T@x, cp.Constant(np.zeros(2))))
+        
+    u2 = u1+3*(n_discretization-1)
+    for i in range(n_discretization-1):
+        c_vec=np.zeros(2*n_discretization+(2+3*n_wheels)*(n_discretization-1))
+        c_vec[u2+i] = -1
+        soc_constraints.append(cp.SOC(c_vec.T@x, cp.Constant(np.zeros(2))))
     return soc_constraints
 
 
@@ -298,7 +348,7 @@ def create_friction_circle_cones(x,n_discretization,m,mu,n_wheels):
 #Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, 
 #M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
-def optimization_SOCP_abu_4(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
+def optimization_SOCP_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display):
     
     #create the decision variables vector
     x = cp.Variable(2*n_discretization+(2+3*n_wheels)*(n_discretization-1))
@@ -312,13 +362,14 @@ def optimization_SOCP_abu_4(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,displa
     
     #creating equality constraint variables
     F=create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization,n_wheels)
-    g = np.zeros(7*(n_discretization-1))
+    g = create_independent_forces(d_t,n_discretization)
     
     
     #creating cone constraints
     soc_constraints = []
   
     soc_constraints.extend(create_b_bounds(x,n_discretization,n_wheels))
+    soc_constraints.extend(create_F_bounds(x,n_discretization,n_wheels))
     soc_constraints.extend(create_b_c_cones(x,n_discretization,n_wheels))
     soc_constraints.extend(create_c_d_cones(x,n_discretization,n_wheels))
     

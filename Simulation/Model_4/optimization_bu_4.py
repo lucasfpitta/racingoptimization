@@ -11,7 +11,7 @@ import matplotlib as plt
 def create_objective(xsi,A_t,T0,E0,n_discretization,n_wheels):
     
     #flattened vector coordinates
-    u=n_discretization+n_discretization-1
+    u=n_discretization
     
     def objective_function(decision_variables):
         
@@ -48,8 +48,7 @@ def create_objective(xsi,A_t,T0,E0,n_discretization,n_wheels):
 def create_constraint1(R_t,M_t,C_t,d_t,n_discretization,n_wheels):
     
     #flattened vector coordinates
-    a = n_discretization
-    u=n_discretization+n_discretization-1
+    u=n_discretization
     
     def constraint1(decision_variables):
         
@@ -59,33 +58,42 @@ def create_constraint1(R_t,M_t,C_t,d_t,n_discretization,n_wheels):
         for i in range(n_discretization-1):
             
             #first Cartesian coordinate 
-            remainder[i] = -M_t[i][0]*decision_variables[a+i]-(
+            remainder[i] = -M_t[i][0]*((decision_variables[i+1]\
+                        -decision_variables[i])/(2*1/(n_discretization-1)))-(
                 C_t[i][0])*(decision_variables[i]+decision_variables[i+1])/2\
                     -d_t[i][0]
             
             #second Cartesian coordinate
-            remainder[n_discretization-1+i] = -M_t[i][1]*decision_variables[a+i]-(
+            remainder[n_discretization-1+i] = -M_t[i][1]*((decision_variables[i+1]\
+                        -decision_variables[i])/(2*1/(n_discretization-1)))-(
                     C_t[i][1])*(decision_variables[i]+decision_variables[i+1])/2\
                         -d_t[i][1]
             
             #third Cartesian coordinate
-            remainder[2*(n_discretization-1)+i] = -M_t[i][2]*decision_variables[a+i]-(
+            remainder[2*(n_discretization-1)+i] = -M_t[i][2]*((decision_variables[i+1]\
+                        -decision_variables[i])/(2*1/(n_discretization-1)))-(
                     C_t[i][2])*(decision_variables[i]+decision_variables[i+1])/2\
                         -d_t[i][2]
             
             #First angle coordinate
             remainder[3*(n_discretization-1)+i] = -M_t[i][3]*\
-                decision_variables[a+i]-(C_t[i][3])*(decision_variables[i]\
+                ((decision_variables[i+1]\
+                        -decision_variables[i])/(2*1/(n_discretization-1)))\
+                            -(C_t[i][3])*(decision_variables[i]\
                     +decision_variables[i+1])/2-d_t[i][3]
                 
             #Second angle coordinate
             remainder[4*(n_discretization-1)+i] = -M_t[i][4]*\
-                decision_variables[a+i]-(C_t[i][4])*(decision_variables[i]\
+                ((decision_variables[i+1]\
+                        -decision_variables[i])/(2*1/(n_discretization-1)))\
+                            -(C_t[i][4])*(decision_variables[i]\
                     +decision_variables[i+1])/2-d_t[i][4]
                 
             #Third angle coordinate
             remainder[5*(n_discretization-1)+i] = -M_t[i][5]*\
-                decision_variables[a+i]-(C_t[i][5])*(decision_variables[i]\
+                ((decision_variables[i+1]\
+                        -decision_variables[i])/(2*1/(n_discretization-1)))\
+                            -(C_t[i][5])*(decision_variables[i]\
                     +decision_variables[i+1])/2-d_t[i][5]
             
             for j in range(3*n_wheels):
@@ -128,31 +136,6 @@ def create_constraint1(R_t,M_t,C_t,d_t,n_discretization,n_wheels):
 
 
 
-#defines second equality constraint (differential)
-#Input number of discretizations
-#Output 1d vector remainder, which goes to zero when the equality holds
-def create_constraint2(n_discretization):
-    
-    #flattened vector coordinates
-    a = n_discretization
-    
-    
-    def constraint2(decision_variables):
-        
-        remainder = np.zeros(n_discretization-1)
-        
-        for i in range(n_discretization-1):
-            remainder[i] = decision_variables[i+1]-decision_variables[i]-(2
-                            )*decision_variables[a+i]*1/(n_discretization-1)
-        return remainder
-    return constraint2
-
-
-
-
-
-
-
 
 
 #creates bounds to b 
@@ -165,8 +148,8 @@ def create_b_bounds(n_discretization,n_wheels):
     
     #lower bounds above 0 to avoid objective problems
     lb.extend([1E-6]*n_discretization)
-    lb.extend([-np.inf]*(n_discretization-1+length_wheels))
-    ub.extend([np.inf]*(2*n_discretization-1))
+    lb.extend([-np.inf]*(length_wheels))
+    ub.extend([np.inf]*(n_discretization))
     #front wheels are not driven
     ub.extend([0]*(n_discretization-1))
     ub.extend([np.inf]*(2*(n_discretization-1)))
@@ -186,12 +169,12 @@ def create_b_bounds(n_discretization,n_wheels):
 #defines innequality constraint (friction circle)
 #Input friction coef mu, mass of the vehicle m, number of discretizations
 #Output 1d vector remainder, which goes to zero when the inequality holds
-def create_constraint3(mu,mass,n_discretization,n_wheels):
+def create_constraint2(mu,mass,n_discretization,n_wheels):
     
     #flattened vector coordinates
-    u=n_discretization+n_discretization-1
+    u=n_discretization
 
-    def constraint3(decision_variables):
+    def constraint2(decision_variables):
         remainder = np.zeros(n_wheels*(n_discretization-1))
         
         #in each section
@@ -205,7 +188,7 @@ def create_constraint3(mu,mass,n_discretization,n_wheels):
                              **2)**0.5+mu*decision_variables[u+i+(3*j+2)*(n_discretization-1)]
             
         return remainder
-    return constraint3
+    return constraint2
 
 
 
@@ -223,10 +206,10 @@ def build_x0(b0,R_t,M_t,C_t,d_t,n_discretization,n_wheels):
     
     #creates innitial guess
     x0 = (np.ones(n_discretization))*b0
-    x0 = np.append(x0,np.zeros((1+3*n_wheels)*(n_discretization-1)))
+    x0 = np.append(x0,np.zeros((3*n_wheels)*(n_discretization-1)))
     
     #flattened vector coordinates first 3 forces
-    u1=n_discretization+n_discretization-1
+    u1=n_discretization
     u2=u1+n_discretization-1
     u3=u2+n_discretization-1
     u4=u3+n_discretization-1
@@ -235,8 +218,7 @@ def build_x0(b0,R_t,M_t,C_t,d_t,n_discretization,n_wheels):
     
     #calculates forces that are necessary for constant u
     for i in range(n_discretization-1):
-        a = (x0[i+1]-x0[i])/(2*1/(n_discretization-1))
-        u = a*np.linalg.pinv(R_t[i])@M_t[i]+(x0[i+1]+x0[i])/2*\
+        u = (x0[i+1]+x0[i])/2*\
         np.linalg.pinv(R_t[i])@C_t[i]+np.linalg.pinv(R_t[i])@d_t[i]
             
         x0[u1+i]=u[0]
@@ -270,7 +252,7 @@ def build_x0(b0,R_t,M_t,C_t,d_t,n_discretization,n_wheels):
 # and Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors 
 # A_t, M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
-def optimization_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display):
+def optimization_bu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display):
     if n_wheels != 3:
         print("Wrong optimization model. This one is specific for model4 (3 wheels)")
         SystemExit
@@ -278,18 +260,16 @@ def optimization_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display
 
     #creating constraints
     constraint1 = create_constraint1(R_t,M_t,C_t,d_t,n_discretization,n_wheels)
-    constraint2=create_constraint2(n_discretization)
     
     mu=1 #friction coeficient
     mass=85 #mass of the vehicle
     
-    constraint3 =create_constraint3(mu,mass,n_discretization,n_wheels)
+    constraint2 =create_constraint2(mu,mass,n_discretization,n_wheels)
     bounds = create_b_bounds(n_discretization,n_wheels)
     
     cons = [
     {'type': 'eq', 'fun': constraint1},  # Equality constraint 1
-    {'type': 'eq', 'fun': constraint2},  # Equality constraint 2
-    {'type': 'ineq', 'fun': constraint3}  # Inequality friction circle
+    {'type': 'ineq', 'fun': constraint2}  # Inequality friction circle
         ]
     
     #optimizer options
@@ -307,7 +287,7 @@ def optimization_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display
     b0=1
     #building innitial guess
     x0 , T0, E0 =  build_x0(b0,R_t,M_t,C_t,d_t,n_discretization,n_wheels)
-    while not ((constraint3(x0)>= -1E-6).all()):
+    while not ((constraint2(x0)>= -1E-6).all()):
         b0=b0/2
         x0, T0, E0 =  build_x0(b0,R_t,M_t,C_t,d_t,n_discretization,n_wheels)
      #creating constraints
@@ -324,9 +304,8 @@ def optimization_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display
     
     if display:
         print("T0 ", T0, " E0 ", E0)
-        print("Test friction circle ", (constraint3(result.x)>= -1E-6).all())
-        print("Test friction circle initial guess ", (constraint3(x0)>= -1E-6).all())
+        print("Test friction circle ", (constraint2(result.x)>= -1E-6).all())
+        print("Test friction circle initial guess ", (constraint2(x0)>= -1E-6).all())
         print("Test dynamics ", (constraint1(result.x)>= -1E-6).all())
-        print("Test diff", (constraint2(result.x)>= -1E-6).all())
         
     return  result, x0
