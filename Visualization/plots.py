@@ -3,29 +3,43 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 import numpy as np
 from Simulation.optimization_main import *
-
-
+import matplotlib.colors as mcolors
 
 
 ##################################################################
 ###                     Circular Path test                     ###
 ##################################################################
 
-def circular_path_test(derivative,decision_variables,n_discretization):
+def circular_path_test(derivative,decision_variables,n_discretization,m,mu,\
+    pho_air,A0,Cx):
     
     #calculate absolute velocity
+    #Change here the coordinates to b
     v = translate_velocity(derivative,decision_variables[0:n_discretization],
                         n_discretization)
+    
+    
+    #building acceleration vector
+    delta_theta = 1/(n_discretization-1)
+    a_opt = np.zeros(n_discretization-1)
+    
+    for i in range(n_discretization-1):
+        a_opt[i]=(decision_variables[i+1]-decision_variables[i])/(2*delta_theta)
     
     #calculate absolute acceleration
     a = translate_acceleration(derivative, derivative.derivative(),
                             decision_variables[0:n_discretization],
-        decision_variables[n_discretization:2*n_discretization-1],
-        n_discretization)
+        a_opt,n_discretization)
 
 
-    #Theoretical Circle maximum velocity
-    theoretical_v = np.ones(len(v))*np.sqrt(9.81*100)
+    #Theoretical Circle maximum velocity (no drag R=100)
+    theoretical_v_inf = np.ones(len(v))*np.sqrt(9.81*100*mu)
+    
+    
+    #Theoretical Circle maximum velocity (with drag R=100)
+    theoretical_v = theoretical_v_inf*np.sqrt(m/np.sqrt(m**2+(100*pho_air*\
+        A0*Cx/2)**2))
+    
     
     #Theoretical Circle maximum acceleration
     theoretical_a = 9.81*np.ones(len(v))
@@ -42,13 +56,15 @@ def circular_path_test(derivative,decision_variables,n_discretization):
     ax1.set_ylim(0,max(v)+5)
     ax2.set_ylim(0,max(a)+5)
     ax1.plot(np.linspace(0,1,n_discretization-1),
-            v,'-r',label="Optimized velocity")
+            v,'*r',label="Optimized velocity")
     ax1.plot(np.linspace(0,1,n_discretization-1),
-            theoretical_v,'-b',label="Theoretical velocity")
+            theoretical_v_inf,'-b',label="Theoretical v_inf R=100")
+    ax1.plot(np.linspace(0,1,n_discretization-1),
+            theoretical_v,'-g',label="Theoretical v R=100")
     ax2.plot(np.linspace(0,1,n_discretization-1),
             a,'*r',label="Optimized acceleration")
     ax2.plot(np.linspace(0,1,n_discretization-1),
-            theoretical_a,'-b',label="Theoretical acceleration")
+            theoretical_a,'-b',label="Theoretical acceleration inf")
     ax1.grid()
     ax2.grid()
     ax1.legend()
@@ -72,7 +88,7 @@ def circular_path_test(derivative,decision_variables,n_discretization):
 
 
 def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
-               ,t0,t1,n_discretization):
+               ,t0,t1,n_discretization,m):
     
     #spline discretization over sections 
     spline_points_animation = spline(np.linspace(0,1,num = n_discretization))
@@ -87,23 +103,23 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 
 
     # Set limits and labels for the first subplot
-    ax1.set_xlim(min(right[0])-10,max(right[0])+10)
-    ax1.set_ylim(min(right[1])-10,max(right[1])+10)
+    ax1.set_xlim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
+    ax1.set_ylim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
     ax1.set_title('First guess constant dtheta Animation')
     ax1.set_xlabel('X')
     ax1.set_ylabel('Y')
 
 
     # Set limits and labels for the second subplot
-    ax2.set_xlim(min(right[0])-10,max(right[0])+10)
-    ax2.set_ylim(min(right[1])-10,max(right[1])+10)
+    ax2.set_xlim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
+    ax2.set_ylim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
     ax2.set_title('Optimized Animation')
     ax2.set_xlabel('X')
     ax2.set_ylabel('Y')
 
 
     #Set the friction circle radius
-    radius = 85 * 9.81
+    radius = m * 9.81
 
 
     # Create an array of angles for friction circle
@@ -116,8 +132,8 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 
 
     # Set limits and labels for the force plot 1 (bottom-left)
-    ax3.set_xlim(-85*9.81, 85*9.81)  # X-axis is time
-    ax3.set_ylim(-85*9.81, 85*9.81)    # Y-axis is force
+    ax3.set_xlim(-m*9.81, m*9.81)  # X-axis is time
+    ax3.set_ylim(-m*9.81, m*9.81)    # Y-axis is force
     ax3.set_title('First guess Force')
     ax3.set_xlabel('Time')
     ax3.set_ylabel('Force')
@@ -125,8 +141,8 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 
 
     # Set limits and labels for the force plot 2 (bottom-right)
-    ax4.set_xlim(-85*9.81, 85*9.81)    # X-axis is time
-    ax4.set_ylim(-85*9.81, 85*9.81)    # Y-axis is force
+    ax4.set_xlim(-m*9.81, m*9.81)    # X-axis is time
+    ax4.set_ylim(-m*9.81, m*9.81)    # Y-axis is force
     ax4.set_title('Optimized Force')
     ax4.set_xlabel('Time')
     ax4.set_ylabel('Force')
@@ -231,25 +247,25 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 ###                    Comparison Methods                      ###
 ##################################################################
 
-def comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi):
+def comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels):
 
     #all results needed
     t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
         decision_variables_abu = init_optimization_abu(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
     
     t0_bu,t1_bu,forcex0_bu,forcey0_bu,forcex1_bu,forcey1_bu,x0_bu,\
         decision_variables_bu = init_optimization_bu(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
     
     t0_b,t1_b,x0_b,decision_variables_b = init_optimization_b(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
     
     t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
     
     t1_SOCP_b,decision_variables_SOCP_b = init_optimization_SOCP_b(
-          R_t, M_t, C_t, A_t,n_discretization,xsi,display=False,plot=True)
+        R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
 
 
@@ -326,29 +342,36 @@ def comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi):
 
 
 
-def model_complexity(model_names, data_dict):
+def model_complexity(model_names, data_dict,title):
     plt.figure(figsize=(10, 8))
-    
+
+    norm = mcolors.Normalize(vmin=0, vmax=1)
+    cmap = plt.cm.Blues
     
     for model_name in model_names:
         # Extract data for the model
         number_of_sections = data_dict[model_name][0]
-        log_time_to_compute = data_dict[model_name][1]
+        log_time_to_compute = np.array(data_dict[model_name][1])
         slope, intercept = data_dict[model_name][2]
-        
+        lb = data_dict[model_name][3]
+        ub = data_dict[model_name][4]
+        std = np.array(data_dict[model_name][5])
+
         # Generate x-values for the fit line
         x_fit = np.array(number_of_sections)
         y_fit = slope * x_fit + intercept
-        
+
         # Plot data points and fit line for each model
+        plt.plot(number_of_sections,lb,'.k',number_of_sections,ub,'.k')
         plt.plot(number_of_sections, log_time_to_compute, 'o', label=fr'{model_name} Data')
-        plt.plot(x_fit, y_fit, '-', label=fr'{model_name} Fit (slope: {slope:.1f})')
+        plt.plot(x_fit, y_fit, '-', label=fr'{model_name} Fit (slope: {slope:.2f})')
+        
     
     # Labels and title
     plt.xlabel(r'Log Number of Sections')
     plt.ylabel(r'Log Time to Compute')
-    plt.title(r'Model Comparisons')
-    plt.legend()
+    plt.title(f'Model Comparison - {title}')
+    plt.legend(loc="upper left")
     plt.grid(True)
     
     # Display plot

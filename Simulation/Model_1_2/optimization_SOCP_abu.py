@@ -269,7 +269,7 @@ def create_friction_circle_cones(x,n_discretization,m,mu):
 #Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, 
 #M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
-def optimization_SOCP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
+def optimization_SOCP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
     
     #create the decision variables vector
     x = cp.Variable(2*n_discretization+4*(n_discretization-1))
@@ -301,7 +301,7 @@ def optimization_SOCP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     
     #set the SOCP problem
     prob = cp.Problem(cp.Minimize(f.T@x),soc_constraints+[F @ x == g])
-    prob.solve()
+    prob.solve(solver=cp.CLARABEL)
 
     # Print result.
     if display:

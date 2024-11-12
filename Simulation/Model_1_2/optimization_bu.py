@@ -171,7 +171,7 @@ def build_x0(b0, R_t,C_t,n_discretization):
 # Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, M_t 
 #and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
-def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
+def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
     
     #creating objective and constraints
     objective_function = create_objective(xsi, A_t,n_discretization)

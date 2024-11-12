@@ -17,6 +17,10 @@ def knot_points(left, right, alfas):
     for i in range(len(right[0])):
         splpoints[0][i] = right[0][i]+alfas[i]*(left[0][i]-right[0][i])
         splpoints[1][i] = right[1][i]+alfas[i]*(left[1][i]-right[1][i])
+     
+    #connects the last and first points    
+    splpoints[0][-1]=splpoints[0][0]
+    splpoints[1][-1]=splpoints[1][0]
     return splpoints
 
 
@@ -33,9 +37,8 @@ def knot_points(left, right, alfas):
 def splines_and_derivatives(splpoints):
     
     t = np.linspace(0,1,num = len(splpoints[0]))
-    
     interpol = scp.interpolate.CubicSpline(t, (splpoints[0],splpoints[1]
-                                            ),axis=1, bc_type='natural')
+                                            ),axis=1, bc_type='periodic')
     
     #spline derivative
     diff = interpol.derivative()
@@ -55,23 +58,81 @@ def splines_and_derivatives(splpoints):
 #Output angle assessment vector
 
 
-def find_angle(derivative):
+def find_angle(spline,N_angle):
     
-    angle = np.zeros(len(derivative[0]))
+    #defines spline info
+    delta  = 1/(N_angle-1)
+    midpoints = np.linspace(delta/2,1-delta/2,num = \
+                    (N_angle-1))
+    
+    #spline derivatives
+    diff = spline.derivative()
+    second_diff = spline.derivative().derivative()
+    
+    #splines at the midpoints
+    spline_points = spline(midpoints)
+    derivative = diff(midpoints)
+    sec_derivative=second_diff(midpoints)
+    
+    
+    
+    #Builds the vectors
+    angle = np.zeros(len(midpoints))
+    angle_derivative = np.zeros(len(midpoints))
+    angle_sec_derivative = np.zeros(len(midpoints))
+    
     
     #calculates the angle with the spline derivative
-    for i in range(len(derivative[0])):
+    for i in range(len(midpoints)):
         if derivative[0][i] >= 0:
             angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))
         else:
             angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))+np.pi
             
-     #last angle is the same as the first       
-    angle[0]=angle[-1]
+            
+    #calculates the  derivative
+    angle_derivative = (spline_points[0]*derivative[1]-spline_points[1]*derivative[0])\
+        /(spline_points[0]**2+spline_points[1]**2)
     
-    return angle
+    
+    #calculates second derivative (complicated expression)
+    angle_sec_derivative = 1/(spline_points[0]**2+spline_points[1]**2)**2*\
+        ((spline_points[0]**2+spline_points[1]**2)*(spline_points[0]*\
+            sec_derivative[1]-spline_points[1]*sec_derivative[0])-\
+            (spline_points[0]*derivative[1]-spline_points[1]*derivative[0])\
+        *(2*spline_points[0]*derivative[0]+2*spline_points[1]*derivative[1]))   
+    
+    return angle, angle_derivative, angle_sec_derivative
 
 
+
+#defines the front and rear wheels angles in the trajectory
+def model4_extra_angles(spline_derivative,spline_sec_derivative,\
+    n_discretization,Wf,L,w):
+    
+    #midpoints
+    delta = 1/(n_discretization-1)
+    discretization = np.linspace(delta/2,1-delta/2,num=n_discretization-1)
+    
+    #Cg instantaneous radius
+    Rc = (spline_derivative(discretization)[0]**2+spline_derivative(\
+        discretization)[1]**2)**(3/2)/(spline_derivative(discretization)[0]*\
+        spline_sec_derivative(discretization)[1]-spline_sec_derivative(\
+            discretization)[0]*spline_derivative(discretization)[1])
+        
+    #Rear axel instantaneus radious    
+    Rr = Rc/np.abs(Rc)*np.sqrt(Rc**2-((1-Wf)*L*np.ones(len(discretization))\
+        )**2)
+    
+    #rear wheel angle
+    theta_r = np.arcsin((1-Wf)*L/Rc)
+    
+    #front wheel angles
+    theta_f0 = np.arctan(L/(Rr-w/2))-theta_r
+    theta_f1 = np.arctan(L/(Rr+w/2))-theta_r
+    
+    return theta_r,theta_f0,theta_f1
+    
 
 
 
@@ -91,7 +152,9 @@ def path_info(left, right, alfas,N_angle):
     #fit a spline on the control points and calculate derivative
     spline, derivative = splines_and_derivatives(splpoints)
     
-    #calculates spline angles
-    angle = find_angle(derivative(np.linspace(0,1,num = N_angle)))
+    #calculates spline angles at midpoints
     
-    return spline, derivative, angle
+    angle, angle_derivative, angle_sec_derivative  = \
+        find_angle(spline,N_angle)
+    
+    return spline, derivative, angle, angle_derivative, angle_sec_derivative
