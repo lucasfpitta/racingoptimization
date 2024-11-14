@@ -16,6 +16,7 @@ from Simulation.Model_1_2.optimization_b import optimization_b
 from Simulation.Model_1_2.optimization_bu import optimization_bu
 from Simulation.Model_1_2.optimization_SOCP_abu import optimization_SOCP_abu
 from Simulation.Model_1_2.optimization_SOCP_b import optimization_SOCP_b
+from Simulation.Model_1_2.optimization_SQP_abu import optimization_SQP_abu
 from Simulation.Model_3.optimization_abu_3 import optimization_abu_3
 from Simulation.Model_3.optimization_bu_3 import optimization_bu_3
 from Simulation.Model_3.optimization_b_3 import optimization_b_3
@@ -213,6 +214,52 @@ def init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,
           return t1_SOCP_b,decision_variables_SOCP_b
      else:
           return t1_SOCP_b
+     
+     
+     
+     
+     
+     
+     
+     
+     
+##################################################################
+###               Seq Quadratic Prog (abu) Model               ###
+##################################################################
+
+def init_optimization_SQP_abu(R_t, M_t, C_t, A_t,n_discretization,
+                                      xsi,n_wheels,display,plot):
+     if display:
+          print_separator("Seq Quadratic Prog (abu) Model")
+
+     #finds the optimal solution. Outputs vector with variables a, b, u, 
+     # c, d 
+     decision_variables_SQP_abu = optimization_SQP_abu(R_t, M_t, C_t, 
+                                             A_t,n_discretization,xsi,display)
+
+
+     #calculated time to run each trajectory using generalized velocity 
+     #square b 
+     t1_SQP_abu=reconstruct(decision_variables_SQP_abu[0:n_discretization])
+     
+     if plot:
+          return t1_SQP_abu,decision_variables_SQP_abu
+     else:
+          return t1_SQP_abu   
+  
+  
+  
+  
+  
+     
+     
+     
+     
+     
+     
+     
+     
+     
      
      
      
