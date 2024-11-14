@@ -192,7 +192,7 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     F=create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization)
     
     #create the approx Matrices
-    Grad = create_gradient_objective(xsi,A_t,T0,E0,n_discretization)
+    Grad_f = create_gradient_objective(xsi,A_t,T0,E0,n_discretization)
     Hessian = create_Hessian_objective(xsi,T0,n_discretization)
     B1 = create_friction_circle(n_discretization)
     
@@ -205,24 +205,45 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     
     d=0
     while np.linalg.norm(deltaX1-deltaX0)>1E-9 or d>=1000:
-        print("Eq",np.shape(F))
-        print("Ineq1", np.shape(B0))
-        print("Hessian", np.shape(Hessian(deltaX1)))
-        print("Grad",np.shape(Grad(deltaX1)))
-        print("Ineq2",np.shape(B1(deltaX1)))
-        B= np.vstack((B0,B1(deltaX1)))
+
+        Hess = Hessian(deltaX1[0:n_discretization+3*(n_discretization-1)])
+        B= np.vstack((B0,B1(deltaX1[0:n_discretization+3*(n_discretization-1)])))
+        Grad = Grad_f(deltaX1[0:n_discretization+3*(n_discretization-1)])
+        
+
+
+        #Build the Lagrangian Gradient
+        primal_variables = Hess@deltaX1[0:n_discretization+3*(n_discretization-1)]+\
+        np.transpose(Grad)+np.transpose(F)@deltaX1[n_discretization+3*(n_discretization-1):\
+                                                   n_discretization+6*(n_discretization-1)]+\
+        np.transpose(B)@deltaX1[n_discretization+6*(n_discretization-1):\
+                                2*n_discretization+7*(n_discretization-1)]
+        
+        dual_variables1 = F@deltaX1[0:n_discretization+3*(n_discretization-1)]
+
+        dual_variables2=B@deltaX1[0:n_discretization+3*(n_discretization-1)]
+
+        Lag_Grad = np.vstack((primal_variables[:, None] ,dual_variables1[:, None] ,dual_variables2[:, None] ))
+
+
+        #Build the Lagrangian Hessian
         Lag_Hessian =  np.block([
-            [Hessian(deltaX1), np.transpose(F), np.transpose(B)],
+            [Hess, np.transpose(F), np.transpose(B)],
             [F, Block1, Block2],
             [B, Block3, Block4]
             ])
+        
+
         print("Lag, Hessian", np.shape(Lag_Hessian))
+        print("Lag, Grad", np.shape(Lag_Grad))
+
+
+
+
         deltaX0 = deltaX1
+        deltaX1 = deltaX0-np.linalg.inv(Lag_Hessian)@Lag_Grad
         d=+1
         print(f"Iteration {d}")
-        
-        
-        
 
 
     # Print result.
