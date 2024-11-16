@@ -4,6 +4,92 @@ import cvxpy as cp
 
 
 
+#defines the objective
+#Input optimization weight scalar xsi, Power A_t (2d array with 
+#n_discretizatio vector A_t), 
+# number of discretization
+#Output cost of the solution (scalar)
+def create_objective(xsi,A_t,T0,E0,n_discretization):
+    
+    #flattened vector coordinates
+    b=n_discretization-1
+    u1=n_discretization+n_discretization-1
+    u2=n_discretization+n_discretization-1+n_discretization-1
+    
+    def objective_function(decision_variables):
+        
+        cost=0
+        
+        #sum over the path 
+        for i in range(n_discretization-1):
+            cost = cost+(2*xsi/((decision_variables[b+i+1]**0.5+decision_variables[b+i]
+                    **0.5)*T0)+(1-xsi)*(decision_variables[u1+i]*A_t[i][0]+
+                                        decision_variables[u2+i]*A_t[i][1])/E0)
+        return cost
+    
+    return objective_function
+
+
+
+
+def teste_Grad(grad_anal,f,epsilon,x):
+    grad_num = np.zeros(len(grad_anal))
+    for i in range (len(grad_anal)):
+        x_up = x.copy()
+        x_up[i]=x_up[i]+epsilon
+        x_down = x.copy()
+        x_down[i]=x_down[i]-epsilon
+        f_up = f(x_up)
+        f_down = f(x_down)
+        grad_num[i]=1/(2*epsilon)*(f_up-f_down)
+
+    return grad_num
+
+
+
+def teste_Hessian(hess_anal,f,epsilon,x):
+    hess_num = np.zeros(np.shape(hess_anal))
+    for i in range (np.shape(hess_anal)[0]):
+        for j in range (np.shape(hess_anal)[1]):
+            e_i = np.zeros(np.shape(hess_anal)[0])
+            e_j = np.zeros(np.shape(hess_anal)[1])
+            e_i[i] = epsilon
+            e_j[j] = epsilon
+
+            f_pp = f(x+e_i+e_j)
+            f_pm = f(x+e_i-e_j)
+            f_mp = f(x-e_i+e_j)
+            f_mm = f(x-e_i-e_j)
+
+            hess_num[i][j]=1/(4*epsilon**2)*(f_pp-f_pm-f_mp+f_mm)
+    
+    output_file = "matrix_export.csv"
+    np.savetxt(output_file, hess_anal-hess_num, delimiter=",", fmt="%g")
+
+    return hess_num
+
+
+
+
+def teste_Grad_friction(grad_anal,f,epsilon,x):
+    grad_num = np.zeros(np.shape(grad_anal))
+    for j in range(np.shape(grad_anal)[0]):
+        for i in range (np.shape(grad_anal)[1]):
+            x_up = x.copy()
+            x_up[i]=x_up[i]+epsilon
+            x_down = x.copy()
+            x_down[i]=x_down[i]-epsilon
+            f_up = f(x_up)[j]
+            f_down = f(x_down)[j]
+            grad_num[j][i]=1/(2*epsilon)*(f_up-f_down)
+
+    return grad_num
+
+
+
+
+
+
 #defines gradient of the function at a linearization point
 def create_gradient_objective(xsi,A_t,T0,E0,n_discretization):
     
@@ -19,8 +105,10 @@ def create_gradient_objective(xsi,A_t,T0,E0,n_discretization):
         for i in range(n_discretization-1):
             f[u1+i]=(1-xsi)*A_t[i][0]/E0
             f[u2+i]=(1-xsi)*A_t[i][1]/E0
-            f[b+i]=f[b+i]+2*xsi/T0*(-1/(2*x[b+i]**0.5*(x[b+i]**0.5+x[b+1+i]**0.5)**2))
-            f[b+i+1]=2*xsi/T0*(-1/(2*x[b+i+1]**0.5*(x[b+i+1]**0.5+x[b+i]**0.5)**2))
+
+        for i in range(n_discretization-1):
+            f[b+i] += 2*xsi*(-1/(2*np.sqrt(x[b+i])*(np.sqrt(x[b+i+1])+np.sqrt(x[b+i]))**2))/T0
+            f[b+i+1] += 2*xsi*(-1/(2*np.sqrt(x[b+i+1])*(np.sqrt(x[b+i+1])+np.sqrt(x[b+i]))**2))/T0
         return f
     return Grad
 
@@ -42,14 +130,60 @@ def create_Hessian_objective(xsi,T0,n_discretization):
         
         #for each path section
         for i in range(n_discretization-1):
-            H[b+i][b+i]=H[b+i][b+i]+2*xsi/T0*(x[b+i+1]**0.5+3*x[b+i]**0.5)/(4*x[b+i]**1.5*(x[b+i]**0.5\
-                +x[b+i+1]**0.5)**3)
-            H[b+i+1][b+i+1]= 2*xsi/T0*(x[b+i]**0.5+3*x[b+i+1]**0.5)/(4*x[b+i+1]**1.5*(x[b+i+1]**0.5\
-                +x[b+i]**0.5)**3)
-            H[b+i][b+i+1] = 2*xsi/T0/(2*(x[b+i]*x[b+i+1])**0.5*(x[b+i]**0.5+x[b+i+1]**0.5)**3)
-            H[b+i+1][b+i] = 2*xsi/T0/(2*(x[b+i]*x[b+i])**0.5*(x[b+i+1]**0.5+x[b+i]**0.5)**3)
+            H[b+i][b+i]+=2*xsi*(x[b+i+1]**0.5+3*x[b+i]**0.5)/(4*x[b+i]**1.5*(x[b+i]**0.5\
+                +x[b+i+1]**0.5)**3)/T0
+            H[b+i+1][b+i+1]+= 2*xsi*(x[b+i]**0.5+3*x[b+i+1]**0.5)/(4*x[b+i+1]**1.5*(x[b+i+1]**0.5\
+                +x[b+i]**0.5)**3)/T0
+            H[b+i][b+i+1]+= 2*xsi/(2*(x[b+i]*x[b+i+1])**0.5*(x[b+i]**0.5+x[b+i+1]**0.5)**3)/T0
+            H[b+i+1][b+i]+= 2*xsi/(2*(x[b+i]*x[b+i+1])**0.5*(x[b+i+1]**0.5+x[b+i]**0.5)**3)/T0
         return H
     return Hessian
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def create_Hessian_constraint(n_discretization):
+    
+    #flattened vector coordinates
+    u1 = 2*n_discretization-1
+    u2 = u1+n_discretization-1
+    mu = n_discretization+6*(n_discretization-1)
+    
+    def Hessian_constraint(x):
+    
+        H = np.zeros((3*(n_discretization-1)+n_discretization,3*(n_discretization-1)+n_discretization))
+        
+        
+        #for each path section
+        for i in range(n_discretization-1):
+            H[u1+i][u1+i]=x[mu+i]*x[u2+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
+            H[u1+i][u2+i]=-x[mu+i]*x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
+            H[u2+i][u2+i]=x[mu+i]*x[u1+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
+            H[u2+i][u1+i]=-x[mu+i]*x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
+        return H
+    return Hessian_constraint
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -119,7 +253,7 @@ def create_b_bounds(n_discretization):
     B0=np.zeros((n_discretization,n_discretization+3*(n_discretization-1)))
     #create all the b>=0 constraint
     for i in range(n_discretization):
-        B0[i][b+i]=1
+        B0[i][b+i]=-1
     return B0
 
 
@@ -160,6 +294,21 @@ def create_friction_circle(n_discretization):
 
 
 
+def create_constraint3(mu,mass,n_discretization):
+    
+    #flattened vector coordinates
+    u1=n_discretization+n_discretization-1
+    u2=n_discretization+n_discretization-1+n_discretization-1
+    
+    
+    def constraint3(decision_variables):
+        remainder = np.zeros(n_discretization-1)
+        for i in range(n_discretization-1):
+            remainder[i] = -(decision_variables[u1+i]**2+decision_variables[u2+i]
+                             **2)**0.5+mu*mass*9.81
+            
+        return remainder
+    return constraint3
 
 
 
@@ -198,8 +347,35 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     #create the approx Matrices
     Grad_f = create_gradient_objective(xsi,A_t,T0,E0,n_discretization)
     Hessian = create_Hessian_objective(xsi,T0,n_discretization)
+    Hessian_c = create_Hessian_constraint(n_discretization)
     B1 = create_friction_circle(n_discretization)
+
     
+
+
+    # obj = create_objective(xsi,A_t,T0,E0,n_discretization)
+    # epsilon =1e-5
+    # for i in range(10):
+    #     x_test = np.random.rand(n_discretization+3*(n_discretization-1))
+    #     grad_anal = Grad_f(x_test)
+    #     print("teste Grad",teste_Grad(grad_anal,obj,epsilon,x_test)<=1e-5)
+
+
+    # for i in range(10):
+    #     x_test = np.random.rand(n_discretization+3*(n_discretization-1))
+    #     hess_anal = Hessian(x_test)
+    #     print("teste Hess",teste_Hessian(hess_anal,obj,epsilon,x_test)<=1)
+        
+
+    # fc = create_constraint3(mu,mass,n_discretization)
+    # for i in range(10):
+    #     x_test = np.random.rand(n_discretization+3*(n_discretization-1))
+    #     grad_anal = B1(x_test)
+    #     print("teste Fric",teste_Grad_friction(grad_anal,fc,epsilon,x_test)<=1e-5)
+        
+
+
+
     
     #creates the 0 blocks
     Block1 = np.zeros((3*(n_discretization-1),3*(n_discretization-1)))
@@ -217,8 +393,9 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
                 deltaX1[n_discretization-1+i]=1e-10
 
         Hess = Hessian(deltaX1[0:n_discretization+3*(n_discretization-1)])
+        Hess_c = Hessian_c(deltaX1)
         B_h= np.vstack((B0,B1(deltaX1[0:n_discretization+3*(n_discretization-1)])))
-        B_g= np.vstack((B0,mu*mass*9.81-B1(deltaX1[0:n_discretization+3*(n_discretization-1)])))
+        B_g= np.vstack((B0,-mu*mass*9.81+B1(deltaX1[0:n_discretization+3*(n_discretization-1)])))
         Grad = Grad_f(deltaX1[0:n_discretization+3*(n_discretization-1)])
 
 
@@ -241,7 +418,7 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
 
         #Build the Lagrangian Hessian
         Lag_Hessian =  np.block([
-            [Hess, np.transpose(F), np.transpose(B_h)],
+            [Hess+Hess_c, np.transpose(F), np.transpose(B_h)],
             [F, Block1, Block2],
             [B_h, Block3, Block4]
             ])
@@ -249,7 +426,7 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
 
 
 
-        deltaX0 = deltaX1
+        deltaX0 = deltaX1.copy()
         deltaX1 = deltaX0-(scp.linalg.lu(Lag_Hessian)[0]@Lag_Grad).reshape(-1)
         d=d+1
         

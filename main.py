@@ -38,7 +38,7 @@ xsi = 1 #optimization scalar
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "circle"
+path_name = "eight"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -109,9 +109,9 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 #Model 2, oriented point with drag
 # R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
 #     pho_air,A0,Cx)
-
-
 """
+
+
 #Comment the models you dont want to compute
 
 #Model abu
@@ -392,20 +392,21 @@ model_complexity(models,complexity,title)
 #Uncomment the plots you want
 
 # #solution general model
-# t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
-#      decision_variables_abu = init_optimization_abu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
+     decision_variables_abu = init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
 
 # #Test if the circular path velocity is equal to the theoretical
-circular_path_test(derivative,decision_variables_SOCP_abu_4[0:n_discretization],n_discretization,m,mu,\
+circular_path_test(derivative,decision_variables_abu[0:n_discretization],n_discretization,m,mu,\
     pho_air,A0,Cx)
 
 # #Animates initial guess vs optimized solution
-# animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
-#             forcex1_abu,forcey1_abu
-#                ,t0_abu,t1_abu,n_discretization,m)
+animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
+            forcex1_abu,forcey1_abu
+               ,t0_abu,t1_abu,n_discretization,m)
 
 #Solution comparison plot
 # comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
+
 """
