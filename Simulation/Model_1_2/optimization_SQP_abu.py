@@ -445,7 +445,7 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
             ])
         
         
-
+        print(np.shape(Lag_Hessian))
 
 
         deltaX0 = deltaX1.copy()
