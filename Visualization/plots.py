@@ -4,7 +4,10 @@ from matplotlib.animation import FuncAnimation
 import numpy as np
 from Simulation.optimization_main import *
 import matplotlib.colors as mcolors
-
+from matplotlib.gridspec import GridSpec
+from matplotlib.colors import Normalize
+from matplotlib.patches import Circle
+import matplotlib.cm as cm
 
 ##################################################################
 ###                     Circular Path test                     ###
@@ -228,6 +231,181 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
     # Show the animation
     plt.tight_layout()
     plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##################################################################
+###                    Complete animation                      ###
+##################################################################
+
+
+def animation_complete(spline,right,left,spline_points,decision_variables,\
+               t1,n_discretization,m,mu,n_wheels):
+    
+    #spline discretization over sections 
+    spline_points_animation = spline(np.linspace(0,1,num = n_discretization))
+
+
+    #get the forces
+    force=[]
+    radii=[]
+    u=2*n_discretization-1
+
+    for i in range(n_wheels):
+        if n_wheels==3:
+            force.append((decision_variables[u+\
+        3*i*(n_discretization-1):u+(3*i+1)*(n_discretization-1)]**2+decision_variables[u+\
+        (3*i+1)*(n_discretization-1):u+(3*i+2)*(n_discretization-1)]**2)**0.5)
+            radii.append(mu*decision_variables[u+\
+        (3*i+2)*(n_discretization-1):u+(3*i+3)*(n_discretization-1)])
+            
+        if n_wheels==4:
+            force.append((decision_variables[u+\
+        2*i*(n_discretization-1):u+(2*i+1)*(n_discretization-1)]**2+decision_variables[u+\
+        (2*i+1)*(n_discretization-1):u+(2*i+2)*(n_discretization-1)]**2)**0.5)
+            radii.append(m*mu/n_wheels*9.81*np.ones(n_discretization-1))
+        
+        else:
+            force.append((decision_variables[u\
+                :u+(n_discretization-1)]**2+decision_variables[u+\
+            (n_discretization-1):u+2*(n_discretization-1)]**2)**0.5)
+            radii.append(m*mu/n_wheels*9.81*np.ones(n_discretization-1))
+
+        print(force[i])
+        print(radii[i])
+
+
+
+
+
+
+    #create figure
+    fig = plt.figure(figsize=(12, 8))
+    gs = GridSpec(n_wheels, 4, figure=fig)
+    cmap = cm.get_cmap('RdYlGn')  # Green to red
+    norm = Normalize(vmin=0, vmax=1)  # Normalize force/radius between 0 and 1
+
+    ax1 = fig.add_subplot(gs[:, :3])  # Span all rows and first 3 columns
+
+    # Three smaller stacked plots on the right
+    wheel_axes = []
+    circles = {}  # Store the circles
+
+    for i in range(n_wheels):
+        ax = fig.add_subplot(gs[i, 3])  # Create a subplot in the appropriate row
+        ax.set_title(f"Wheel {i + 1}")
+        # Set limits and labels for the force plot 1 (bottom-left)
+        ax.set_xlim(-1, 1)  # X-axis is time
+        ax.set_ylim(-1, 1)    # Y-axis is force
+        ax.set_xlabel('Time')
+        ax.set_ylabel('Force')
+        ax.grid()
+        wheel_axes.append(ax)
+        # Create a circle for the wheel
+        circle = Circle((0, 0), radius=0.1, color=cmap(0), ec='black')
+        ax.add_patch(circle)
+        circles[i] = circle
+
+
+    #Animation speed
+    animation_time = 100
+
+
+    # Set limits and labels for the first subplot
+    ax1.set_xlim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
+    ax1.set_ylim(min(min(right[0]),min(right[1]))-10,max(max(right[0]),max(right[1]))+10)
+    ax1.set_title('Optimized Animation')
+    ax1.set_xlabel('X')
+    ax1.set_ylabel('Y')
+
+
+    # Plot the spline points in both axes
+    ax1.plot(spline_points[0], spline_points[1], 'g--', label='Path')
+    ax1.plot(right[0], right[1], 'gray')
+    ax1.plot(left[0], left[1], 'red')
+
+
+    # Create lines for both objects
+    line1, = ax1.plot([], [], 'bo', label='Object 1')  # Blue point for object 1
+
+    force_discs = {}
+
+    for i, ax in enumerate(wheel_axes):
+        # Create a Circle object and add it to the axis
+        disc = plt.Circle((0, 0), 0, color='green', alpha=0.5)  # Start with a small green circle
+        ax.add_patch(disc)  # Add the circle to the plot
+        force_discs[i] = disc
+
+        # Set fixed axis limits to show all potential disc sizes
+        ax.set_xlim(-2 * m * 9.81 / n_wheels, 2 * m * 9.81 / n_wheels)
+        ax.set_ylim(-2 * m * 9.81 / n_wheels, 2 * m * 9.81 / n_wheels)
+
+
+    # Add legends to all axes
+    ax1.legend()
+
+
+
+    def init1():
+        line1.set_data([], [])
+        for i in range(n_wheels):
+            force_discs[i].center = (0, 0)  # Reset disc to the center
+            force_discs[i].set_radius(0)  # Reset radius to 0
+            force_discs[i].set_color('green')  # Start with green color
+        return (line1, *force_discs.values())
+
+
+
+
+    # Update function for object animation
+    def update(frame):
+        if frame < len(t1)-1:
+            line1.set_data([spline_points_animation[0, frame]], 
+                        [spline_points_animation[1, frame]])
+            for i in range(n_wheels):
+                normalized = norm(1-force[i][frame] / radii[i][frame])
+                circles[i].set_radius(radii[i][frame])  # Adjust radius
+                circles[i].set_color(cmap(normalized))  # Adjust color
+        return (line1, *circles.values())
+
+                
+        
+
+
+
+
+
+    def next_frame1(i):
+        return update(i)
+
+
+    # Create the animations
+    ani1 = FuncAnimation(fig, next_frame1, frames=len(t1), init_func=init1,
+    blit=True, repeat=True, interval=(t1[1] - t1[0]) * animation_time 
+    if len(t1) > 1 else animation_time)
+
+
+    # Adjust the timing for each animation based on its time vector
+    # Average time difference for animation 1
+    ani1.event_source.interval = np.mean(np.diff(t1)) * animation_time 
+
+    # Show the animation
+    plt.tight_layout()
+    plt.show()
+
 
 
 

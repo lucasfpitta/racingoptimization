@@ -31,7 +31,7 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=10 #number of path sections
+n_discretization=30 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -56,7 +56,7 @@ Cx = 0.5 #Drag coeficient
 width = 0.5 #car track width
 L = 1 #can wheelbase
 Wf=0.4 #position of the center of mass in relation to wheels
-h=0.05 #CG height
+h=0.35 #CG height
 
 
 
@@ -109,15 +109,15 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 #Model 2, oriented point with drag
 # R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
 #     pho_air,A0,Cx)
-"""
+
 
 
 #Comment the models you dont want to compute
 
 #Model abu
-t1_abu=init_optimization_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
-
+# t1_abu=init_optimization_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+"""
 
 #Model bu
 t1_bu=init_optimization_bu(
@@ -134,7 +134,7 @@ t1_SOCP_abu=init_optimization_SOCP_abu(
 #Model SOCP b
 t1_SOCP_b=init_optimization_SOCP_b(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-"""
+
 
 
 t1_SQP_abu=init_optimization_SQP_abu(
@@ -144,7 +144,7 @@ t1_SQP_abu=init_optimization_SQP_abu(
 
 
 
-"""
+
 
 
 ##################################################################
@@ -189,7 +189,7 @@ t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
 t1_SOCP_b_3=init_optimization_SOCP_b_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
-
+"""
 
 
 
@@ -223,6 +223,8 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
     angle_sec_derivative,theta_r,theta_f0,theta_f1,n_discretization,\
         m,mu,pho_air,A0,Cx,J,width,L,Wf,h,n_wheels)
 
+        
+"""        
 #Comment the models you dont want to compute
 
 #Model abu
@@ -381,7 +383,7 @@ model_complexity(models,complexity,title)
 
 
 
-
+"""
 
 
 ##################################################################
@@ -392,21 +394,35 @@ model_complexity(models,complexity,title)
 #Uncomment the plots you want
 
 # #solution general model
-t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
-     decision_variables_abu = init_optimization_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+# t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
+#      decision_variables_abu = init_optimization_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
 
-# #Test if the circular path velocity is equal to the theoretical
-circular_path_test(derivative,decision_variables_abu[0:n_discretization],n_discretization,m,mu,\
-    pho_air,A0,Cx)
+#  #Test if the circular path velocity is equal to the theoretical
+# circular_path_test(derivative,decision_variables_abu[0:n_discretization],n_discretization,m,mu,\
+#     pho_air,A0,Cx)
 
-# #Animates initial guess vs optimized solution
-animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,\
-            forcex1_abu,forcey1_abu
-               ,t0_abu,t1_abu,n_discretization,m)
+
+
+
+
+#usar sempre o abu SOCP
+t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_abu_4(
+    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+
+n_wheels = 3
+
+
+#Animates initial guess vs optimized solution
+animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu.x,\
+               t1_SOCP_abu,n_discretization,m,mu,n_wheels)
+
+
+
+
+
 
 #Solution comparison plot
 # comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
 
-"""
