@@ -165,6 +165,7 @@ def create_Hessian_constraint(n_discretization):
     
         H = np.zeros((3*(n_discretization-1)+n_discretization,3*(n_discretization-1)+n_discretization))
         
+        
         #for each path section
         for i in range(n_discretization-1):
             H[u1+i][u1+i]=x[mu+i]*x[u2+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
@@ -274,30 +275,13 @@ def create_b_bounds(n_discretization):
 
 
 #creates friction circle constraints
-def create_friction_circle(n_discretization,mass,mu):
+def create_friction_circle(n_discretization):
     
     #flattened vector coordinates
     u1=n_discretization+n_discretization-1
     u2=u1+n_discretization-1
     
     def friction_circle(x):
-        B1=np.zeros(n_discretization-1)
-        
-        #create all the frisction circle constraints
-        for i in range(n_discretization-1):
-            B1[i] = (x[u1+i]**2+x[u2+i]**2)**0.5-mass*mu*9.81
-        return B1
-    return friction_circle
-
-
-#creates friction circle constraints
-def create_friction_circle_grad(n_discretization):
-    
-    #flattened vector coordinates
-    u1=n_discretization+n_discretization-1
-    u2=u1+n_discretization-1
-    
-    def friction_circle_grad(x):
         B1=np.zeros((n_discretization-1,n_discretization+3*(n_discretization-1)))
         
         #create all the frisction circle constraints
@@ -305,7 +289,8 @@ def create_friction_circle_grad(n_discretization):
             B1[i][u1+i] = x[u1+i]/(x[u1+i]**2+x[u2+i]**2)**0.5
             B1[i][u2+i] = x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**0.5
         return B1
-    return friction_circle_grad
+    return friction_circle
+
 
 
 
@@ -347,7 +332,7 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     mass=85 #mass of the vehicle
     
     #create initial guess
-    x0 = 1e-6*np.ones(n_discretization+3*(n_discretization-1))
+    x0 = 1e-8*np.ones(n_discretization+3*(n_discretization-1))
     deltaX0 = np.zeros(n_discretization+3*(n_discretization-1)+3*(n_discretization-1)+2*n_discretization-1)
     deltaX1 = np.append(x0,np.zeros(3*(n_discretization-1)+2*n_discretization-1))
     
@@ -363,14 +348,13 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     Grad_f = create_gradient_objective(xsi,A_t,T0,E0,n_discretization)
     Hessian = create_Hessian_objective(xsi,T0,n_discretization)
     Hessian_c = create_Hessian_constraint(n_discretization)
-    B1 = create_friction_circle(n_discretization,mass,mu)
-    B1_grad = create_friction_circle_grad(n_discretization)
+    B1 = create_friction_circle(n_discretization)
 
     
 
 
-    obj = create_objective(xsi,A_t,T0,E0,n_discretization)
-    epsilon =1e-10
+    # obj = create_objective(xsi,A_t,T0,E0,n_discretization)
+    # epsilon =1e-5
     # for i in range(10):
     #     x_test = np.random.rand(n_discretization+3*(n_discretization-1))
     #     grad_anal = Grad_f(x_test)
@@ -407,15 +391,16 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     d=0
     while np.linalg.norm(deltaX1-deltaX0)>1E-9 or d>=1000:
         print(f"iteration {d}")
+        print(deltaX1)
 
         for i in range(n_discretization):
-            if deltaX1[n_discretization-1+i]<=1e-9:
-                deltaX1[n_discretization-1+i]=1e-9
+            if deltaX1[n_discretization-1+i]<=0:
+                deltaX1[n_discretization-1+i]=1e-10
 
         Hess = Hessian(deltaX1[0:n_discretization+3*(n_discretization-1)])
         Hess_c = Hessian_c(deltaX1)
-        B_h= np.vstack((B0,B1_grad(deltaX1[0:n_discretization+3*(n_discretization-1)])))
-        B_g= np.concatenate((B0@deltaX1[0:n_discretization+3*(n_discretization-1)],B1(deltaX1[0:n_discretization+3*(n_discretization-1)])))
+        B_h= np.vstack((B0,B1(deltaX1[0:n_discretization+3*(n_discretization-1)])))
+        B_g= np.vstack((B0,-mu*mass*9.81+B1(deltaX1[0:n_discretization+3*(n_discretization-1)])))
         Grad = Grad_f(deltaX1[0:n_discretization+3*(n_discretization-1)])
         
 
@@ -427,14 +412,14 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
         np.transpose(B_h)@deltaX1[n_discretization+6*(n_discretization-1):\
                                 2*n_discretization+7*(n_discretization-1)]
     
-        
+
         
         
         dual_variables1 = F@deltaX1[0:n_discretization+3*(n_discretization-1)]
 
+        dual_variables2=B_g@deltaX1[0:n_discretization+3*(n_discretization-1)]
 
-        Lag_Grad = np.concatenate((primal_variables,dual_variables1,B_g))
-        print(Lag_Grad)
+        Lag_Grad = np.vstack((primal_variables[:, None] ,dual_variables1[:, None] ,dual_variables2[:, None] ))
 
 
         #Build the Lagrangian Hessian
@@ -444,12 +429,11 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
             [B_h, Block3, Block4]
             ])
         
-        
 
 
 
         deltaX0 = deltaX1.copy()
-        deltaX1 = deltaX0-np.linalg.inv(Lag_Hessian)@Lag_Grad
+        deltaX1 = deltaX0-1e-5*(np.linalg.inv(Lag_Hessian)@Lag_Grad).reshape(-1)
         d=d+1
         
 
