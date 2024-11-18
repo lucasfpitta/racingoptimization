@@ -31,7 +31,7 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=30 #number of path sections
+n_discretization=15 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -412,6 +412,7 @@ t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_abu_4(
     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
 n_wheels = 3
+
 
 
 #Animates initial guess vs optimized solution

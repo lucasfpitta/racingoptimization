@@ -8,6 +8,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.colors import Normalize
 from matplotlib.patches import Circle
 import matplotlib.cm as cm
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 ##################################################################
 ###                     Circular Path test                     ###
@@ -257,7 +258,12 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
     
     #spline discretization over sections 
     spline_points_animation = spline(np.linspace(0,1,num = n_discretization))
-
+    
+    #calculate absolute velocity
+    #Change here the coordinates to b
+    velocity = translate_velocity(spline.derivative(),decision_variables[0:n_discretization],
+                        n_discretization)
+    max_velocity = np.max(velocity)
 
     #get the forces
     force=[]
@@ -269,10 +275,10 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
             force.append((decision_variables[u+\
         3*i*(n_discretization-1):u+(3*i+1)*(n_discretization-1)]**2+decision_variables[u+\
         (3*i+1)*(n_discretization-1):u+(3*i+2)*(n_discretization-1)]**2)**0.5)
-            radii.append(mu*decision_variables[u+\
-        (3*i+2)*(n_discretization-1):u+(3*i+3)*(n_discretization-1)])
+            radii.append(mu*np.abs(decision_variables[u+\
+        (3*i+2)*(n_discretization-1):u+(3*i+3)*(n_discretization-1)]))
             
-        if n_wheels==4:
+        elif n_wheels==4:
             force.append((decision_variables[u+\
         2*i*(n_discretization-1):u+(2*i+1)*(n_discretization-1)]**2+decision_variables[u+\
         (2*i+1)*(n_discretization-1):u+(2*i+2)*(n_discretization-1)]**2)**0.5)
@@ -284,8 +290,6 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
             (n_discretization-1):u+2*(n_discretization-1)]**2)**0.5)
             radii.append(m*mu/n_wheels*9.81*np.ones(n_discretization-1))
 
-        print(force[i])
-        print(radii[i])
 
 
 
@@ -299,6 +303,20 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
     norm = Normalize(vmin=0, vmax=1)  # Normalize force/radius between 0 and 1
 
     ax1 = fig.add_subplot(gs[:, :3])  # Span all rows and first 3 columns
+    
+    
+        # Inset axes for velocity bar chart (vertical)
+    inset_ax = inset_axes(ax1, width="5%", height="25%", loc='upper right', borderpad=2)
+    inset_ax.set_xlim(0, 1)
+    inset_ax.set_ylim(0, 1)
+    inset_ax.axis('off')  # Turn off axis labels and ticks
+
+    # Add gray and green bars (vertical)
+    gray_bar = inset_ax.bar(0.5, 1, color='gray', width=0.2, edgecolor='black')
+    green_bar = inset_ax.bar(0.5, 0, color='green', width=0.2)
+
+    # Add velocity label
+    inset_ax.text(0.5, 1.05, "Velocity", fontsize=10, ha='center')
 
     # Three smaller stacked plots on the right
     wheel_axes = []
@@ -350,8 +368,8 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
         force_discs[i] = disc
 
         # Set fixed axis limits to show all potential disc sizes
-        ax.set_xlim(-2 * m * 9.81 / n_wheels, 2 * m * 9.81 / n_wheels)
-        ax.set_ylim(-2 * m * 9.81 / n_wheels, 2 * m * 9.81 / n_wheels)
+        ax.set_xlim(-4 * m * 9.81 / n_wheels, 4 * m * 9.81 / n_wheels)
+        ax.set_ylim(-4 * m * 9.81 / n_wheels, 4 * m * 9.81 / n_wheels)
 
 
     # Add legends to all axes
@@ -365,7 +383,8 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
             force_discs[i].center = (0, 0)  # Reset disc to the center
             force_discs[i].set_radius(0)  # Reset radius to 0
             force_discs[i].set_color('green')  # Start with green color
-        return (line1, *force_discs.values())
+            green_bar[0].set_height(0)  # Start green bar with zero height
+        return (line1,  green_bar[0], *force_discs.values())
 
 
 
@@ -379,7 +398,10 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
                 normalized = norm(1-force[i][frame] / radii[i][frame])
                 circles[i].set_radius(radii[i][frame])  # Adjust radius
                 circles[i].set_color(cmap(normalized))  # Adjust color
-        return (line1, *circles.values())
+            # Update green bar height based on velocity
+            green_height = velocity[frame] / max_velocity
+            green_bar[0].set_height(green_height)
+        return (line1, green_bar[0], *circles.values())
 
                 
         
