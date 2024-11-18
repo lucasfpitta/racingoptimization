@@ -339,7 +339,7 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
 
 
     #Animation speed
-    animation_time = 100
+    animation_time = 500
 
 
     # Set limits and labels for the first subplot
@@ -351,13 +351,13 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
 
 
     # Plot the spline points in both axes
-    ax1.plot(spline_points[0], spline_points[1], 'g--', label='Path')
+    ax1.plot(spline_points[0], spline_points[1], 'g--')
     ax1.plot(right[0], right[1], 'gray')
     ax1.plot(left[0], left[1], 'red')
 
 
     # Create lines for both objects
-    line1, = ax1.plot([], [], 'bo', label='Object 1')  # Blue point for object 1
+    line1, = ax1.plot([], [], 'bo')  # Blue point for object 1
 
     force_discs = {}
 

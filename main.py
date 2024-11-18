@@ -38,7 +38,7 @@ xsi = 1 #optimization scalar
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "eight"
+path_name = "circle"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -56,7 +56,7 @@ Cx = 0.5 #Drag coeficient
 width = 0.5 #car track width
 L = 1 #can wheelbase
 Wf=0.4 #position of the center of mass in relation to wheels
-h=0.35 #CG height
+h=0.05 #CG height
 
 
 
@@ -100,10 +100,10 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 #Define physics over the path. Uncomment the desired Physics model
-n_wheels=1 #number of wheels
+# n_wheels=1 #number of wheels
 
 #Model 1, point
-R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
+# R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 
 #Model 2, oriented point with drag
@@ -189,10 +189,10 @@ t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
 t1_SOCP_b_3=init_optimization_SOCP_b_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
+
+
+
 """
-
-
-
 
 
 
@@ -224,7 +224,7 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
         m,mu,pho_air,A0,Cx,J,width,L,Wf,h,n_wheels)
 
         
-"""        
+"""
 #Comment the models you dont want to compute
 
 #Model abu
@@ -251,7 +251,6 @@ t1_SOCP_abu_4=init_optimization_SOCP_abu_4(
 t1_SOCP_b_4=init_optimization_SOCP_b_4(
     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
-""" 
 
 
 
@@ -267,7 +266,8 @@ t1_SOCP_b_4=init_optimization_SOCP_b_4(
 
 
 
-"""
+
+
 ##################################################################
 ###                 Model Performance Comparison              ###
 ##################################################################

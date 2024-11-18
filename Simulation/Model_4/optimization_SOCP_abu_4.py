@@ -382,7 +382,7 @@ def optimization_SOCP_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,di
     
     #set the SOCP problem
     prob = cp.Problem(cp.Minimize(f.T@x),soc_constraints+[F @ x == g])
-    prob.solve()
+    prob.solve(solver=cp.CLARABEL, verbose = True)
 
     # Print result.
     if display:
