@@ -261,7 +261,7 @@ def optimization_SOCP_b(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     
     #set the SOCP problem
     prob = cp.Problem(cp.Minimize(f.T@x),soc_constraints)
-    prob.solve()
+    prob.solve(solver = cp.CLARABEL)
 
     # Print result.
     if display:

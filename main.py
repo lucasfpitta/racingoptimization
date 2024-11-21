@@ -38,7 +38,7 @@ xsi = 1 #optimization scalar
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "eight"
+path_name = "circle"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -131,10 +131,12 @@ t1_b=init_optimization_b(
 t1_SOCP_abu=init_optimization_SOCP_abu(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
+    """
 #Model SOCP b
-t1_SOCP_b=init_optimization_SOCP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-"""
+# t1_SOCP_b=init_optimization_SOCP_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+
 
 
 t1_SQP_abu=init_optimization_SQP_abu(
