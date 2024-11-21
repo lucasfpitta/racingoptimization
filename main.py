@@ -38,7 +38,7 @@ xsi = 1 #optimization scalar
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "google_earth"
+path_name = "circle"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -100,10 +100,10 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 #Define physics over the path. Uncomment the desired Physics model
-# n_wheels=1 #number of wheels
+n_wheels=1 #number of wheels
 
 #Model 1, point
-# R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
+R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 
 #Model 2, oriented point with drag
@@ -131,9 +131,11 @@ t1_b=init_optimization_b(
 t1_SOCP_abu=init_optimization_SOCP_abu(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
+    """
 #Model SOCP b
-t1_SOCP_b=init_optimization_SOCP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# t1_SOCP_b=init_optimization_SOCP_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
 
 
 
@@ -144,7 +146,7 @@ t1_SQP_abu=init_optimization_SQP_abu(
 
 
 
-
+"""
 
 
 ##################################################################
@@ -192,7 +194,7 @@ t1_SOCP_b_3=init_optimization_SOCP_b_3(
 
 
 
-"""
+
 
 
 
@@ -224,7 +226,7 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
         m,mu,pho_air,A0,Cx,J,width,L,Wf,h,n_wheels)
 
         
-"""
+
 #Comment the models you dont want to compute
 
 #Model abu
@@ -383,7 +385,7 @@ model_complexity(models,complexity,title)
 
 
 
-"""
+
 
 
 ##################################################################
@@ -427,3 +429,4 @@ animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu.x
 #Solution comparison plot
 # comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
 
+"""

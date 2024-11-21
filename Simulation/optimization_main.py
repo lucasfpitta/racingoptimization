@@ -205,7 +205,6 @@ def init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,
      decision_variables_SOCP_b = optimization_SOCP_b(R_t, M_t, C_t, 
                                              A_t,n_discretization,xsi,display)
 
-
      #calculated time to run each trajectory using generalized velocity 
      #square b 
      t1_SOCP_b=reconstruct(decision_variables_SOCP_b[0:n_discretization])
@@ -218,6 +217,8 @@ def init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,
      
      
      
+
+
      
      
      
@@ -237,10 +238,10 @@ def init_optimization_SQP_abu(R_t, M_t, C_t, A_t,n_discretization,
      decision_variables_SQP_abu = optimization_SQP_abu(R_t, M_t, C_t, 
                                              A_t,n_discretization,xsi,display)
 
-
      #calculated time to run each trajectory using generalized velocity 
      #square b 
-     t1_SQP_abu=reconstruct(decision_variables_SQP_abu[0:n_discretization])
+     t1_SQP_abu=reconstruct(decision_variables_SQP_abu[n_discretization-1
+                                                       :2*n_discretization-1])
      
      if plot:
           return t1_SQP_abu,decision_variables_SQP_abu
@@ -252,6 +253,8 @@ def init_optimization_SQP_abu(R_t, M_t, C_t, A_t,n_discretization,
   
   
      
+
+
      
      
      
