@@ -261,7 +261,26 @@ def create_friction_circle_jacobian(n_discretization):
 
 
 
-
+#creates friction circle constraints gradient
+def create_friction_circle_Hessian(n_discretization):
+    
+    #flattened vector coordinates
+    u1=n_discretization+n_discretization-1
+    u2=u1+n_discretization-1
+    
+    def friction_circle_Hessian(x,v):
+        B=sparse.lil_matrix((n_discretization+3*(n_discretization-1),n_discretization+3*(n_discretization-1)))
+        
+        #create all the frisction circle constraints
+        for i in range(n_discretization-1):
+            Hessian_i = sparse.lil_matrix((n_discretization+3*(n_discretization-1),n_discretization+3*(n_discretization-1)))
+            Hessian_i[u1+i,u1+i]=x[u2+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
+            Hessian_i[u1+i,u2+i]=-x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
+            Hessian_i[u2+i,u2+i]=x[u1+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
+            Hessian_i[u2+i,u1+i]=-x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
+            B+=v[i]*Hessian_i
+        return sparse.csr_matrix(B)
+    return friction_circle_Hessian
 
 
 
@@ -350,9 +369,9 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     #create Firction Circle Constraints
     friction_circle, lb_fc, ub_fc = create_friction_circle(mu,mass,n_discretization)
     Grad_fc = create_friction_circle_jacobian(n_discretization)
-    #Hessian_fc = create_Hessian_objective(xsi,T0,n_discretization)
+    Hessian_fc = create_friction_circle_Hessian(n_discretization)
     Non_linear_c = NonlinearConstraint(friction_circle,lb_fc,ub_fc,\
-                    Grad_fc, hess=BFGS())
+                    Grad_fc, hess=Hessian_fc)
 
 
 
