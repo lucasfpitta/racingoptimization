@@ -243,7 +243,6 @@ def init_optimization_SQP_abu(R_t, M_t, C_t, A_t,n_discretization,
      t1_SQP_abu=reconstruct(decision_variables_SQP_abu[n_discretization-1
                                                        :2*n_discretization-1])
      
-     print(t1_SQP_abu)
      if plot:
           return t1_SQP_abu,decision_variables_SQP_abu
      else:
