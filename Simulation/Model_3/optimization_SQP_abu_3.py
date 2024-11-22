@@ -353,7 +353,7 @@ def build_x0(b0,R_t,C_t,n_discretization,n_wheels,expansion_factor_ab,expansion_
     
     #calculates forces that are necessary for constant u
     for i in range(n_discretization-1):
-        u = np.linalg.pinv(R_t[i])@C_t[i]*b0*expansion_factor_ab/2/expansion_factor_u
+        u = np.linalg.pinv(R_t[i])@C_t[i]*b0*expansion_factor_u
         x0[u1+i]=u[0]
         x0[u2+i]=u[1]
         x0[u3+i]=u[2]

@@ -267,9 +267,9 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 
 
 #Model SOCP abu
-t1_SOCP_abu_4=init_optimization_SOCP_abu_4(
-    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-print(t1_SOCP_abu_4)
+# t1_SOCP_abu_4=init_optimization_SOCP_abu_4(
+#     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# print(t1_SOCP_abu_4)
 
 #Model SOCP b
 # t1_SOCP_b_4=init_optimization_SOCP_b_4(

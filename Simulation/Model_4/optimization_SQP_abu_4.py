@@ -376,23 +376,15 @@ def build_x0(b0,R_t,C_t,d_t,n_discretization,n_wheels,expansion_factor_ab,expans
     
     #flattened vector coordinates first 6 forces
     u1=n_discretization+n_discretization-1
-    u2=u1+n_discretization-1
-    u3=u2+n_discretization-1
-    u4=u3+n_discretization-1
-    u5=u4+n_discretization-1
-    u6=u5+n_discretization-1
+
     
     #calculates forces that are necessary for constant u
     for i in range(n_discretization-1):
-        u = (x0[i+1]+x0[i])/2*\
-        np.linalg.pinv(R_t[i])@C_t[i]+np.linalg.pinv(R_t[i])@d_t[i]
+        u = np.linalg.pinv(R_t[i])@C_t[i]*b0*expansion_factor_u\
+            +np.linalg.pinv(R_t[i])@d_t[i]*expansion_factor_u
             
-        x0[u1+i]=u[0]
-        x0[u2+i]=u[1]
-        x0[u3+i]=u[2]
-        x0[u4+i]=u[3]
-        x0[u5+i]=u[4]
-        x0[u6+i]=u[5]
+        for j in range(3*n_wheels):
+            x0[u1+i+j*(n_discretization-1)]=u[j]
         
     return x0
 
@@ -459,11 +451,12 @@ def optimization_SQP_abu_4(R_t,M_t,C_t,A_t,d_t,n_discretization,xsi,n_wheels,dis
     
     b0=1e-4
     x0=build_x0(b0,R_t,C_t,d_t,n_discretization,n_wheels,expansion_factor_ab,expansion_factor_u)
-
+    print("Test friction circle initial guess ", friction_circle(x0))
+    print("Test eq initial guess ", Linear_c.A(x0))
 
     options = {
     'verbose': True,      # Display iteration info
-    'maxiter': 10000,   # Increase the maximum number of iterations
+    'maxiter': 1000,   # Increase the maximum number of iterations
         }   
     
 
@@ -471,6 +464,10 @@ def optimization_SQP_abu_4(R_t,M_t,C_t,A_t,d_t,n_discretization,xsi,n_wheels,dis
          constraints=[Linear_c, Non_linear_c],options=options,bounds=bounds)
     
     decision_variables = result.x
+
+    print(obj(decision_variables))
+    print(obj_grad(decision_variables))
+    print(obj_hess(decision_variables))
     if display:
         print("T0 ", T0, " E0 ", E0)
         print("Test friction circle ", (friction_circle(decision_variables)<= 1E-6).all())
