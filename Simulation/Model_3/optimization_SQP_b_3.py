@@ -338,7 +338,7 @@ def optimization_SQP_b_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
 
     options = {
     'verbose': True,      # Display iteration info
-    'maxiter': 10000,   # Increase the maximum number of iterations
+    'maxiter': 1000,   # Increase the maximum number of iterations
         }   
     
 
