@@ -151,7 +151,7 @@ print(t1_SQP_b)
 
 
 
-
+"""
 
 ##################################################################
 ###                           Model 3                          ###
@@ -187,13 +187,31 @@ R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
 
 
 #Model SOCP abu
-t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP b
-t1_SOCP_b_3=init_optimization_SOCP_b_3(
+# t1_SOCP_b_3=init_optimization_SOCP_b_3(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+
+#Model SQP abu
+# t1_SQP_abu_3=init_optimization_SQP_abu_3(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+
+
+
+#Model SQP abu
+t1_SQP_b_3=init_optimization_SQP_b_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+print(t1_SQP_b_3)
+
+
+
+
 
 
 """
@@ -260,7 +278,7 @@ t1_SOCP_b_4=init_optimization_SOCP_b_4(
 
 
 
-
+"""
 
 
 
