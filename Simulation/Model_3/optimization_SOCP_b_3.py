@@ -1,7 +1,6 @@
 import numpy as np
-import scipy as scp
 import cvxpy as cp
-
+from scipy import sparse 
 
 
 # Create the vectors F_it for both the objective and constraints
@@ -124,9 +123,9 @@ def create_b_c_cones(x,n_discretization,n_wheels):
         
         #build the cone matrix A_matrix, which is 2 for c_k in the first 
         # line, 1 for b_k in thensecond line, and 0 otherwise
-        A_matrix = np.zeros((2,2*n_discretization+(n_discretization-1)))
-        A_matrix[0][c+i]=2
-        A_matrix[1][i]=1
+        A_matrix = sparse.lil_matrix((2,2*n_discretization+(n_discretization-1)))
+        A_matrix[0,c+i]=2
+        A_matrix[1,i]=1
         
         
         #build the cone vector b_vec, which is -1 on the second line and 0 otherwise
@@ -134,7 +133,7 @@ def create_b_c_cones(x,n_discretization,n_wheels):
         b_vec[1] = -1
         
         
-        soc_constraints.append(cp.SOC(c_vec.T @ x+cp.Constant(1), A_matrix@x+b_vec))
+        soc_constraints.append(cp.SOC(c_vec.T @ x+cp.Constant(1),sparse.csr_matrix(A_matrix)@x+b_vec))
         
     return soc_constraints
 
@@ -176,10 +175,10 @@ def create_c_d_cones(x,n_discretization,n_wheels):
         #build the cone matrix A_matrix, which is 1 for d_k, -1 for c_{k+1}
         #, -1 for c_k in the
         #second line, and 0 otherwise
-        A_matrix = np.zeros((2,2*n_discretization+(n_discretization-1)))
-        A_matrix[1][d+i]=1
-        A_matrix[1][c+i]=-1
-        A_matrix[1][c+1+i]=-1
+        A_matrix = sparse.lil_matrix((2,2*n_discretization+(n_discretization-1)))
+        A_matrix[1,d+i]=1
+        A_matrix[1,c+i]=-1
+        A_matrix[1,c+1+i]=-1
         
         #build the cone vector b_vec, which is 2 on the first line and 
         #0 otherwise
@@ -187,7 +186,7 @@ def create_c_d_cones(x,n_discretization,n_wheels):
         b_vec[0] = 2
         
         
-        soc_constraints.append(cp.SOC(c_vec.T @ x, A_matrix@x+cp.Constant(b_vec)))
+        soc_constraints.append(cp.SOC(c_vec.T @ x,sparse.csr_matrix(A_matrix)@x+cp.Constant(b_vec)))
         
     return soc_constraints
 
@@ -218,15 +217,15 @@ def create_friction_circle_cones(x,F_1t,F_2t,n_discretization,m,mu,n_wheels):
         for j in range(n_wheels):
             #build the cone matrix A_matrix, which is 1 for u_1k on the first 
             #line and for u_2k on the second line,and 0 otherwise
-            A_matrix = np.zeros((2,2*n_discretization+(n_discretization-1)))
+            A_matrix = sparse.lil_matrix((2,2*n_discretization+(n_discretization-1)))
             
-            A_matrix[0][i]=F_2t[i][2*j]
-            A_matrix[0][i+1]=F_1t[i][2*j]
-            A_matrix[1][i]=F_2t[i][2*j+1]
-            A_matrix[1][i+1]=F_1t[i][2*j+1]
+            A_matrix[0,i]=F_2t[i][2*j]
+            A_matrix[0,i+1]=F_1t[i][2*j]
+            A_matrix[1,i]=F_2t[i][2*j+1]
+            A_matrix[1,i+1]=F_1t[i][2*j+1]
             
             
-            soc_constraints.append(cp.SOC(cp.Constant(m*mu*9.81/n_wheels), A_matrix@x))
+            soc_constraints.append(cp.SOC(cp.Constant(m*mu*9.81/n_wheels),sparse.csr_matrix(A_matrix)@x))
         
     return soc_constraints
 

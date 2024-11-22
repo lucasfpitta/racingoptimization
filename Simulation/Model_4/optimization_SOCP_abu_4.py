@@ -1,6 +1,6 @@
 import numpy as np
-import scipy as scp
 import cvxpy as cp
+from scipy import sparse 
 
 
 
@@ -48,7 +48,7 @@ def create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization,n_wheels):
     u=n_discretization+n_discretization-1
     
     
-    F = np.zeros((7*(n_discretization-1),2*n_discretization+(2+3*n_wheels)*
+    F = sparse.lil_matrix((7*(n_discretization-1),2*n_discretization+(2+3*n_wheels)*
                   (n_discretization-1)))
     
     
@@ -106,7 +106,7 @@ def create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization,n_wheels):
         F[6*(n_discretization-1)+i,i]=2*1/(n_discretization-1)
         F[6*(n_discretization-1)+i,b+i]=1
         F[6*(n_discretization-1)+i,b+1+i]=-1
-    return F
+    return sparse.csr_matrix(F)
 
 
 
@@ -167,7 +167,7 @@ def create_b_bounds(x,n_discretization,n_wheels):
 
 
 
-#creates bounds to front wheels
+#creates bounds to front wheels (not driven)
 def create_F_bounds(x,n_discretization,n_wheels):
     #flattened vector coordinates
     u1 = 2*n_discretization-1
@@ -220,9 +220,9 @@ def create_b_c_cones(x,n_discretization,n_wheels):
         
         #build the cone matrix A_matrix, which is 2 for c_k in the first 
         # line, 1 for b_k in thensecond line, and 0 otherwise
-        A_matrix = np.zeros((2,2*n_discretization+(2+3*n_wheels)*(n_discretization-1)))
-        A_matrix[0][c+i]=2
-        A_matrix[1][b+i]=1
+        A_matrix = sparse.lil_matrix((2,2*n_discretization+(2+3*n_wheels)*(n_discretization-1)))
+        A_matrix[0,c+i]=2
+        A_matrix[1,b+i]=1
         
         
         #build the cone vector b_vec, which is -1 on the second line and 0 otherwise
@@ -230,7 +230,7 @@ def create_b_c_cones(x,n_discretization,n_wheels):
         b_vec[1] = -1
         
         
-        soc_constraints.append(cp.SOC(c_vec.T @ x+cp.Constant(1), A_matrix@x+b_vec))
+        soc_constraints.append(cp.SOC(c_vec.T @ x+cp.Constant(1),sparse.csr_matrix(A_matrix)@x+b_vec))
         
     return soc_constraints
 
@@ -272,10 +272,10 @@ def create_c_d_cones(x,n_discretization,n_wheels):
         #build the cone matrix A_matrix, which is 1 for d_k, -1 for c_{k+1}
         #, -1 for c_k in the
         #second line, and 0 otherwise
-        A_matrix = np.zeros((2,2*n_discretization+(2+3*n_wheels)*(n_discretization-1)))
-        A_matrix[1][d+i]=1
-        A_matrix[1][c+i]=-1
-        A_matrix[1][c+1+i]=-1
+        A_matrix = sparse.lil_matrix((2,2*n_discretization+(2+3*n_wheels)*(n_discretization-1)))
+        A_matrix[1,d+i]=1
+        A_matrix[1,c+i]=-1
+        A_matrix[1,c+1+i]=-1
         
         #build the cone vector b_vec, which is 2 on the first line and 
         #0 otherwise
@@ -283,7 +283,7 @@ def create_c_d_cones(x,n_discretization,n_wheels):
         b_vec[0] = 2
         
         
-        soc_constraints.append(cp.SOC(c_vec.T @ x, A_matrix@x+cp.Constant(b_vec)))
+        soc_constraints.append(cp.SOC(c_vec.T @ x,sparse.csr_matrix(A_matrix)@x+cp.Constant(b_vec)))
         
     return soc_constraints
 
@@ -317,15 +317,15 @@ def create_friction_circle_cones(x,n_discretization,m,mu,n_wheels):
         for j in range(n_wheels):
             #build the cone matrix A_matrix, which is 1 for u_1k on the first 
             #line and for u_2k on the second line,and 0 otherwise
-            A_matrix = np.zeros((2,2*n_discretization+(2+3*n_wheels)*(n_discretization-1)))
-            A_matrix[0][u+i+3*j*(n_discretization-1)]=1
-            A_matrix[1][u+i+(3*j+1)*(n_discretization-1)]=1
+            A_matrix = sparse.lil_matrix((2,2*n_discretization+(2+3*n_wheels)*(n_discretization-1)))
+            A_matrix[0,u+i+3*j*(n_discretization-1)]=1
+            A_matrix[1,u+i+(3*j+1)*(n_discretization-1)]=1
             
             #build the cone vector c_vec, which is mu for u_3k
             c_vec = np.zeros(2*n_discretization+(2+3*n_wheels)*(n_discretization-1))
             c_vec[u+i+(3*j+2)*(n_discretization-1)] = mu 
             
-            soc_constraints.append(cp.SOC(c_vec.T @ x, A_matrix@x))
+            soc_constraints.append(cp.SOC(c_vec.T @ x, sparse.csr_matrix(A_matrix)@x))
         
     return soc_constraints
 
@@ -382,7 +382,7 @@ def optimization_SOCP_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,di
     
     #set the SOCP problem
     prob = cp.Problem(cp.Minimize(f.T@x),soc_constraints+[F @ x == g])
-    prob.solve(solver=cp.CLARABEL, verbose = True)
+    prob.solve(solver=cp.CLARABEL)
 
     # Print result.
     if display:

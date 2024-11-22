@@ -3,7 +3,6 @@ import scipy as scp
 from scipy.optimize import Bounds
 from scipy.optimize import LinearConstraint
 from scipy.optimize import NonlinearConstraint
-from scipy.optimize import BFGS
 from scipy import sparse 
 
 
@@ -218,7 +217,7 @@ def create_friction_circle(mu,mass,n_discretization):
         remainder = np.zeros(n_discretization-1)
         for i in range(n_discretization-1):
             remainder[i] = (x[u1+i]**2+x[u2+i]
-                             **2)**0.5-mu*mass*9.81
+                             **2)-(mu*mass*9.81)**2
         return remainder
     return friction_circle, lb, ub
 
@@ -249,8 +248,8 @@ def create_friction_circle_jacobian(n_discretization):
         
         #create all the frisction circle constraints
         for i in range(n_discretization-1):
-            B1[i,u1+i] = x[u1+i]/(x[u1+i]**2+x[u2+i]**2)**0.5
-            B1[i,u2+i] = x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**0.5
+            B1[i,u1+i] = 2*x[u1+i]#/(x[u1+i]**2+x[u2+i]**2)**0.5
+            B1[i,u2+i] = 2*x[u2+i]#/(x[u1+i]**2+x[u2+i]**2)**0.5
         return sparse.csr_matrix(B1)
     return friction_circle_jac
 
@@ -274,10 +273,10 @@ def create_friction_circle_Hessian(n_discretization):
         #create all the frisction circle constraints
         for i in range(n_discretization-1):
             Hessian_i = sparse.lil_matrix((n_discretization+3*(n_discretization-1),n_discretization+3*(n_discretization-1)))
-            Hessian_i[u1+i,u1+i]=x[u2+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
-            Hessian_i[u1+i,u2+i]=-x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
-            Hessian_i[u2+i,u2+i]=x[u1+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
-            Hessian_i[u2+i,u1+i]=-x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
+            Hessian_i[u1+i,u1+i]=2#x[u2+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
+            #Hessian_i[u1+i,u2+i]=-x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
+            Hessian_i[u2+i,u2+i]=2#x[u1+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
+            #Hessian_i[u2+i,u1+i]=-x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
             B+=v[i]*Hessian_i
         return sparse.csr_matrix(B)
     return friction_circle_Hessian
@@ -345,7 +344,6 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
 
     mu=1 #friction coeficient
     mass=85 #mass of the vehicle
-    epsilon=1e-3 #hypercube size
     
     
     #creating objective vector
