@@ -38,7 +38,7 @@ xsi = 1 #optimization scalar
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "eight"
+path_name = "circle"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -103,12 +103,12 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 n_wheels=1 #number of wheels
 
 #Model 1, point
-R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
+# R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 
 #Model 2, oriented point with drag
-# R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
-#     pho_air,A0,Cx)
+R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
+    pho_air,A0,Cx)
 
 
 
@@ -309,7 +309,7 @@ t1_SQP_b_4=init_optimization_SQP_b_4(
 N_computation_average=1
 
 #Physical model to compute
-Physical_model=1
+Physical_model=2
 
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"
@@ -357,10 +357,10 @@ discretizations = [10,18,32,56,100]
 N_computation_average=50
 
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model1_eight.csv"
+filename = "Comparison/Results/comparison_timeit_model2_circle.csv"
 
 #Physical model to compute
-Physical_model=1
+Physical_model=2
 
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
@@ -379,7 +379,7 @@ data = read_csv_to_dict(filename)
 
 complexity = fit_log(data)
 
-title = "Point mass"
+title = "Point mass with Drag"
 model_complexity(models,complexity,title)
 
 
