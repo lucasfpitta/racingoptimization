@@ -46,7 +46,7 @@ def circular_path_test(derivative,decision_variables,n_discretization,m,mu,\
     
     
     #Theoretical Circle maximum acceleration
-    theoretical_a = 9.81*np.ones(len(v))
+    theoretical_a = theoretical_v**2/100
     
 
 
@@ -61,14 +61,14 @@ def circular_path_test(derivative,decision_variables,n_discretization,m,mu,\
     ax2.set_ylim(0,max(a)+5)
     ax1.plot(np.linspace(0,1,n_discretization-1),
             v,'*r',label="Optimized velocity")
-    ax1.plot(np.linspace(0,1,n_discretization-1),
-            theoretical_v_inf,'-b',label="Theoretical v_inf R=100")
+    # ax1.plot(np.linspace(0,1,n_discretization-1),
+    #         theoretical_v_inf,'-b',label="Theoretical v_max R=100")
     ax1.plot(np.linspace(0,1,n_discretization-1),
             theoretical_v,'-g',label="Theoretical v R=100")
     ax2.plot(np.linspace(0,1,n_discretization-1),
             a,'*r',label="Optimized acceleration")
     ax2.plot(np.linspace(0,1,n_discretization-1),
-            theoretical_a,'-b',label="Theoretical acceleration inf")
+            theoretical_a,'-b',label="Theoretical a_max")
     ax1.grid()
     ax2.grid()
     ax1.legend()

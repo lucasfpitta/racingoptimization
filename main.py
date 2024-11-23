@@ -38,7 +38,7 @@ xsi = 1 #optimization scalar
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "eight"
+path_name = "circle"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -103,12 +103,12 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 n_wheels=1 #number of wheels
 
 #Model 1, point
-R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
+# R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 
 #Model 2, oriented point with drag
-# R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
-#     pho_air,A0,Cx)
+R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
+    pho_air,A0,Cx)
 
 
 
@@ -310,7 +310,7 @@ t1_SQP_b_4=init_optimization_SQP_b_4(
 N_computation_average=1
 
 #Physical model to compute
-Physical_model=1
+Physical_model=2
 
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"
@@ -361,7 +361,7 @@ N_computation_average=1
 filename = "Comparison/Results/comparison_timeit_model1_eight.csv"
 """
 #Physical model to compute
-Physical_model=1
+Physical_model=2
 
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
@@ -380,7 +380,7 @@ data = read_csv_to_dict(filename)
 
 complexity = fit_log(data)
 
-title = "Point mass"
+title = "Point mass with Drag"
 model_complexity(models,complexity,title)
 
 
@@ -418,7 +418,7 @@ model_complexity(models,complexity,title)
 
 
 
-"""
+
 
 ##################################################################
 ###                            Plots                           ###
@@ -428,18 +428,18 @@ model_complexity(models,complexity,title)
 #Uncomment the plots you want
 
 # #solution general model
-# t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
-#      decision_variables_abu = init_optimization_abu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
+     decision_variables_abu = init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
 
 #  #Test if the circular path velocity is equal to the theoretical
-# circular_path_test(derivative,decision_variables_abu[0:n_discretization],n_discretization,m,mu,\
-#     pho_air,A0,Cx)
+circular_path_test(derivative,decision_variables_abu[0:n_discretization],n_discretization,m,mu,\
+    pho_air,A0,Cx)
 
 
 
-
+"""
 
 #usar sempre o abu SOCP
 t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_abu_4(
