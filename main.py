@@ -31,7 +31,7 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=50 #number of path sections
+n_discretization=10 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -114,38 +114,37 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 #Comment the models you dont want to compute
 
-# #Model abu
-# t1_abu=init_optimization_abu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+#Model abu
+t1_abu=init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
-# #Model bu
-# t1_bu=init_optimization_bu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+#Model bu
+t1_bu=init_optimization_bu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
-# #Model b
-# t1_b=init_optimization_b(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-
-
-# #Model SOCP abu
-# t1_SOCP_abu=init_optimization_SOCP_abu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+#Model b
+t1_b=init_optimization_b(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-# #Model SOCP b
-# t1_SOCP_b=init_optimization_SOCP_b(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+#Model SOCP abu
+t1_SOCP_abu=init_optimization_SOCP_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-# #Model SQP trust-constr abu
+#Model SOCP b
+t1_SOCP_b=init_optimization_SOCP_b(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+
+#Model SQP trust-constr abu
 t1_SQP_abu=init_optimization_SQP_abu(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-print(t1_SQP_abu)
 
-# #Model SQP trust-constr b
-# t1_SQP_b=init_optimization_SQP_b(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+#Model SQP trust-constr b
+t1_SQP_b=init_optimization_SQP_b(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 
@@ -298,7 +297,7 @@ t1_SQP_b_4=init_optimization_SQP_b_4(
 
 
 
-"""
+
 
 
 
@@ -355,10 +354,10 @@ computation_time = model_performance(Physical_model,models,results,N_computation
 discretizations = [10,18,32,56,100]
 
 #number of timeit assessments
-N_computation_average=1
+N_computation_average=50
 
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model1_test.csv"
+filename = "Comparison/Results/comparison_timeit_model1_circle.csv"
 
 #Physical model to compute
 Physical_model=1
@@ -382,7 +381,7 @@ complexity = fit_log(data)
 
 title = "Point mass"
 model_complexity(models,complexity,title)
-"""
+
 
 
 
