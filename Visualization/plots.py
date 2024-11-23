@@ -548,7 +548,12 @@ def model_complexity(model_names, data_dict,title):
     norm = mcolors.Normalize(vmin=0, vmax=1)
     cmap = plt.cm.Blues
     
+    formats = [':r',':g',':b','-.r','-.b','-r','-b']
+    colors = ['or', 'og', 'ob', 'oc', 'oy', 'ok', 'om']
+    colors2 = ['.r', '.g', '.b', '.c', '.y', '.k', '.m']
+    counter =0
     for model_name in model_names:
+
         # Extract data for the model
         number_of_sections = data_dict[model_name][0]
         log_time_to_compute = np.array(data_dict[model_name][1])
@@ -561,10 +566,12 @@ def model_complexity(model_names, data_dict,title):
         x_fit = np.array(number_of_sections)
         y_fit = slope * x_fit + intercept
 
+
         # Plot data points and fit line for each model
-        plt.plot(number_of_sections,lb,'.k',number_of_sections,ub,'.k')
-        plt.plot(number_of_sections, log_time_to_compute, 'o', label=fr'{model_name} Data')
-        plt.plot(x_fit, y_fit, '-', label=fr'{model_name} Fit (slope: {slope:.2f})')
+        plt.plot(number_of_sections,lb,colors2[counter],number_of_sections,ub,colors2[counter])
+        plt.plot(number_of_sections, log_time_to_compute, colors[counter], label=fr'{model_name} Data')
+        plt.plot(x_fit, y_fit, formats[counter], label=fr'{model_name} Fit (slope: {slope:.2f})')
+        counter+=1
         
     
     # Labels and title
