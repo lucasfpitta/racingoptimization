@@ -38,7 +38,7 @@ xsi = 1 #optimization scalar
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "circle"
+path_name = "eight"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -357,7 +357,7 @@ discretizations = [10,18,32,56,100]
 N_computation_average=50
 
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model1_circle.csv"
+filename = "Comparison/Results/comparison_timeit_model1_eight.csv"
 
 #Physical model to compute
 Physical_model=1
