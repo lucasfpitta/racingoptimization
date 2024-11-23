@@ -358,7 +358,7 @@ discretizations = [10,18,32,56,100]
 N_computation_average=1
 """
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model1_eight.csv"
+filename = "Comparison/Results/comparison_timeit_model2_circle.csv"
 """
 #Physical model to compute
 Physical_model=2
