@@ -31,6 +31,7 @@ from Simulation.Model_4.optimization_b_4 import optimization_b_4
 from Simulation.Model_4.optimization_SOCP_abu_4 import optimization_SOCP_abu_4
 from Simulation.Model_4.optimization_SOCP_b_4 import optimization_SOCP_b_4
 from Simulation.Model_4.optimization_SQP_abu_4 import optimization_SQP_abu_4
+from Simulation.Model_4.optimization_SQP_b_4 import optimization_SQP_b_4
 from Simulation.reconstruct import reconstruct, interpolate_u, control_system
 from Visualization.print import print_separator, print_table
 
@@ -814,15 +815,15 @@ def init_optimization_SOCP_b_4(R_t, M_t, C_t, d_t, A_t,n_discretization,
 ###          Seq Quadratic Prog (abu) for Model4               ###
 ##################################################################
 
-def init_optimization_SQP_abu_4(R_t, M_t, C_t, A_t, d_t,n_discretization,
+def init_optimization_SQP_abu_4(R_t, M_t, C_t, d_t, A_t,n_discretization,
                                       xsi,n_wheels,display,plot):
      if display:
           print_separator("Seq Quadratic Prog (abu) Model4 ")
 
      #finds the optimal solution. Outputs vector with variables a, b, u, 
      # c, d 
-     decision_variables_SQP_abu_4 = optimization_SQP_abu_4(R_t, M_t, C_t, 
-                         A_t,d_t,n_discretization,xsi,n_wheels,display)
+     decision_variables_SQP_abu_4 = optimization_SQP_abu_4(R_t, M_t, C_t,d_t, 
+                         A_t,n_discretization,xsi,n_wheels,display)
 
 
      #calculated time to run each trajectory using generalized velocity 
@@ -842,6 +843,37 @@ def init_optimization_SQP_abu_4(R_t, M_t, C_t, A_t, d_t,n_discretization,
      
      
      
+
+
+
+
+
+
+
+##################################################################
+###          Seq Quadratic Prog (b) for Model4               ###
+##################################################################
+
+def init_optimization_SQP_b_4(R_t, M_t, C_t, d_t, A_t,n_discretization,
+                                      xsi,n_wheels,display,plot):
+     if display:
+          print_separator("Seq Quadratic Prog (b) Model4 ")
+
+     #finds the optimal solution. Outputs vector with variables a, b, u, 
+     # c, d 
+     decision_variables_SQP_b_4 = optimization_SQP_b_4(R_t, M_t, C_t,d_t, 
+                         A_t,n_discretization,xsi,n_wheels,display)
+
+
+     #calculated time to run each trajectory using generalized velocity 
+     #square b 
+     t1_SQP_b_4=reconstruct(decision_variables_SQP_b_4[0:n_discretization])
+     
+     if plot:
+          return t1_SQP_b_4,decision_variables_SQP_b_4
+     else:
+          return t1_SQP_b_4       
+
      
      
      
@@ -882,7 +914,9 @@ def model_performance(Physical_model, models,results,N_computation_average,R_t, 
                "Time bu": init_optimization_bu,
                "Time b": init_optimization_b,
                "Time SOCP abu": init_optimization_SOCP_abu,
-               "Time SOCP b": init_optimization_SOCP_b
+               "Time SOCP b": init_optimization_SOCP_b,
+               "Time SQP abu": init_optimization_SQP_abu,
+               "Time SQP b": init_optimization_SQP_b
                }
      elif Physical_model == 3:
           Models_dict = {
@@ -890,7 +924,9 @@ def model_performance(Physical_model, models,results,N_computation_average,R_t, 
                "Time bu": init_optimization_bu_3,
                "Time b": init_optimization_b_3,
                "Time SOCP abu": init_optimization_SOCP_abu_3,
-               "Time SOCP b": init_optimization_SOCP_b_3
+               "Time SOCP b": init_optimization_SOCP_b_3,
+               "Time SQP abu": init_optimization_SQP_abu_3,
+               "Time SQP b": init_optimization_SQP_b_3
                }
      elif Physical_model == 4:
           Models_dict = {
@@ -898,7 +934,9 @@ def model_performance(Physical_model, models,results,N_computation_average,R_t, 
                "Time bu": init_optimization_bu_4,
                "Time b": init_optimization_b_4,
                "Time SOCP abu": init_optimization_SOCP_abu_4,
-               "Time SOCP b": init_optimization_SOCP_b_4
+               "Time SOCP b": init_optimization_SOCP_b_4,
+               "Time SQP abu": init_optimization_SQP_abu_4,
+               "Time SQP b": init_optimization_SQP_b_4
                }
      else:
           print("Wrong Physical Model")

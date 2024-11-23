@@ -23,14 +23,18 @@ from scipy import sparse
 #n_discretizatio vector A_t), 
 # number of discretization
 #Output cost of the solution (scalar)
-def create_objective(xsi,A_t,T0,E0,n_discretization):
+def create_objective(xsi,A_t,T0,E0,n_discretization,expansion_factor):
     
     #flattened vector coordinates
     b=n_discretization-1
     u1=n_discretization+n_discretization-1
     u2=n_discretization+n_discretization-1+n_discretization-1
     
-    def objective_function(decision_variables):
+    def objective_function(t):
+
+        decision_variables = np.zeros(len(t))
+        decision_variables[0:2*n_discretization-1] = t[0:2*n_discretization-1]/expansion_factor
+        decision_variables[2*n_discretization-1:len(t)] = t[2*n_discretization-1:len(t)]
         
         cost=0
         
@@ -57,14 +61,18 @@ def create_objective(xsi,A_t,T0,E0,n_discretization):
 
 
 #defines gradient of the function at a linearization point
-def create_gradient_objective(xsi,A_t,T0,E0,n_discretization):
+def create_gradient_objective(xsi,A_t,T0,E0,n_discretization,expansion_factor):
     
     #flattened vector coordinates
     b=n_discretization-1
     u1=n_discretization+n_discretization-1
     u2=u1+n_discretization-1
     
-    def Grad(x):
+    def Grad(t):
+        x = np.zeros(len(t))
+        x[0:2*n_discretization-1] = t[0:2*n_discretization-1]/expansion_factor
+        x[2*n_discretization-1:len(t)] = t[2*n_discretization-1:len(t)]
+
         f = np.zeros(3*(n_discretization-1)+n_discretization)
         
         #for each path section
@@ -73,8 +81,8 @@ def create_gradient_objective(xsi,A_t,T0,E0,n_discretization):
             f[u2+i]=(1-xsi)*A_t[i][1]/E0
 
         for i in range(n_discretization-1):
-            f[b+i] += 2*xsi*(-1/(2*np.sqrt(x[b+i])*(np.sqrt(x[b+i+1])+np.sqrt(x[b+i]))**2))/T0
-            f[b+i+1] += 2*xsi*(-1/(2*np.sqrt(x[b+i+1])*(np.sqrt(x[b+i+1])+np.sqrt(x[b+i]))**2))/T0
+            f[b+i] += 2*xsi*(-1/(2*np.sqrt(x[b+i])*(np.sqrt(x[b+i+1])+np.sqrt(x[b+i]))**2))/T0/expansion_factor
+            f[b+i+1] += 2*xsi*(-1/(2*np.sqrt(x[b+i+1])*(np.sqrt(x[b+i+1])+np.sqrt(x[b+i]))**2))/T0/expansion_factor
         return f
     return Grad
 
@@ -84,12 +92,13 @@ def create_gradient_objective(xsi,A_t,T0,E0,n_discretization):
 
 
 #defines Hessian of the function at a linearization point
-def create_Hessian_objective(xsi,T0,n_discretization):
+def create_Hessian_objective(xsi,T0,n_discretization,expansion_factor):
     
     #flattened vector coordinates
     b=n_discretization-1
     
-    def Hessian(x):
+    def Hessian(t):
+        x = t/expansion_factor
     
         H = sparse.lil_matrix((3*(n_discretization-1)+n_discretization,3*(n_discretization-1)+n_discretization))
         
@@ -102,7 +111,7 @@ def create_Hessian_objective(xsi,T0,n_discretization):
                 +x[b+i]**0.5)**3)/T0
             H[b+i,b+i+1]+= 2*xsi/(2*(x[b+i]*x[b+i+1])**0.5*(x[b+i]**0.5+x[b+i+1]**0.5)**3)/T0
             H[b+i+1,b+i]+= 2*xsi/(2*(x[b+i]*x[b+i+1])**0.5*(x[b+i+1]**0.5+x[b+i]**0.5)**3)/T0
-        return sparse.csr_matrix(H)
+        return sparse.csr_matrix(H)/expansion_factor**2
     return Hessian
 
 
@@ -156,7 +165,7 @@ def create_b_bounds(n_discretization):
 #M_t, C_t (2d array with n_discretizatio of vectors M_t and C_t), 
 # number of discretization
 #Output constraint Matrix F
-def create_Linear_Constraints(R_t,M_t,C_t,n_discretization):
+def create_Linear_Constraints(R_t,M_t,C_t,n_discretization,expansion_factor):
     
     #flattened vector coordinates
     b = n_discretization-1
@@ -175,25 +184,25 @@ def create_Linear_Constraints(R_t,M_t,C_t,n_discretization):
     for i in range(n_discretization-1):
         
         #first Cartesian coordinate dynamic constraint
-        F[i,i]=-M_t[i][0]
-        F[i,b+i]=-C_t[i][0]/2
-        F[i,b+i+1]=-C_t[i][0]/2
+        F[i,i]=-M_t[i][0]/expansion_factor
+        F[i,b+i]=-C_t[i][0]/2/expansion_factor
+        F[i,b+i+1]=-C_t[i][0]/2/expansion_factor
         F[i,u1+i]=R_t[i][0][0]
         F[i,u2+i]=R_t[i][0][1]
         
         
         #second Cartesian coordinate dynamic constraint
-        F[n_discretization-1+i,i]=-M_t[i][1]
-        F[n_discretization-1+i,b+i]=-C_t[i][1]/2
-        F[n_discretization-1+i,b+i+1]=-C_t[i][1]/2
+        F[n_discretization-1+i,i]=-M_t[i][1]/expansion_factor
+        F[n_discretization-1+i,b+i]=-C_t[i][1]/2/expansion_factor
+        F[n_discretization-1+i,b+i+1]=-C_t[i][1]/2/expansion_factor
         F[n_discretization-1+i,u1+i]=R_t[i][1][0]
         F[n_discretization-1+i,u2+i]=R_t[i][1][1]
         
         
         #Differential contraint
-        F[2*(n_discretization-1)+i,i]=2*1/(n_discretization-1)
-        F[2*(n_discretization-1)+i,b+i]=1
-        F[2*(n_discretization-1)+i,b+1+i]=-1
+        F[2*(n_discretization-1)+i,i]=2*1/(n_discretization-1)/expansion_factor
+        F[2*(n_discretization-1)+i,b+i]=1/expansion_factor
+        F[2*(n_discretization-1)+i,b+1+i]=-1/expansion_factor
     return LinearConstraint(sparse.csr_matrix(F),lb,ub)
 
 
@@ -273,10 +282,8 @@ def create_friction_circle_Hessian(n_discretization):
         #create all the frisction circle constraints
         for i in range(n_discretization-1):
             Hessian_i = sparse.lil_matrix((n_discretization+3*(n_discretization-1),n_discretization+3*(n_discretization-1)))
-            Hessian_i[u1+i,u1+i]=2#x[u2+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
-            #Hessian_i[u1+i,u2+i]=-x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
-            Hessian_i[u2+i,u2+i]=2#x[u1+i]**2/(x[u1+i]**2+x[u2+i]**2)**1.5
-            #Hessian_i[u2+i,u1+i]=-x[u1+i]*x[u2+i]/(x[u1+i]**2+x[u2+i]**2)**1.5
+            Hessian_i[u1+i,u1+i]=2
+            Hessian_i[u2+i,u2+i]=2
             B+=v[i]*Hessian_i
         return sparse.csr_matrix(B)
     return friction_circle_Hessian
@@ -291,11 +298,11 @@ def create_friction_circle_Hessian(n_discretization):
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Centrifugal 
 #C_t (2d array with n_discretizatio of vector C_t), number of discretization
 #Output 1d flattened vector of initial guess
-def build_x0(b0,R_t,C_t,n_discretization):
+def build_x0(b0,R_t,C_t,n_discretization,expansion_factor):
     
     #creates innitial guess
     x0 = np.zeros(n_discretization-1)
-    x0 = np.append(x0,np.ones(n_discretization)*b0)
+    x0 = np.append(x0,np.ones(n_discretization)*b0*expansion_factor)
     x0 = np.append(x0,np.zeros(2*(n_discretization-1)))
 
     
@@ -307,7 +314,7 @@ def build_x0(b0,R_t,C_t,n_discretization):
     
     #calculates forces that are necessary for constant u
     for i in range(n_discretization-1):
-        u = (x0[b+i+1]+x0[b+i])/2*\
+        u = b0/2*\
             np.linalg.inv(R_t[i])@C_t[i]
         x0[u1+i]=u[0]
         x0[u2+i]=u[1]
@@ -350,11 +357,12 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     T0=1
     E0=1
     
+    expansion_factor=1e3
 
     #create the objective information
-    obj = create_objective(xsi,A_t,T0,E0,n_discretization)
-    obj_grad = create_gradient_objective(xsi,A_t,T0,E0,n_discretization)
-    obj_hess = create_Hessian_objective(xsi,T0,n_discretization)
+    obj = create_objective(xsi,A_t,T0,E0,n_discretization,expansion_factor)
+    obj_grad = create_gradient_objective(xsi,A_t,T0,E0,n_discretization,expansion_factor)
+    obj_hess = create_Hessian_objective(xsi,T0,n_discretization,expansion_factor)
 
 
     #create bounds
@@ -362,7 +370,7 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
 
 
     #Create Linear Constraints
-    Linear_c = create_Linear_Constraints(R_t,M_t,C_t,n_discretization)
+    Linear_c = create_Linear_Constraints(R_t,M_t,C_t,n_discretization,expansion_factor)
     
     #create Firction Circle Constraints
     friction_circle, lb_fc, ub_fc = create_friction_circle(mu,mass,n_discretization)
@@ -375,11 +383,11 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
 
     
     b0=1e-4
-    x0=build_x0(b0,R_t,C_t,n_discretization)
+    x0=build_x0(b0,R_t,C_t,n_discretization,expansion_factor)
 
 
     options = {
-    'verbose': True,      # Display iteration info
+    'verbose': display,      # Display iteration info
     'maxiter': 1000,   # Increase the maximum number of iterations
         }   
     
@@ -388,11 +396,12 @@ def optimization_SQP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
          constraints=[Linear_c, Non_linear_c],options=options,bounds=bounds)
     
     decision_variables = result.x
+
     if display:
         print("T0 ", T0, " E0 ", E0)
         print("Test friction circle ", (friction_circle(decision_variables)<= 1E-6).all())
         print("Test friction circle initial guess ", (friction_circle(x0)<= 1E-6).all())
-    return  decision_variables
+    return  decision_variables/expansion_factor
 
 
 

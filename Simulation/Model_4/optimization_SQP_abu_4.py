@@ -175,7 +175,7 @@ def create_b_bounds(n_discretization,n_wheels):
 #M_t, C_t (2d array with n_discretizatio of vectors M_t and C_t), 
 # number of discretization
 #Output constraint Matrix F
-def create_Linear_Constraints(R_t,M_t,C_t,n_discretization,n_wheels,expansion_factor_ab,expansion_factor_u):
+def create_Linear_Constraints(R_t,M_t,C_t,d_t,n_discretization,n_wheels,expansion_factor_ab,expansion_factor_u):
     
     lb = np.zeros(7*(n_discretization-1))
     ub = np.zeros(7*(n_discretization-1))
@@ -200,7 +200,8 @@ def create_Linear_Constraints(R_t,M_t,C_t,n_discretization,n_wheels,expansion_fa
         F[i,b+i+1]=-C_t[i][0]/2/expansion_factor_ab
         for j in range(3*n_wheels):
             F[i,u+i+j*(n_discretization-1)]=R_t[i][0][j]/expansion_factor_u
-        
+        lb[i]=d_t[i][0]
+        ub[i]=d_t[i][0]
         
         #second Cartesian coordinate dynamic constraint
         F[n_discretization-1+i,i]=-M_t[i][1]/expansion_factor_ab
@@ -208,7 +209,8 @@ def create_Linear_Constraints(R_t,M_t,C_t,n_discretization,n_wheels,expansion_fa
         F[n_discretization-1+i,b+i+1]=-C_t[i][1]/2/expansion_factor_ab
         for j in range(3*n_wheels):
             F[n_discretization-1+i,u+i+j*(n_discretization-1)]=R_t[i][1][j]/expansion_factor_u
-            
+        lb[n_discretization-1+i]=d_t[i][1]
+        ub[n_discretization-1+i]=d_t[i][1]    
             
             
         #Third Cartesian coordinate dynamic constraint
@@ -217,33 +219,42 @@ def create_Linear_Constraints(R_t,M_t,C_t,n_discretization,n_wheels,expansion_fa
         F[2*(n_discretization-1)+i,b+i+1]=-C_t[i][2]/2/expansion_factor_ab
         for j in range(3*n_wheels):
             F[2*(n_discretization-1)+i,u+i+j*(n_discretization-1)]=R_t[i][2][j]/expansion_factor_u
-            
+        lb[2*(n_discretization-1)+i]=d_t[i][2]
+        ub[2*(n_discretization-1)+i]=d_t[i][2]
+
         #4th Cartesian coordinate dynamic constraint
         F[3*(n_discretization-1)+i,i]=-M_t[i][3]/expansion_factor_ab
         F[3*(n_discretization-1)+i,b+i]=-C_t[i][3]/2/expansion_factor_ab
         F[3*(n_discretization-1)+i,b+i+1]=-C_t[i][3]/2/expansion_factor_ab
         for j in range(3*n_wheels):
             F[3*(n_discretization-1)+i,u+i+j*(n_discretization-1)]=R_t[i][3][j]/expansion_factor_u
-            
+        lb[3*(n_discretization-1)+i]=d_t[i][3]
+        ub[3*(n_discretization-1)+i]=d_t[i][3]
+
         #5th Cartesian coordinate dynamic constraint
         F[4*(n_discretization-1)+i,i]=-M_t[i][4]/expansion_factor_ab
         F[4*(n_discretization-1)+i,b+i]=-C_t[i][4]/2/expansion_factor_ab
         F[4*(n_discretization-1)+i,b+i+1]=-C_t[i][4]/2/expansion_factor_ab
         for j in range(3*n_wheels):
             F[4*(n_discretization-1)+i,u+i+j*(n_discretization-1)]=R_t[i][4][j]/expansion_factor_u  
-            
+        lb[4*(n_discretization-1)+i]=d_t[i][4]
+        ub[4*(n_discretization-1)+i]=d_t[i][4]
+
         #6th Cartesian coordinate dynamic constraint
         F[5*(n_discretization-1)+i,i]=-M_t[i][5]/expansion_factor_ab
         F[5*(n_discretization-1)+i,b+i]=-C_t[i][5]/2/expansion_factor_ab
         F[5*(n_discretization-1)+i,b+i+1]=-C_t[i][5]/2/expansion_factor_ab
         for j in range(3*n_wheels):
             F[5*(n_discretization-1)+i,u+i+j*(n_discretization-1)]=R_t[i][5][j]/expansion_factor_u                  
+        lb[5*(n_discretization-1)+i]=d_t[i][5]
+        ub[5*(n_discretization-1)+i]=d_t[i][5]
 
         #Differential contraint
         F[6*(n_discretization-1)+i,i]=2*1/(n_discretization-1)/expansion_factor_ab
         F[6*(n_discretization-1)+i,b+i]=1/expansion_factor_ab
         F[6*(n_discretization-1)+i,b+1+i]=-1/expansion_factor_ab
     return LinearConstraint(sparse.csr_matrix(F),lb,ub)
+
 
 
 
@@ -382,7 +393,7 @@ def build_x0(b0,R_t,C_t,d_t,n_discretization,n_wheels,expansion_factor_ab,expans
     for i in range(n_discretization-1):
         u = np.linalg.pinv(R_t[i])@C_t[i]*b0*expansion_factor_u\
             +np.linalg.pinv(R_t[i])@d_t[i]*expansion_factor_u
-            
+   
         for j in range(3*n_wheels):
             x0[u1+i+j*(n_discretization-1)]=u[j]
         
@@ -412,7 +423,7 @@ def build_x0(b0,R_t,C_t,d_t,n_discretization,n_wheels,expansion_factor_ab,expans
 #Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, 
 #M_t and C_t), number of discretization, xsi optimization scalar
 #Output result
-def optimization_SQP_abu_4(R_t,M_t,C_t,A_t,d_t,n_discretization,xsi,n_wheels,display):
+def optimization_SQP_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display):
 
 
     mu=1 #friction coeficient
@@ -437,8 +448,10 @@ def optimization_SQP_abu_4(R_t,M_t,C_t,A_t,d_t,n_discretization,xsi,n_wheels,dis
 
 
     #Create Linear Constraints
-    Linear_c = create_Linear_Constraints(R_t,M_t,C_t,n_discretization,n_wheels,expansion_factor_ab,expansion_factor_u)
+    Linear_c = create_Linear_Constraints(R_t,M_t,C_t,d_t,n_discretization,n_wheels,expansion_factor_ab,expansion_factor_u)
     
+
+
     #create Firction Circle Constraints
     friction_circle, lb_fc, ub_fc = create_friction_circle(mu,mass,n_discretization,n_wheels,expansion_factor_u)
     Grad_fc = create_friction_circle_jacobian(n_discretization,n_wheels,mu,expansion_factor_u)
@@ -451,11 +464,9 @@ def optimization_SQP_abu_4(R_t,M_t,C_t,A_t,d_t,n_discretization,xsi,n_wheels,dis
     
     b0=1e-4
     x0=build_x0(b0,R_t,C_t,d_t,n_discretization,n_wheels,expansion_factor_ab,expansion_factor_u)
-    print("Test friction circle initial guess ", friction_circle(x0))
-    print("Test eq initial guess ", Linear_c.A(x0))
-
+    
     options = {
-    'verbose': True,      # Display iteration info
+    'verbose': display,      # Display iteration info
     'maxiter': 1000,   # Increase the maximum number of iterations
         }   
     
@@ -465,9 +476,7 @@ def optimization_SQP_abu_4(R_t,M_t,C_t,A_t,d_t,n_discretization,xsi,n_wheels,dis
     
     decision_variables = result.x
 
-    print(obj(decision_variables))
-    print(obj_grad(decision_variables))
-    print(obj_hess(decision_variables))
+
     if display:
         print("T0 ", T0, " E0 ", E0)
         print("Test friction circle ", (friction_circle(decision_variables)<= 1E-6).all())

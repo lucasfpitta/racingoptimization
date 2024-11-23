@@ -35,7 +35,9 @@ def export_comparison_to_csv(Physical_model,models, discretizations,filename,
                "Time bu": init_optimization_bu,
                "Time b": init_optimization_b,
                "Time SOCP abu": init_optimization_SOCP_abu,
-               "Time SOCP b": init_optimization_SOCP_b
+               "Time SOCP b": init_optimization_SOCP_b,
+               "Time SQP abu": init_optimization_SQP_abu,
+               "Time SQP b": init_optimization_SQP_b
                }
         
     elif Physical_model == 3:
@@ -44,7 +46,9 @@ def export_comparison_to_csv(Physical_model,models, discretizations,filename,
                "Time bu": init_optimization_bu_3,
                "Time b": init_optimization_b_3,
                "Time SOCP abu": init_optimization_SOCP_abu_3,
-               "Time SOCP b": init_optimization_SOCP_b_3
+               "Time SOCP b": init_optimization_SOCP_b_3,
+               "Time SQP abu": init_optimization_SQP_abu_3,
+               "Time SQP b": init_optimization_SQP_b_3
                }
         
     elif Physical_model == 4:
@@ -53,7 +57,9 @@ def export_comparison_to_csv(Physical_model,models, discretizations,filename,
                "Time bu": init_optimization_bu_4,
                "Time b": init_optimization_b_4,
                "Time SOCP abu": init_optimization_SOCP_abu_4,
-               "Time SOCP b": init_optimization_SOCP_b_4
+               "Time SOCP b": init_optimization_SOCP_b_4,
+               "Time SQP abu": init_optimization_SQP_abu_4,
+               "Time SQP b": init_optimization_SQP_b_4
                }
         
     else:

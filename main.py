@@ -31,7 +31,7 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=10 #number of path sections
+n_discretization=50 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -56,7 +56,7 @@ Cx = 0.5 #Drag coeficient
 width = 0.5 #car track width
 L = 1 #can wheelbase
 Wf=0.4 #position of the center of mass in relation to wheels
-h=0.05 #CG height
+h=0.35 #CG height
 
 
 
@@ -91,7 +91,7 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 
-"""
+
 
 
 ##################################################################
@@ -114,44 +114,45 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 #Comment the models you dont want to compute
 
-#Model abu
-t1_abu=init_optimization_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+# #Model abu
+# t1_abu=init_optimization_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
-#Model bu
-t1_bu=init_optimization_bu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+# #Model bu
+# t1_bu=init_optimization_bu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
-#Model b
-t1_b=init_optimization_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-
-
-#Model SOCP abu
-t1_SOCP_abu=init_optimization_SOCP_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model b
+# t1_b=init_optimization_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-#Model SOCP b
-t1_SOCP_b=init_optimization_SOCP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model SOCP abu
+# t1_SOCP_abu=init_optimization_SOCP_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-#Model SQP trust-constr abu
+# #Model SOCP b
+# t1_SOCP_b=init_optimization_SOCP_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+
+# #Model SQP trust-constr abu
 t1_SQP_abu=init_optimization_SQP_abu(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+print(t1_SQP_abu)
 
-
-#Model SQP trust-constr b
-t1_SQP_b=init_optimization_SQP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-print(t1_SQP_b)
-
-
+# #Model SQP trust-constr b
+# t1_SQP_b=init_optimization_SQP_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 
+
+
+
+"""
 
 ##################################################################
 ###                           Model 3                          ###
@@ -172,43 +173,39 @@ R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
 #Comment the models you dont want to compute
 
 #Model abu
-# t1_abu_3=init_optimization_abu_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+t1_abu_3=init_optimization_abu_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
 #Model bu
-# t1_bu_3=init_optimization_bu_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+t1_bu_3=init_optimization_bu_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
 #Model b
-# t1_b_3=init_optimization_b_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+t1_b_3=init_optimization_b_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP abu
-# t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP b
-# t1_SOCP_b_3=init_optimization_SOCP_b_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+t1_SOCP_b_3=init_optimization_SOCP_b_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 #Model SQP abu
-# t1_SQP_abu_3=init_optimization_SQP_abu_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-
+t1_SQP_abu_3=init_optimization_SQP_abu_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 
 #Model SQP abu
-# t1_SQP_b_3=init_optimization_SQP_b_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-
-
-
+t1_SQP_b_3=init_optimization_SQP_b_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 
@@ -226,6 +223,9 @@ R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
 
 
 
+
+
+"""
 ##################################################################
 ###                           Model 4                          ###
 ##################################################################
@@ -252,35 +252,44 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 #Comment the models you dont want to compute
 
 #Model abu
-# t1_abu_4=init_optimization_abu_4(
-#     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+t1_abu_4=init_optimization_abu_4(
+    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
 #Model bu
-# t1_bu_4=init_optimization_bu_4(
-#     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+t1_bu_4=init_optimization_bu_4(
+    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
 #Model b
-# t1_b_4=init_optimization_b_4(
-#     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+t1_b_4=init_optimization_b_4(
+    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP abu
-# t1_SOCP_abu_4=init_optimization_SOCP_abu_4(
-#     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-# print(t1_SOCP_abu_4)
+t1_SOCP_abu_4=init_optimization_SOCP_abu_4(
+    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+
 
 #Model SOCP b
-# t1_SOCP_b_4=init_optimization_SOCP_b_4(
-#     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+t1_SOCP_b_4=init_optimization_SOCP_b_4(
+    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-#Model SOQP abu
+#Model SQP abu
 t1_SQP_abu_4=init_optimization_SQP_abu_4(
-    R_t, M_t, C_t, A_t, d_t, n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, d_t, A_t, n_discretization,xsi,n_wheels,display=True,plot=False)
 
-print(t1_SQP_abu_4)
+
+
+#Model SQP abu
+t1_SQP_b_4=init_optimization_SQP_b_4(
+    R_t, M_t, C_t, d_t, A_t, n_discretization,xsi,n_wheels,display=True,plot=False)
+"""
+
+
+
 
 
 
@@ -290,10 +299,6 @@ print(t1_SQP_abu_4)
 
 
 """
-
-
-
-
 
 
 
@@ -308,14 +313,14 @@ N_computation_average=1
 Physical_model=1
 
 #List to chose the models you do not want to time
-#"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
+#"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"
 
-models = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
+models = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"]
 
 
 #Use same order as the models above
-#t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1]
-results = [t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1]]
+#t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1],t1_SQP_abu[-1],t1_SQP_b[-1]
+results = [t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1],t1_SQP_abu[-1],t1_SQP_b[-1]]
 
 
 #Call the timeit
@@ -350,10 +355,10 @@ computation_time = model_performance(Physical_model,models,results,N_computation
 discretizations = [10,18,32,56,100]
 
 #number of timeit assessments
-N_computation_average=50
+N_computation_average=1
 
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model1_eight.csv"
+filename = "Comparison/Results/comparison_timeit_model1_test.csv"
 
 #Physical model to compute
 Physical_model=1
@@ -361,7 +366,7 @@ Physical_model=1
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
 
-models_export = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"]
+models_export = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"]
 
 export_comparison_to_csv(Physical_model,models_export, discretizations,filename,
     N_computation_average,xsi,spline,m,mu,pho_air,A0,Cx,J,width,L,Wf,h)
@@ -377,11 +382,11 @@ complexity = fit_log(data)
 
 title = "Point mass"
 model_complexity(models,complexity,title)
+"""
 
 
 
-
-
+"""
 
 
 

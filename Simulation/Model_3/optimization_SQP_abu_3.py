@@ -426,7 +426,7 @@ def optimization_SQP_abu_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display
 
 
     options = {
-    'verbose': True,      # Display iteration info
+    'verbose': display,      # Display iteration info
     'maxiter': 1000,   # Increase the maximum number of iterations
         }   
     

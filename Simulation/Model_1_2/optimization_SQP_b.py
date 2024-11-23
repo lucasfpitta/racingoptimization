@@ -285,7 +285,7 @@ def optimization_SQP_b(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
 
 
     options = {
-    'verbose': True,      # Display iteration info
+    'verbose': display,      # Display iteration info
     'xtol': 1e-6, 'gtol': 1e-6, 'maxiter': 1000,
     "initial_tr_radius": 1.0
         }   
