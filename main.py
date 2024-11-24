@@ -31,14 +31,14 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=10 #number of path sections
+n_discretization=5 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "eight"
+path_name = "circle"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -90,7 +90,7 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 
-
+"""
 
 
 
@@ -207,7 +207,7 @@ t1_SQP_b_3=init_optimization_SQP_b_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-
+"""
 
 
 """
@@ -309,7 +309,7 @@ t1_SQP_b_4=init_optimization_SQP_b_4(
 N_computation_average=1
 
 #Physical model to compute
-Physical_model=2
+Physical_model=3
 
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"
@@ -319,7 +319,7 @@ models = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP 
 
 #Use same order as the models above
 #t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1],t1_SQP_abu[-1],t1_SQP_b[-1]
-results = [t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1],t1_SQP_abu[-1],t1_SQP_b[-1]]
+results = [t1_abu_3[-1], t1_bu_3[-1],t1_b_3[-1],t1_SOCP_abu_3[-1],t1_SOCP_b_3[-1],t1_SQP_abu_3[-1],t1_SQP_b_3[-1]]
 
 
 #Call the timeit
@@ -351,16 +351,16 @@ computation_time = model_performance(Physical_model,models,results,N_computation
 ##################################################################
 
 #number of sections to access
-discretizations = [10,18,32,56,100]
+discretizations = [10,18,32,56]
 
 #number of timeit assessments
 N_computation_average=50
 
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model2_eight.csv"
+filename = "Comparison/Results/comparison_timeit_model3_circle.csv"
 
 #Physical model to compute
-Physical_model=2
+Physical_model=3
 
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
@@ -379,7 +379,7 @@ data = read_csv_to_dict(filename)
 
 complexity = fit_log(data)
 
-title = "Point mass with Drag"
+title = "4 wheels vehicle with drag"
 model_complexity(models,complexity,title)
 
 
