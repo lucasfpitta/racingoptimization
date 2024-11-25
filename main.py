@@ -31,7 +31,7 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=5 #number of path sections
+n_discretization=10 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -146,7 +146,7 @@ t1_SQP_abu=init_optimization_SQP_abu(
 t1_SQP_b=init_optimization_SQP_b(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
-
+"""
 
 
 
@@ -210,7 +210,6 @@ t1_SQP_b_3=init_optimization_SQP_b_3(
 """
 
 
-"""
 
 
 
@@ -224,7 +223,8 @@ t1_SQP_b_3=init_optimization_SQP_b_3(
 
 
 
-"""
+
+
 ##################################################################
 ###                           Model 4                          ###
 ##################################################################
@@ -285,7 +285,7 @@ t1_SQP_abu_4=init_optimization_SQP_abu_4(
 #Model SQP abu
 t1_SQP_b_4=init_optimization_SQP_b_4(
     R_t, M_t, C_t, d_t, A_t, n_discretization,xsi,n_wheels,display=True,plot=False)
-"""
+
 
 
 
@@ -309,7 +309,7 @@ t1_SQP_b_4=init_optimization_SQP_b_4(
 N_computation_average=1
 
 #Physical model to compute
-Physical_model=3
+Physical_model=4
 
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"
@@ -319,13 +319,13 @@ models = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP 
 
 #Use same order as the models above
 #t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1],t1_SQP_abu[-1],t1_SQP_b[-1]
-results = [t1_abu_3[-1], t1_bu_3[-1],t1_b_3[-1],t1_SOCP_abu_3[-1],t1_SOCP_b_3[-1],t1_SQP_abu_3[-1],t1_SQP_b_3[-1]]
+results = [t1_abu_4[-1], t1_bu_4[-1],t1_b_4[-1],t1_SOCP_abu_4[-1],t1_SOCP_b_4[-1],t1_SQP_abu_4[-1],t1_SQP_b_4[-1]]
 
 
 #Call the timeit
 #Pay attention to call with the correct physical matrices
 
-d_t = 0 #comment for model 4
+# d_t = 0 #comment for model 4
 
 computation_time = model_performance(Physical_model,models,results,N_computation_average,
             R_t, M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display=False)
@@ -357,7 +357,7 @@ discretizations = [10,18,32,56]
 N_computation_average=50
 
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model3_circle.csv"
+filename = "Comparison/Results/comparison_timeit_model4_circle.csv"
 
 #Physical model to compute
 Physical_model=3
