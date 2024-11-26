@@ -261,7 +261,7 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
     
     #calculate absolute velocity
     #Change here the coordinates to b
-    velocity = translate_velocity(spline.derivative(),decision_variables[0:n_discretization],
+    velocity = translate_velocity(spline.derivative(),decision_variables[n_discretization-1:2*n_discretization-1],
                         n_discretization)
     max_velocity = np.max(velocity)
 
@@ -290,7 +290,7 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
             (n_discretization-1):u+2*(n_discretization-1)]**2)**0.5)
             radii.append(m*mu/n_wheels*9.81*np.ones(n_discretization-1))
 
-
+    
 
 
 
@@ -339,7 +339,7 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
 
 
     #Animation speed
-    animation_time = 500
+    animation_time = 100
 
 
     # Set limits and labels for the first subplot

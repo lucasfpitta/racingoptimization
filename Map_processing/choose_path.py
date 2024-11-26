@@ -122,7 +122,7 @@ def eight(N_angle):
     
     #define track middle (just for consistency)
     alfas= alfas = np.ones(30)*0.5
-    theta = np.linspace(0, 2 * np.pi, len(alfas))
+    theta = np.linspace(0, 2 * np.pi-0.1, len(alfas))
     
     
     #outer line
