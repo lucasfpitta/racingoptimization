@@ -126,10 +126,10 @@ def eight(N_angle):
     
     
     #outer line
-    right = [Radius/2*np.sin(2*theta),Radius*np.sin(theta)]
+    right = [Radius/2*np.sin(2*theta)+10,Radius*np.sin(theta)]
     
     #inner line
-    left = [Radius/2*np.sin(2*theta),Radius*np.sin(theta)]
+    left = [Radius/2*np.sin(2*theta)+10,Radius*np.sin(theta)]
     
     #calculate the spline (scipy spline), its derivative (scipy spline), 
     # angle (array over N_angle points)
