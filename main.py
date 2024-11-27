@@ -86,8 +86,10 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 
-
-
+import matplotlib.pyplot as plt
+plt.figure()
+plt.plot(np.linspace(0,1,len(angle)),angle_sec_derivative)
+plt.show()
 
 
 

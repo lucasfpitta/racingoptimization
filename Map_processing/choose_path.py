@@ -122,14 +122,14 @@ def eight(N_angle):
     
     #define track middle (just for consistency)
     alfas= alfas = np.ones(30)*0.5
-    theta = np.linspace(0, 2 * np.pi-0.1, len(alfas))
+    theta = np.linspace(0, 2 * np.pi, len(alfas))
     
     
     #outer line
-    right = [Radius/2*np.sin(2*theta)+10,Radius*np.sin(theta)]
+    right = [Radius/2*np.sin(2*theta),Radius*np.sin(theta)]
     
     #inner line
-    left = [Radius/2*np.sin(2*theta)+10,Radius*np.sin(theta)]
+    left = [Radius/2*np.sin(2*theta),Radius*np.sin(theta)]
     
     #calculate the spline (scipy spline), its derivative (scipy spline), 
     # angle (array over N_angle points)

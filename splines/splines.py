@@ -68,12 +68,13 @@ def find_angle(spline,N_angle):
     #spline derivatives
     diff = spline.derivative()
     second_diff = spline.derivative().derivative()
+    third_diff = spline.derivative().derivative().derivative()
     
     #splines at the midpoints
     spline_points = spline(midpoints)
     derivative = diff(midpoints)
     sec_derivative=second_diff(midpoints)
-    
+    third_derivative=third_diff(midpoints)
     
     
     #Builds the vectors
@@ -91,16 +92,16 @@ def find_angle(spline,N_angle):
             
             
     #calculates the  derivative
-    angle_derivative = (spline_points[0]*derivative[1]-spline_points[1]*derivative[0])\
-        /(spline_points[0]**2+spline_points[1]**2)
+    angle_derivative = (derivative[0]*sec_derivative[1]-derivative[1]*sec_derivative[0])\
+        /(derivative[0]**2+derivative[1]**2)
     
     
     #calculates second derivative (complicated expression)
-    angle_sec_derivative = 1/(spline_points[0]**2+spline_points[1]**2)**2*\
-        ((spline_points[0]**2+spline_points[1]**2)*(spline_points[0]*\
-            sec_derivative[1]-spline_points[1]*sec_derivative[0])-\
-            (spline_points[0]*derivative[1]-spline_points[1]*derivative[0])\
-        *(2*spline_points[0]*derivative[0]+2*spline_points[1]*derivative[1]))   
+    angle_sec_derivative = 1/(derivative[0]**2+derivative[1]**2)**2*\
+        ((derivative[0]**2+derivative[1]**2)*(derivative[0]*\
+            third_derivative[1]-derivative[1]*third_derivative[0])-\
+            (derivative[0]*sec_derivative[1]-derivative[1]*sec_derivative[0])\
+        *(2*derivative[0]*sec_derivative[0]+2*derivative[1]*sec_derivative[1]))   
     
     return angle, angle_derivative, angle_sec_derivative
 
