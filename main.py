@@ -31,14 +31,14 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=500 #number of path sections
+n_discretization=10 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "eight"
+path_name = "circle"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -161,7 +161,7 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 
 
-"""
+
 ##################################################################
 ###                           Model 3                          ###
 ##################################################################
@@ -180,19 +180,19 @@ R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
 
 #Comment the models you dont want to compute
 
-# #Model abu
-# t1_abu_3=init_optimization_abu_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+#Model abu
+t1_abu_3=init_optimization_abu_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
-# #Model bu
-# t1_bu_3=init_optimization_bu_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+#Model bu
+t1_bu_3=init_optimization_bu_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
-# #Model b
-# t1_b_3=init_optimization_b_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+#Model b
+t1_b_3=init_optimization_b_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP abu
@@ -209,34 +209,34 @@ print(t1_SOCP_b_3[-1])
 
 
 
-# #Model SQP abu
-# t1_SQP_abu_3=init_optimization_SQP_abu_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+#Model SQP abu
+t1_SQP_abu_3=init_optimization_SQP_abu_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 
-# #Model SQP abu
-# t1_SQP_b_3=init_optimization_SQP_b_3(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+#Model SQP abu
+t1_SQP_b_3=init_optimization_SQP_b_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 """
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ##################################################################
 ###                           Model 4                          ###
@@ -300,19 +300,19 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 #     R_t, M_t, C_t, d_t, A_t, n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 """
+
+
+
+
+
+
+
+
+
+
+
+
 
 ##################################################################
 ###                 Model Performance Comparison              ###
@@ -343,7 +343,6 @@ d_t = 0 #comment for model 4
 computation_time = model_performance(Physical_model,models,results,N_computation_average,
             R_t, M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display=False)
 
-"""
 
 
 
@@ -357,7 +356,8 @@ computation_time = model_performance(Physical_model,models,results,N_computation
 
 
 
-"""
+
+
 ##################################################################
 ###                       Comparison Export                   ###
 ##################################################################
@@ -369,7 +369,7 @@ discretizations = [10,18,32,56]
 N_computation_average=50
 
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model3_eight.csv"
+filename = "Comparison/Results/comparison_timeit_model3_circle.csv"
 
 #Physical model to compute
 Physical_model=3
@@ -396,7 +396,7 @@ model_complexity(models,complexity,title)
 
 
 
-"""
+
 
 
 
@@ -451,22 +451,22 @@ model_complexity(models,complexity,title)
 
 
 
-#usar sempre o abu SOCP
-t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu_4(
-    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+# #usar sempre o abu SOCP
+# t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu_4(
+#     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
-n_wheels = 3
-
-
-
-#Animates initial guess vs optimized solution
-animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
-               t1_SOCP_abu,n_discretization,m,mu,n_wheels)
+# n_wheels = 3
 
 
-#compares local max velocity and optimize velocity
-local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discretization-1],n_discretization,m,mu,\
-    pho_air,A0,Cx)
+
+# #Animates initial guess vs optimized solution
+# animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
+#                t1_SOCP_abu,n_discretization,m,mu,n_wheels)
+
+
+# #compares local max velocity and optimize velocity
+# local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discretization-1],n_discretization,m,mu,\
+#     pho_air,A0,Cx)
 
 
 #  #Test if the circular path velocity is equal to the theoretical
@@ -476,5 +476,5 @@ local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discre
 
 
 #Solution comparison plot
-# comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
+comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
 
