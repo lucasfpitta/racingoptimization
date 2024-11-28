@@ -173,6 +173,10 @@ def build_x0(b0, R_t,C_t,n_discretization):
 #Output scipy result and innitial guess x0
 def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
     
+    E0=2000000
+    T0=1300
+
+
     #creating objective and constraints
     objective_function = create_objective(xsi, A_t,n_discretization)
     constraint1 = create_constraint1(R_t,M_t,C_t,n_discretization)

@@ -255,8 +255,8 @@ def optimization_SQP_b(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     
     
     #creating objective vector
-    T0=1
-    E0=1
+    E0=2000000
+    T0=1300
     
 
     #create the objective information

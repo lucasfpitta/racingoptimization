@@ -238,8 +238,8 @@ def optimization_SOCP_b(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     x = cp.Variable(2*n_discretization+n_discretization-1)
     
     #creating objective vector
-    T0=1
-    E0=1
+    E0=2000000
+    T0=1300
     
     #Creating force matrices F_1t and F_2t
     F_1t, F_2t = create_F_it(R_t,M_t,C_t,n_discretization)

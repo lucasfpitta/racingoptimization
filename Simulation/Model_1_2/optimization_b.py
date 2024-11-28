@@ -116,7 +116,8 @@ def create_constraint(mu,mass, F_1t, F_2t, n_discretization,expansion_factor):
 def optimization_b(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     
     expansion_factor = 1E3
-    
+    E0=2000000
+    T0=1300
     
     #Creating force matrices F_1t and F_2t
     F_1t, F_2t = create_F_it(R_t,M_t,C_t,n_discretization)

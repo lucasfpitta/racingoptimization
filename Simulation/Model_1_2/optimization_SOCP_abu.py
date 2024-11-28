@@ -275,8 +275,8 @@ def optimization_SOCP_abu(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display)
     
     
     #creating objective vector
-    T0=1
-    E0=1
+    E0=2000000
+    T0=1300
     f = create_objective_vector(xsi, A_t,T0,E0,n_discretization)
     
     
