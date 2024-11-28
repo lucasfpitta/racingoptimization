@@ -85,7 +85,11 @@ def find_angle(spline,N_angle):
     
     #calculates the angle with the spline derivative
     for i in range(len(midpoints)):
-        if derivative[0][i] >= 0:
+        if np.abs(derivative[0][i]) <= 1e-18 and np.abs(derivative[1][i]) <= 1e-18:
+            raise ValueError("Valores de x` e y` estão muito próximos de zero!")
+        elif np.abs(derivative[0][i]) <= 1e-18:
+            angle[i] = np.pi/2
+        elif derivative[0][i] >= 0:
             angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))
         else:
             angle[i] = np.arctan((derivative[1][i])/(derivative[0][i]))+np.pi
