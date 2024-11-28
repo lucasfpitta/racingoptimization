@@ -80,6 +80,67 @@ def circular_path_test(derivative,decision_variables,n_discretization,m,mu,\
 
 
 
+##################################################################
+###                     Local max Velocity                     ###
+##################################################################
+
+def local_max_v(derivative,decision_variables,n_discretization,m,mu,\
+    pho_air,A0,Cx):
+    
+    #calculate absolute velocity
+    #Change here the coordinates to b
+    v = translate_velocity(derivative,decision_variables[0:n_discretization],
+                        n_discretization)
+
+
+    sec_diff = derivative.derivative()
+    delta = 1/(n_discretization-1)
+    mid_p = np.linspace(delta/2,1-delta/2,n_discretization-1)
+    
+    der=derivative(mid_p)
+    sec_der=sec_diff(mid_p)
+    
+    curvature = np.abs((der[0]*sec_der[1]-der[1]*sec_der[0])/((der[0]**2+der[1]**2)**(3/2)))
+    #Theoretical Circle maximum velocity (no drag R=100)
+    theoretical_max_v = np.sqrt(9.81*mu/curvature)*np.sqrt(m/np.sqrt(m**2+(pho_air/curvature*\
+        A0*Cx/2)**2))
+
+
+    
+    
+    
+
+
+    plt.figure(figsize=(8, 8))
+    plt.title('Velocity vs Local max velocity')
+    plt.xlabel('Path position')
+    plt.ylabel('Velocity m/s')
+    plt.ylim(0,max(v)+10)
+    plt.plot(np.linspace(0,1,n_discretization-1),
+            v,'-r',label="Optimized velocity")
+    plt.plot(mid_p,
+            theoretical_max_v,':b',label="Theoretical v_max")
+    plt.grid()
+    plt.legend()
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -312,8 +373,8 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
     inset_ax.axis('off')  # Turn off axis labels and ticks
 
     # Add gray and green bars (vertical)
-    gray_bar = inset_ax.bar(0.5, 1, color='gray', width=0.2, edgecolor='black')
-    green_bar = inset_ax.bar(0.5, 0, color='green', width=0.2)
+    #gray_bar = inset_ax.bar(0.5, 1, color='gray', width=0.2, edgecolor='black')
+    green_bar = inset_ax.bar(0.8, 0, color='green', width=0.4)
 
     # Add velocity label
     inset_ax.text(0.5, 1.05, "Velocity", fontsize=10, ha='center')

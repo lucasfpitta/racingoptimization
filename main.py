@@ -31,7 +31,7 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=1000 #number of path sections
+n_discretization=500 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -56,7 +56,7 @@ Cx = 0.5 #Drag coeficient
 width = 0.5 #car track width
 L = 1 #can wheelbase
 Wf=0.4 #position of the center of mass in relation to wheels
-h=0.35 #CG height
+h=0.15 #CG height
 
 
 
@@ -86,10 +86,9 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 
-import matplotlib.pyplot as plt
-plt.figure()
-plt.plot(np.linspace(0,1,len(angle)),angle_sec_derivative)
-plt.show()
+
+
+
 
 
 
@@ -138,14 +137,14 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 #     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-#Model SOCP abu
-t1_SOCP_abu=init_optimization_SOCP_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model SOCP abu
+# t1_SOCP_abu=init_optimization_SOCP_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-#Model SOCP b
-t1_SOCP_b=init_optimization_SOCP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model SOCP b
+# t1_SOCP_b=init_optimization_SOCP_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 # #Model SQP trust-constr abu
@@ -155,8 +154,8 @@ t1_SOCP_b=init_optimization_SOCP_b(
 # #Model SQP trust-constr b
 # t1_SQP_b=init_optimization_SQP_b(
 #     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-
 """
+
 
 
 
@@ -463,6 +462,11 @@ n_wheels = 3
 #Animates initial guess vs optimized solution
 animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
                t1_SOCP_abu,n_discretization,m,mu,n_wheels)
+
+
+#compares local max velocity and optimize velocity
+local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discretization-1],n_discretization,m,mu,\
+    pho_air,A0,Cx)
 
 
 #  #Test if the circular path velocity is equal to the theoretical
