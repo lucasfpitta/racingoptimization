@@ -31,14 +31,14 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=10 #number of path sections
+n_discretization=50 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "circle"
+path_name = "oval"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -51,7 +51,7 @@ m = 85 #vehicle mass
 J=10 #Moment of inertia
 mu = 1 #tyre friction coeficient 
 pho_air = 1.225 #air density
-A0 = 0.5 #frontal area of the car
+A0 = 0 #frontal area of the car
 Cx = 0.5 #Drag coeficient
 width = 0.5 #car track width
 L = 1 #can wheelbase
@@ -85,6 +85,13 @@ internal,N_angle=n_discretization)
 spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
+import matplotlib.pyplot as plt
+delta = 1/(n_discretization-1)
+
+plt.figure()
+plt.plot(np.linspace(delta/2,1-delta/2,n_discretization-1),angle/2/np.pi*360)
+plt.grid()
+plt.show()
 
 
 
@@ -102,7 +109,6 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 
-"""
 ##################################################################
 ###                         Model 1 & 2                        ###
 ##################################################################
@@ -112,12 +118,12 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 n_wheels=1 #number of wheels
 
 #Model 1, point
-R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
+# R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 
 
 #Model 2, oriented point with drag
-# R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
-#     pho_air,A0,Cx)
+R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
+    pho_air,A0,Cx)
 
 
 
@@ -154,13 +160,13 @@ R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
 # #Model SQP trust-constr b
 # t1_SQP_b=init_optimization_SQP_b(
 #     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+
+
+
+
+
 """
-
-
-
-
-
-
 
 ##################################################################
 ###                           Model 3                          ###
@@ -219,7 +225,7 @@ t1_SQP_abu_3=init_optimization_SQP_abu_3(
 t1_SQP_b_3=init_optimization_SQP_b_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
-
+"""
 
 
 
@@ -313,7 +319,7 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 
 
 
-
+"""
 ##################################################################
 ###                 Model Performance Comparison              ###
 ##################################################################
@@ -343,6 +349,7 @@ d_t = 0 #comment for model 4
 computation_time = model_performance(Physical_model,models,results,N_computation_average,
             R_t, M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display=False)
 
+"""
 
 
 
@@ -355,8 +362,7 @@ computation_time = model_performance(Physical_model,models,results,N_computation
 
 
 
-
-
+"""
 
 ##################################################################
 ###                       Comparison Export                   ###
@@ -397,7 +403,7 @@ model_complexity(models,complexity,title)
 
 
 
-
+"""
 
 
 
@@ -437,11 +443,13 @@ model_complexity(models,complexity,title)
 
 #Uncomment the plots you want
 
-# #solution general model
-# t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
-#      decision_variables_abu = init_optimization_abu(
-#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+#solution general model
+t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu,x0_abu,\
+     decision_variables_abu = init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
+animation_(spline,right,left,spline_points,forcex0_abu,forcey0_abu,forcex1_abu,forcey1_abu
+               ,t0_abu,t1_abu,n_discretization,m)
 
 #  #Test if the circular path velocity is equal to the theoretical
 # circular_path_test(derivative,decision_variables_abu[0:n_discretization],n_discretization,m,mu,\
@@ -451,22 +459,22 @@ model_complexity(models,complexity,title)
 
 
 
-# #usar sempre o abu SOCP
-# t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu_4(
-#     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+#usar sempre o abu SOCP
+t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
-# n_wheels = 3
-
-
-
-# #Animates initial guess vs optimized solution
-# animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
-#                t1_SOCP_abu,n_discretization,m,mu,n_wheels)
+n_wheels = 1
 
 
-# #compares local max velocity and optimize velocity
-# local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discretization-1],n_discretization,m,mu,\
-#     pho_air,A0,Cx)
+
+#Animates initial guess vs optimized solution
+animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
+               t1_SOCP_abu,n_discretization,m,mu,n_wheels)
+
+
+#compares local max velocity and optimize velocity
+local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discretization-1],n_discretization,m,mu,\
+    pho_air,A0,Cx)
 
 
 #  #Test if the circular path velocity is equal to the theoretical
@@ -475,6 +483,6 @@ model_complexity(models,complexity,title)
 
 
 
-#Solution comparison plot
-comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
+# #Solution comparison plot
+# comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
 
