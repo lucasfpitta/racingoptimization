@@ -31,14 +31,14 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=50 #number of path sections
+n_discretization=30 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "oval"
+path_name = "eight"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -51,7 +51,7 @@ m = 85 #vehicle mass
 J=10 #Moment of inertia
 mu = 1 #tyre friction coeficient 
 pho_air = 1.225 #air density
-A0 = 0 #frontal area of the car
+A0 = 1 #frontal area of the car
 Cx = 0.5 #Drag coeficient
 width = 0.5 #car track width
 L = 1 #can wheelbase
