@@ -31,7 +31,7 @@ from splines.splines import model4_extra_angles
 
 
 #Optimization variables
-n_discretization=50 #number of path sections
+n_discretization=100 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -51,7 +51,7 @@ m = 85 #vehicle mass
 J=10 #Moment of inertia
 mu = 1 #tyre friction coeficient 
 pho_air = 1.225 #air density
-A0 = 0.5 #frontal area of the car
+A0 = 1 #frontal area of the car
 Cx = 0.5 #Drag coeficient
 width = 0.5 #car track width
 L = 1 #can wheelbase
@@ -123,37 +123,37 @@ R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
 
 #Comment the models you dont want to compute
 
-#Model abu
-t1_abu=init_optimization_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+# #Model abu
+# t1_abu=init_optimization_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
-#Model bu
-t1_bu=init_optimization_bu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+# #Model bu
+# t1_bu=init_optimization_bu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
-#Model b
-t1_b=init_optimization_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-
-
-#Model SOCP abu
-t1_SOCP_abu=init_optimization_SOCP_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model b
+# t1_b=init_optimization_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-#Model SOCP b
-t1_SOCP_b=init_optimization_SOCP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model SOCP abu
+# t1_SOCP_abu=init_optimization_SOCP_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-#Model SQP trust-constr abu
-t1_SQP_abu=init_optimization_SQP_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model SOCP b
+# t1_SOCP_b=init_optimization_SOCP_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
-#Model SQP trust-constr b
-t1_SQP_b=init_optimization_SQP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+# #Model SQP trust-constr abu
+# t1_SQP_abu=init_optimization_SQP_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+# #Model SQP trust-constr b
+# t1_SQP_b=init_optimization_SQP_b(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 
@@ -313,7 +313,7 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 
 
 
-
+"""
 ##################################################################
 ###                 Model Performance Comparison              ###
 ##################################################################
@@ -342,7 +342,7 @@ d_t = 0 #comment for model 4
 
 computation_time = model_performance(Physical_model,models,results,N_computation_average,
             R_t, M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display=False)
-
+"""
 
 
 
@@ -452,21 +452,21 @@ model_complexity(models,complexity,title)
 
 
 #usar sempre o abu SOCP
-t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+# t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
-n_wheels = 1
+# n_wheels = 1
 
 
 
 #Animates initial guess vs optimized solution
-animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
-               t1_SOCP_abu,n_discretization,m,mu,n_wheels)
+# animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
+#                t1_SOCP_abu,n_discretization,m,mu,n_wheels)
 
 
 #compares local max velocity and optimize velocity
-local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discretization-1],n_discretization,m,mu,\
-    pho_air,A0,Cx)
+# local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discretization-1],n_discretization,m,mu,\
+#     pho_air,A0,Cx)
 
 
 #  #Test if the circular path velocity is equal to the theoretical
@@ -476,5 +476,43 @@ local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discre
 
 
 #Solution comparison plot
-comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
+# comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
 
+
+
+
+
+
+
+
+
+##################################################################
+###                           Energy                           ###
+##################################################################
+
+xsi = 1 #optimization scalar
+
+t1_100,decision_variables_100 = init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=True)
+
+xsi = 0.75 #optimization scalar
+
+t1_75,decision_variables_75 = init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=True)
+
+xsi = 0.5 #optimization scalar
+
+t1_50,decision_variables_50 = init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=True)
+
+xsi = 0.25 #optimization scalar
+
+t1_25,decision_variables_25 = init_optimization_abu(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=True)
+
+
+time_energy_opt(derivative,decision_variables_100,\
+        decision_variables_75,\
+        decision_variables_50,\
+        decision_variables_25,\
+        n_discretization,m,mu,pho_air,A0,Cx)

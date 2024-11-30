@@ -17,21 +17,21 @@ def create_objective(xsi, A_t,T0,E0,n_discretization):
     def objective_function(decision_variables):
         
         cost=0
-        e0=0
-        t0=0
+        # e0=0
+        # t0=0
         
         #sum over the path 
         for i in range(n_discretization-1):
             cost = cost+(2*xsi/((decision_variables[i+1]**0.5+decision_variables[i]
                     **0.5)*T0)+(1-xsi)*(decision_variables[u1+i]*A_t[i][0]+
                                         decision_variables[u2+i]*A_t[i][1])/E0)
-            t0 += 2/((decision_variables[i+1]**0.5+decision_variables[i]
-                    **0.5)*T0)
-            e0 += (decision_variables[u1+i]*A_t[i][0]+
-                                        decision_variables[u2+i]*A_t[i][1])/E0
-        print(t0)
-        print(t0)
-        print(e0)
+            # t0 += 2/((decision_variables[i+1]**0.5+decision_variables[i]
+            #         **0.5)*T0)
+            # e0 += (decision_variables[u1+i]*A_t[i][0]+
+            #                             decision_variables[u2+i]*A_t[i][1])/E0
+        # print(t0)
+        # print(t0)
+        # print(e0)
         return cost
     
     return objective_function
@@ -121,7 +121,8 @@ def create_b_bounds(n_discretization):
     #lower bounds above 0 to avoid objective problems
     lb.extend([1E-6]*n_discretization)
     lb.extend([-np.inf]*3*(n_discretization-1))
-    ub.extend([np.inf]*(4*n_discretization-3))
+    ub.extend([1E-6])
+    ub.extend([np.inf]*(4*n_discretization-4))
     bounds = scp.optimize.Bounds(lb,ub)
     return bounds
 

@@ -637,3 +637,76 @@ def model_complexity(model_names, data_dict,title):
     
     # Display plot
     plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##################################################################
+###                  Time Energy Optimization                  ###
+##################################################################
+
+def time_energy_opt(derivative,b100,b75,b50,b25,n_discretization,m,mu,\
+    pho_air,A0,Cx):
+    
+    #calculate absolute velocity
+    #Change here the coordinates to b
+    v100 = translate_velocity(derivative,b100,
+                        n_discretization)
+    
+    v75 = translate_velocity(derivative,b75,
+                        n_discretization)
+    
+    v50 = translate_velocity(derivative,b50,
+                        n_discretization)
+    
+    v25 = translate_velocity(derivative,b25,
+                        n_discretization)
+
+
+    sec_diff = derivative.derivative()
+    delta = 1/(n_discretization-1)
+    mid_p = np.linspace(delta/2,1-delta/2,n_discretization-1)
+    
+    der=derivative(mid_p)
+    sec_der=sec_diff(mid_p)
+    
+    curvature = np.abs((der[0]*sec_der[1]-der[1]*sec_der[0])/((der[0]**2+der[1]**2)**(3/2)))
+    #Theoretical Circle maximum velocity (no drag R=100)
+    theoretical_max_v = np.sqrt(9.81*mu/curvature)*np.sqrt(m/np.sqrt(m**2+(pho_air/curvature*\
+        A0*Cx/2)**2))
+
+
+    
+    
+    
+
+
+    plt.figure(figsize=(8, 8))
+    plt.rcParams.update({'font.size': 16})
+    plt.title('Time-Energy Optimization',fontsize=25)
+    plt.xlabel('Path position',fontsize=20)
+    plt.ylabel('Velocity m/s',fontsize=20)
+    plt.ylim(0,max(v100)+10)
+    plt.plot(np.linspace(0,1,n_discretization-1),
+            v100,'-r',label="Optimized velocity xsi=1")
+    plt.plot(np.linspace(0,1,n_discretization-1),
+            v75,'-b',label="Optimized velocity xsi=0.75")
+    plt.plot(np.linspace(0,1,n_discretization-1),
+            v50,'-g',label="Optimized velocity xsi=0.5")
+    plt.plot(np.linspace(0,1,n_discretization-1),
+            v25,'-k',label="Optimized velocity xsi=0.25")
+    plt.plot(mid_p,
+            theoretical_max_v,':b',label="Theoretical v_max")
+    plt.grid()
+    plt.legend(fontsize=14,loc='lower left')
+    plt.show()

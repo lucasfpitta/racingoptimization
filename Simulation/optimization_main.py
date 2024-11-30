@@ -79,8 +79,7 @@ def init_optimization_abu(R_t, M_t, C_t, A_t,n_discretization,
 
 
      if plot:
-          return t0_abu,t1_abu,forcex0_abu,forcey0_abu,forcex1_abu,\
-               forcey1_abu,x0_abu,decision_variables_abu.x
+          return t1_abu,decision_variables_abu.x
      else:
           return t1_abu
 
@@ -155,7 +154,7 @@ def init_optimization_b(R_t, M_t, C_t, A_t,n_discretization,
      t1_b=reconstruct(decision_variables_b.x[0:n_discretization])
      
      if plot:
-          return t0_b,t1_b,x0_b,decision_variables_b.x
+          return t1_b,decision_variables_b.x
      else:
           return t1_b
 
