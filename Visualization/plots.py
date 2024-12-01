@@ -261,7 +261,7 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
     
     #calculate absolute velocity
     #Change here the coordinates to b
-    velocity = translate_velocity(spline.derivative(),decision_variables[0:n_discretization],
+    velocity = translate_velocity(spline.derivative(),decision_variables[n_discretization-1:2*n_discretization-1],
                         n_discretization)
     max_velocity = np.max(velocity)
 

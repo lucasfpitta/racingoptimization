@@ -38,7 +38,7 @@ xsi = 1 #optimization scalar
 
 #choose path
 #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "circle"
+path_name = "eight"
 
 #in case of google_earth specify the .kml
 external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -152,7 +152,9 @@ R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
 
 
 
-"""
+
+
+
 
 ##################################################################
 ###                           Model 3                          ###
@@ -172,19 +174,19 @@ R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
 
 #Comment the models you dont want to compute
 
-#Model abu
-t1_abu_3=init_optimization_abu_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+# #Model abu
+# t1_abu_3=init_optimization_abu_3(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
-#Model bu
-t1_bu_3=init_optimization_bu_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+# #Model bu
+# t1_bu_3=init_optimization_bu_3(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
 
 
-#Model b
-t1_b_3=init_optimization_b_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model b
+# t1_b_3=init_optimization_b_3(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP abu
@@ -196,16 +198,31 @@ t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
 t1_SOCP_b_3=init_optimization_SOCP_b_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
+differences = [t1_SOCP_b_3[i + 1] - t1_SOCP_b_3[i] for i in range(len(f) - 1)]  # Using list comprehension
+print("Differences:", differences)
 
-#Model SQP abu
-t1_SQP_abu_3=init_optimization_SQP_abu_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model SQP abu
+# t1_SQP_abu_3=init_optimization_SQP_abu_3(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
 
-#Model SQP abu
-t1_SQP_b_3=init_optimization_SQP_b_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+# #Model SQP abu
+# t1_SQP_b_3=init_optimization_SQP_b_3(
+#     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -213,19 +230,6 @@ t1_SQP_b_3=init_optimization_SQP_b_3(
 
 """
 
-
-
-
-
-
-
-
-
-
-
-
-
-"""
 ##################################################################
 ###                           Model 4                          ###
 ##################################################################
@@ -286,6 +290,7 @@ t1_SQP_abu_4=init_optimization_SQP_abu_4(
 #Model SQP abu
 t1_SQP_b_4=init_optimization_SQP_b_4(
     R_t, M_t, C_t, d_t, A_t, n_discretization,xsi,n_wheels,display=True,plot=False)
+
 """
 
 
@@ -358,7 +363,7 @@ discretizations = [10,18,32,56,100]
 N_computation_average=1
 """
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model2_circle.csv"
+filename = "Comparison/Results/comparison_timeit_model2_eight.csv"
 """
 #Physical model to compute
 Physical_model=2
@@ -442,15 +447,17 @@ circular_path_test(derivative,decision_variables_abu[0:n_discretization],n_discr
 """
 
 #usar sempre o abu SOCP
-t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_abu_4(
-    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu_3(
+    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
 
 n_wheels = 3
-
-
-
+print("Time", t1_SOCP_abu[-1])
+u=2*n_discretization-1
+for i in range(n_wheels):
+    print("F_lon:",  decision_variables_SOCP_abu[u+2*i*(n_discretization-1):u+(2*i+1)*(n_discretization-1)])
+    print("F_lat:",  decision_variables_SOCP_abu[u+(2*i+1)*(n_discretization-1):u+(2*i+2)*(n_discretization-1)])
 #Animates initial guess vs optimized solution
-animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu.x,\
+animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
                t1_SOCP_abu,n_discretization,m,mu,n_wheels)
 
 
