@@ -101,7 +101,7 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 
 
 
-
+"""
 
 ##################################################################
 ###                         Model 1 & 2                        ###
@@ -155,13 +155,13 @@ t1_SQP_abu=init_optimization_SQP_abu(
 t1_SQP_b=init_optimization_SQP_b(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
-
-
-
-
-
-
 """
+
+
+
+
+
+
 ##################################################################
 ###                           Model 3                          ###
 ##################################################################
@@ -199,13 +199,10 @@ t1_b_3=init_optimization_b_3(
 t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
-print(t1_SOCP_abu_3[-1])
+
 #Model SOCP b
 t1_SOCP_b_3=init_optimization_SOCP_b_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
-print(t1_SOCP_b_3[-1])
-
-
 
 
 
@@ -214,12 +211,11 @@ t1_SQP_abu_3=init_optimization_SQP_abu_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
 
-
 #Model SQP b
 t1_SQP_b_3=init_optimization_SQP_b_3(
     R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
 
-"""
+
 
 
 
@@ -322,7 +318,7 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 N_computation_average=1
 
 #Physical model to compute
-Physical_model=2
+Physical_model=3
 
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"
@@ -332,7 +328,7 @@ models = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP 
 
 #Use same order as the models above
 #t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1],t1_SQP_abu[-1],t1_SQP_b[-1]
-results = [t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1],t1_SQP_abu[-1],t1_SQP_b[-1]]
+results = [t1_abu_3[-1], t1_bu_3[-1],t1_b_3[-1],t1_SOCP_abu_3[-1],t1_SOCP_b_3[-1],t1_SQP_abu_3[-1],t1_SQP_b_3[-1]]
 
 
 #Call the timeit
@@ -363,16 +359,16 @@ computation_time = model_performance(Physical_model,models,results,N_computation
 ##################################################################
 
 #number of sections to access
-discretizations = [10,18,32,56,100]
+discretizations = [10,18,32,56]
 
 #number of timeit assessments
 N_computation_average=50
 
 #chose the filename
-filename = "Comparison/Results/comparison_timeit_model2_eight.csv"
+filename = "Comparison/Results/comparison_timeit_model3_eight.csv"
 
 #Physical model to compute
-Physical_model=2
+Physical_model=3
 
 #List to chose the models you do not want to time
 #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b"
