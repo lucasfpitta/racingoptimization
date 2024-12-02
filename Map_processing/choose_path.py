@@ -19,7 +19,7 @@ import numpy as np
 # 1d vector angle assessments angle.
 
 
-def google_earth_path(external,internal,N_angle):
+def google_earth_path(external,alfas,internal,N_angle):
     
     alfa = 0.01 #smoothing parameter for elevation
     n_neighborhood = 16 #smoothing parameter for elevation
@@ -40,9 +40,9 @@ def google_earth_path(external,internal,N_angle):
     
     
     
-    #create a random path on the track
-    alfas = np.random.random_sample(len(right[0]))
-    alfas[-1]=alfas[0]
+    # #create a random path on the track
+    # alfas = np.random.random_sample(len(right[0]))
+    # alfas[-1]=alfas[0]
     
     
     #calculate the spline (scipy spline), its derivative (scipy spline), 
@@ -302,14 +302,13 @@ def semi_circle(N_angle):
 #Output scipy spline and derivative, outlines 2d vectors left and right, 
 # 1d vector angle assessments angle.
 
-def choose_path(path_name,external,internal,N_angle):
+def choose_path(path_name,alfas,external,internal,N_angle):
     if path_name == "circle":
         spline, derivative, angle, angle_derivative, angle_sec_derivative, \
             right, left = circle(N_angle)
     elif path_name == "google_earth":      
         spline, derivative, angle, angle_derivative, angle_sec_derivative,\
-            right, left = google_earth_path(external
-                                                        ,internal,N_angle)
+            right, left = google_earth_path(external,alfas,internal,N_angle)
     elif path_name == "semi_circle":
         spline, derivative, angle, angle_derivative, angle_sec_derivative,\
             right, left = semi_circle(N_angle)

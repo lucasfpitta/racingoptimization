@@ -343,7 +343,6 @@ def optimization_SQP_b_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
          constraints=Non_linear_c,options=options,bounds=bounds)
     
     decision_variables = result.x
-    print(decision_variables)
     if display:
         print("T0 ", T0, " E0 ", E0)
         print("Test friction circle ", (friction_circle(decision_variables)<= 1E-6).all())

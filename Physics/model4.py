@@ -74,7 +74,7 @@ def mass_tilde(derivative, angle_derivative, discretization,m,J):
 def centrifugal_tilde(derivative,secondderivative,angle_sec_derivative,\
     discretization,m,J,pho_air,A0,Cx):
     zero_lines = np.zeros(len(discretization))
-    C_t = np.hstack((m*np.transpose(secondderivative(discretization))-pho_air*A0*Cx/2*\
+    C_t = np.hstack((m*np.transpose(secondderivative(discretization))+pho_air*A0*Cx/2*\
         np.transpose(derivative(discretization))*(np.linalg.norm(np.transpose(\
             derivative(discretization)),axis=1)[:, np.newaxis]),
         zero_lines.reshape(-1, 1),J*angle_sec_derivative.reshape(-1, 1),\

@@ -80,6 +80,67 @@ def circular_path_test(derivative,decision_variables,n_discretization,m,mu,\
 
 
 
+##################################################################
+###                     Local max Velocity                     ###
+##################################################################
+
+def local_max_v(derivative,decision_variables,n_discretization,m,mu,\
+    pho_air,A0,Cx):
+    
+    #calculate absolute velocity
+    #Change here the coordinates to b
+    v = translate_velocity(derivative,decision_variables[0:n_discretization],
+                        n_discretization)
+
+
+    sec_diff = derivative.derivative()
+    delta = 1/(n_discretization-1)
+    mid_p = np.linspace(delta/2,1-delta/2,n_discretization-1)
+    
+    der=derivative(mid_p)
+    sec_der=sec_diff(mid_p)
+    
+    curvature = np.abs((der[0]*sec_der[1]-der[1]*sec_der[0])/((der[0]**2+der[1]**2)**(3/2)))
+    #Theoretical Circle maximum velocity (no drag R=100)
+    theoretical_max_v = np.sqrt(9.81*mu/curvature)*np.sqrt(m/np.sqrt(m**2+(pho_air/curvature*\
+        A0*Cx/2)**2))
+
+
+    
+    
+    
+
+
+    plt.figure(figsize=(8, 8))
+    plt.title('Velocity vs Local max velocity')
+    plt.xlabel('Path position')
+    plt.ylabel('Velocity m/s')
+    plt.ylim(0,max(v)+10)
+    plt.plot(np.linspace(0,1,n_discretization-1),
+            v,'-r',label="Optimized velocity")
+    plt.plot(mid_p,
+            theoretical_max_v,':b',label="Theoretical v_max")
+    plt.grid()
+    plt.legend()
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -253,7 +314,7 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 ##################################################################
 
 
-def animation_complete(spline,right,left,spline_points,decision_variables,\
+def animation_complete(spline,right,left,alfas,spline_points,decision_variables,\
                t1,n_discretization,m,mu,n_wheels):
     
     #spline discretization over sections 
@@ -290,7 +351,7 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
             (n_discretization-1):u+2*(n_discretization-1)]**2)**0.5)
             radii.append(m*mu/n_wheels*9.81*np.ones(n_discretization-1))
 
-
+    
 
 
 
@@ -312,8 +373,8 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
     inset_ax.axis('off')  # Turn off axis labels and ticks
 
     # Add gray and green bars (vertical)
-    gray_bar = inset_ax.bar(0.5, 1, color='gray', width=0.2, edgecolor='black')
-    green_bar = inset_ax.bar(0.5, 0, color='green', width=0.2)
+    #gray_bar = inset_ax.bar(0.5, 1, color='gray', width=0.2, edgecolor='black')
+    green_bar = inset_ax.bar(0.8, 0, color='green', width=0.4)
 
     # Add velocity label
     inset_ax.text(0.5, 1.05, "Velocity", fontsize=10, ha='center')
@@ -339,7 +400,7 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
 
 
     #Animation speed
-    animation_time = 500
+    animation_time = 100
 
 
     # Set limits and labels for the first subplot
@@ -354,6 +415,15 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
     ax1.plot(spline_points[0], spline_points[1], 'g--')
     ax1.plot(right[0], right[1], 'gray')
     ax1.plot(left[0], left[1], 'red')
+    ax1.plot(right[0], right[1], 'ok',linewidth=1, alpha=0.5)
+    ax1.plot(left[0], left[1], 'or',linewidth=1, alpha=0.5)
+
+    splpoints = np.zeros((2,len(right[0])))
+    for i in range(len(right[0])):
+        splpoints[0][i] = right[0][i]+alfas[i]*(left[0][i]-right[0][i])
+        splpoints[1][i] = right[1][i]+alfas[i]*(left[1][i]-right[1][i])
+        ax1.plot([right[0][i],left[0][i]], [right[1][i],left[1][i]],':g',linewidth=1, alpha=0.5)
+        ax1.plot(splpoints[0][i],splpoints[1][i],'og',linewidth=1, alpha=0.5)
 
 
     # Create lines for both objects

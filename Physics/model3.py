@@ -48,7 +48,7 @@ def mass_tilde(derivative, angle_derivative, discretization,m,J):
 #a midpoint discretization vector over [0,1], vehicle info
 def centrifugal_tilde(derivative,secondderivative,angle_sec_derivative,\
     discretization,m,J,pho_air,A0,Cx):
-    C_t = np.hstack((m*np.transpose(secondderivative(discretization))-pho_air*A0*Cx/2*\
+    C_t = np.hstack((m*np.transpose(secondderivative(discretization))+pho_air*A0*Cx/2*\
         np.transpose(derivative(discretization))*(np.linalg.norm(np.transpose(\
             derivative(discretization)),axis=1)[:, np.newaxis]),\
                 J*angle_sec_derivative.reshape(-1, 1)))
