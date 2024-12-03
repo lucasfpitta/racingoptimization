@@ -930,13 +930,13 @@ def model_performance(Physical_model, models,results,N_computation_average,R_t, 
                }
      elif Physical_model == 4:
           Models_dict = {
-               "Time abu": init_optimization_abu_4,
-               "Time bu": init_optimization_bu_4,
-               "Time b": init_optimization_b_4,
+               #"Time abu": init_optimization_abu_4,
+               #"Time bu": init_optimization_bu_4,
+               #"Time b": init_optimization_b_4,
                "Time SOCP abu": init_optimization_SOCP_abu_4,
                "Time SOCP b": init_optimization_SOCP_b_4,
-               "Time SQP abu": init_optimization_SQP_abu_4,
-               "Time SQP b": init_optimization_SQP_b_4
+               #"Time SQP abu": init_optimization_SQP_abu_4,
+               #"Time SQP b": init_optimization_SQP_b_4
                }
      else:
           print("Wrong Physical Model")
