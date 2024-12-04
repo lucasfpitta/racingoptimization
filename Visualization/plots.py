@@ -57,18 +57,18 @@ def circular_path_test(derivative,decision_variables,n_discretization,m,mu,\
     ax2.set_title('Acceleration circular path')
     ax2.set_xlabel('Path position')
     ax2.set_ylabel('Acceleration m/sˆ2')
-    ax1.set_ylim(0,max(v)+5)
-    ax2.set_ylim(0,max(a)+5)
+    ax1.set_ylim(0,max(theoretical_v)+5)
+    ax2.set_ylim(0,max(theoretical_a)+5)
     ax1.plot(np.linspace(0,1,n_discretization-1),
             v,'*r',label="Optimized velocity")
+    # ax1.plot(np.linspace(0,1,n_discretization-1),
+    #         theoretical_v_inf,'-b',label="Theoretical v_inf R=100")
     ax1.plot(np.linspace(0,1,n_discretization-1),
-            theoretical_v_inf,'-b',label="Theoretical v_inf R=100")
-    ax1.plot(np.linspace(0,1,n_discretization-1),
-            theoretical_v,'-g',label="Theoretical v R=100")
+            theoretical_v,'-g',label="Theoretical v point-mass")
     ax2.plot(np.linspace(0,1,n_discretization-1),
             a,'*r',label="Optimized acceleration")
     ax2.plot(np.linspace(0,1,n_discretization-1),
-            theoretical_a,'-b',label="Theoretical acceleration inf")
+            theoretical_a,'-b',label="Theoretical acceleration point-mass")
     ax1.grid()
     ax2.grid()
     ax1.legend()
