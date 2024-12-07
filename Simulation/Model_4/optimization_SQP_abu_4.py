@@ -137,7 +137,8 @@ def create_Hessian_objective(xsi,T0,n_discretization,n_wheels,expansion_factor_a
 
 
 
-#creates bounds to b 
+#creates bounds to b
+#creates RWD constraint
 def create_b_bounds(n_discretization,n_wheels):
     
     length_wheels = 3*n_wheels*(n_discretization-1)
@@ -148,7 +149,12 @@ def create_b_bounds(n_discretization,n_wheels):
     lb.extend([-np.inf]*(n_discretization-1))
     lb.extend([1E-6]*n_discretization)
     lb.extend([-np.inf]*length_wheels)
-    ub.extend([np.inf]*(2*n_discretization-1+length_wheels))
+    ub.extend([np.inf]*(2*n_discretization-1))
+    ub.extend([0]*(n_discretization-1))
+    ub.extend([np.inf]*(2*(n_discretization-1)))
+    ub.extend([0]*(n_discretization-1))
+    ub.extend([np.inf]*(5*(n_discretization-1)))
+
     bounds = Bounds(lb,ub)
     return bounds
 

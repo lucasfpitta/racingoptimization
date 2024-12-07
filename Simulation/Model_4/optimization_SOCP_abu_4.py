@@ -41,7 +41,7 @@ def create_objective_vector(xsi,A_t,T0,E0,n_discretization,n_wheels):
 #M_t, C_t (2d array with n_discretizatio of vectors M_t and C_t), 
 # number of discretization
 #Output constraint Matrix F
-def create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization,n_wheels):
+def create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization,n_wheels,expansion_factor):
     
     #flattened vector coordinates
     b = n_discretization-1
@@ -58,54 +58,54 @@ def create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization,n_wheels):
     for i in range(n_discretization-1):
         
         #first Cartesian coordinate dynamic constraint
-        F[i,i]=-M_t[i][0]
-        F[i,b+i]=-C_t[i][0]/2
-        F[i,b+i+1]=-C_t[i][0]/2
+        F[i,i]=-M_t[i][0]/expansion_factor
+        F[i,b+i]=-C_t[i][0]/2/expansion_factor
+        F[i,b+i+1]=-C_t[i][0]/2/expansion_factor
         for j in range(3*n_wheels):
             F[i,u+i+j*(n_discretization-1)]=R_t[i][0][j]
         
         
         #second Cartesian coordinate dynamic constraint
-        F[n_discretization-1+i,i]=-M_t[i][1]
-        F[n_discretization-1+i,b+i]=-C_t[i][1]/2
-        F[n_discretization-1+i,b+i+1]=-C_t[i][1]/2
+        F[n_discretization-1+i,i]=-M_t[i][1]/expansion_factor
+        F[n_discretization-1+i,b+i]=-C_t[i][1]/2/expansion_factor
+        F[n_discretization-1+i,b+i+1]=-C_t[i][1]/2/expansion_factor
         for j in range(3*n_wheels):
             F[n_discretization-1+i,u+i+j*(n_discretization-1)]=R_t[i][1][j]
             
             
             
         #Third Cartesian coordinate dynamic constraint
-        F[2*(n_discretization-1)+i,i]=-M_t[i][2]
-        F[2*(n_discretization-1)+i,b+i]=-C_t[i][2]/2
-        F[2*(n_discretization-1)+i,b+i+1]=-C_t[i][2]/2
+        F[2*(n_discretization-1)+i,i]=-M_t[i][2]/expansion_factor
+        F[2*(n_discretization-1)+i,b+i]=-C_t[i][2]/2/expansion_factor
+        F[2*(n_discretization-1)+i,b+i+1]=-C_t[i][2]/2/expansion_factor
         for j in range(3*n_wheels):
             F[2*(n_discretization-1)+i,u+i+j*(n_discretization-1)]=R_t[i][2][j]
             
         #4th Cartesian coordinate dynamic constraint
-        F[3*(n_discretization-1)+i,i]=-M_t[i][3]
-        F[3*(n_discretization-1)+i,b+i]=-C_t[i][3]/2
-        F[3*(n_discretization-1)+i,b+i+1]=-C_t[i][3]/2
+        F[3*(n_discretization-1)+i,i]=-M_t[i][3]/expansion_factor
+        F[3*(n_discretization-1)+i,b+i]=-C_t[i][3]/2/expansion_factor
+        F[3*(n_discretization-1)+i,b+i+1]=-C_t[i][3]/2/expansion_factor
         for j in range(3*n_wheels):
             F[3*(n_discretization-1)+i,u+i+j*(n_discretization-1)]=R_t[i][3][j]  
             
         #5th Cartesian coordinate dynamic constraint
-        F[4*(n_discretization-1)+i,i]=-M_t[i][4]
-        F[4*(n_discretization-1)+i,b+i]=-C_t[i][4]/2
-        F[4*(n_discretization-1)+i,b+i+1]=-C_t[i][4]/2
+        F[4*(n_discretization-1)+i,i]=-M_t[i][4]/expansion_factor
+        F[4*(n_discretization-1)+i,b+i]=-C_t[i][4]/2/expansion_factor
+        F[4*(n_discretization-1)+i,b+i+1]=-C_t[i][4]/2/expansion_factor
         for j in range(3*n_wheels):
             F[4*(n_discretization-1)+i,u+i+j*(n_discretization-1)]=R_t[i][4][j]  
             
         #6th Cartesian coordinate dynamic constraint
-        F[5*(n_discretization-1)+i,i]=-M_t[i][5]
-        F[5*(n_discretization-1)+i,b+i]=-C_t[i][5]/2
-        F[5*(n_discretization-1)+i,b+i+1]=-C_t[i][5]/2
+        F[5*(n_discretization-1)+i,i]=-M_t[i][5]/expansion_factor
+        F[5*(n_discretization-1)+i,b+i]=-C_t[i][5]/2/expansion_factor
+        F[5*(n_discretization-1)+i,b+i+1]=-C_t[i][5]/2/expansion_factor
         for j in range(3*n_wheels):
             F[5*(n_discretization-1)+i,u+i+j*(n_discretization-1)]=R_t[i][5][j]                  
 
         #Differential contraint
-        F[6*(n_discretization-1)+i,i]=2*1/(n_discretization-1)
-        F[6*(n_discretization-1)+i,b+i]=1
-        F[6*(n_discretization-1)+i,b+1+i]=-1
+        F[6*(n_discretization-1)+i,i]=2*1/(n_discretization-1)*1/expansion_factor
+        F[6*(n_discretization-1)+i,b+i]=1/expansion_factor
+        F[6*(n_discretization-1)+i,b+1+i]=-1/expansion_factor
     return sparse.csr_matrix(F)
 
 
@@ -143,16 +143,15 @@ def create_independent_forces(d_t,n_discretization):
 
 
 #creates bounds to b 
-def create_b_bounds(x,n_discretization,n_wheels):
+def create_b_bounds(x,n_discretization,n_wheels,expansion_factor):
     #flattened vector coordinates
     b = n_discretization-1
-    
     #create soc constraint vector
     soc_constraints = []
     #create all the b>=0 constraint
     for i in range(n_discretization):
         c_vec=np.zeros(2*n_discretization+(2+3*n_wheels)*(n_discretization-1))
-        c_vec[b+i] = 1
+        c_vec[b+i] = 1/expansion_factor
         
         
         soc_constraints.append(cp.SOC(c_vec.T@x, cp.Constant(np.zeros(2))))
@@ -201,7 +200,7 @@ def create_F_bounds(x,n_discretization,n_wheels):
 
 
 #creates b/c cone constraint
-def create_b_c_cones(x,n_discretization,n_wheels):
+def create_b_c_cones(x,n_discretization,n_wheels,expansion_factor):
     
     #flattened vector coordinates
     b = n_discretization-1
@@ -215,14 +214,14 @@ def create_b_c_cones(x,n_discretization,n_wheels):
         
         #build the cone vector c_vec, which is 1 for b_k and 0 otherwise
         c_vec=np.zeros(2*n_discretization+(2+3*n_wheels)*(n_discretization-1))
-        c_vec[b+i] = 1
+        c_vec[b+i] = 1/expansion_factor
         
         
         #build the cone matrix A_matrix, which is 2 for c_k in the first 
         # line, 1 for b_k in thensecond line, and 0 otherwise
         A_matrix = sparse.lil_matrix((2,2*n_discretization+(2+3*n_wheels)*(n_discretization-1)))
         A_matrix[0,c+i]=2
-        A_matrix[1,b+i]=1
+        A_matrix[1,b+i]=1/expansion_factor
         
         
         #build the cone vector b_vec, which is -1 on the second line and 0 otherwise
@@ -350,6 +349,8 @@ def create_friction_circle_cones(x,n_discretization,m,mu,n_wheels):
 #Output scipy result and innitial guess x0
 def optimization_SOCP_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display):
     
+    expansion_factor = 1E3
+    
     #create the decision variables vector
     x = cp.Variable(2*n_discretization+(2+3*n_wheels)*(n_discretization-1))
     
@@ -361,16 +362,16 @@ def optimization_SOCP_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,di
     
     
     #creating equality constraint variables
-    F=create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization,n_wheels)
+    F=create_equality_constraint_matrix(R_t,M_t,C_t,n_discretization,n_wheels,expansion_factor)
     g = create_independent_forces(d_t,n_discretization)
     
     
     #creating cone constraints
     soc_constraints = []
   
-    soc_constraints.extend(create_b_bounds(x,n_discretization,n_wheels))
+    soc_constraints.extend(create_b_bounds(x,n_discretization,n_wheels,expansion_factor))
     soc_constraints.extend(create_F_bounds(x,n_discretization,n_wheels))
-    soc_constraints.extend(create_b_c_cones(x,n_discretization,n_wheels))
+    soc_constraints.extend(create_b_c_cones(x,n_discretization,n_wheels,expansion_factor))
     soc_constraints.extend(create_c_d_cones(x,n_discretization,n_wheels))
     
     mu=1 #friction coeficient
@@ -388,4 +389,4 @@ def optimization_SOCP_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,di
     if display:
         print("Optimization terminated successfully")
         print(f"The optimal value is, {prob.value:.4f}")
-    return  x.value
+    return  x.value/expansion_factor

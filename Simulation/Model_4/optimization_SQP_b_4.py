@@ -2,6 +2,7 @@ import numpy as np
 import scipy as scp
 from scipy.optimize import Bounds
 from scipy.optimize import NonlinearConstraint
+from scipy.optimize import LinearConstraint
 from scipy import sparse 
 
 
@@ -145,7 +146,26 @@ def create_b_bounds(n_discretization):
 
 
 
+#creates bounds to front wheels
+def create_F_bounds(F_1t,F_2t,F_3t,n_discretization,expansion_factor):
+ 
+    lb = np.full(2*(n_discretization-1),-np.inf)
+    ub = np.zeros(2*(n_discretization-1))
 
+    F = sparse.lil_matrix((2*(n_discretization-1),n_discretization))
+    
+    #create all the F_lon<=0 constraint
+    for i in range(n_discretization-1):                
+        F[i,i] = F_2t[i][0]/expansion_factor
+        F[i,i+1] = F_1t[i][0]/expansion_factor
+        ub[i] -= F_3t[i][0]
+        
+    for i in range(n_discretization-1):
+        F[i+n_discretization-1,i] = F_2t[i][3]/expansion_factor
+        F[i+n_discretization-1,i+1] = F_1t[i][3]/expansion_factor
+        ub[i+n_discretization-1] -= F_3t[i][0]
+
+    return LinearConstraint(sparse.csr_matrix(F),lb,ub)
 
 
 
@@ -300,6 +320,8 @@ def optimization_SQP_b_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,displ
 
     #create bounds
     bounds = create_b_bounds(n_discretization)
+    #Create Linear Constraints
+    Linear_c = create_F_bounds(F_1t,F_2t,F_3t,n_discretization,expansion_factor)
 
 
 
@@ -324,7 +346,7 @@ def optimization_SQP_b_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,displ
     
 
     result = scp.optimize.minimize(obj, x0, method='trust-constr',jac = obj_grad, hess = obj_hess,
-         constraints=Non_linear_c,options=options,bounds=bounds)
+         constraints=[Linear_c, Non_linear_c],options=options,bounds=bounds)
     
     decision_variables = result.x
 

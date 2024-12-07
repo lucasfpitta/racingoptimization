@@ -52,7 +52,7 @@ def create_F_it(R_t,M_t,C_t,d_t,n_discretization):
 #Input optimization weight scalar xsi, Power A_t (2d array with n_discretizatio 
 #vector A_t),number of discretization
 #Output objective vector f
-def create_objective_vector(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization):
+def create_objective_vector(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization,expansion_factor):
     
     #flattened vector coordinates
     d = 2*n_discretization
@@ -61,14 +61,14 @@ def create_objective_vector(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization):
     
     
     #for each path section
-    f[0]=(1-xsi)*(F_2t[0].T@A_t[0])/E0
+    f[0]=(1-xsi)*(F_2t[0].T@A_t[0])/E0/expansion_factor
     
     for i in range(n_discretization-2):
-        f[i+1]=(1-xsi)*(F_1t[i].T@A_t[i]+F_2t[i+1].T@A_t[i+1])/E0
+        f[i+1]=(1-xsi)*(F_1t[i].T@A_t[i]+F_2t[i+1].T@A_t[i+1])/E0/expansion_factor
         f[d+i]=2*xsi/T0
         
     f[n_discretization-1]=(1-xsi)*(F_1t[n_discretization-2].T@
-                                   A_t[n_discretization-2])/E0
+                                   A_t[n_discretization-2])/E0/expansion_factor
     f[-1]=2*xsi/T0
     return f
 
@@ -87,14 +87,14 @@ def create_objective_vector(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization):
 
 
 #creates bounds to b 
-def create_b_bounds(x,n_discretization):
+def create_b_bounds(x,n_discretization,expansion_factor):
     
     #create soc constraint vector
     soc_constraints = []
     #create all the b>=0 constraint
     for i in range(n_discretization):
         c_vec=np.zeros(2*n_discretization+(n_discretization-1))
-        c_vec[i] = 1
+        c_vec[i] = 1/expansion_factor
         soc_constraints.append(cp.SOC(c_vec.T@x, cp.Constant(np.zeros(2))))
         
     return soc_constraints
@@ -107,7 +107,7 @@ def create_b_bounds(x,n_discretization):
 
 
 #creates bounds to front wheels
-def create_F_bounds(x,F_1t,F_2t,F_3t,n_discretization):
+def create_F_bounds(x,F_1t,F_2t,F_3t,n_discretization,expansion_factor):
  
     #create soc constraint vector
     soc_constraints = []
@@ -115,15 +115,15 @@ def create_F_bounds(x,F_1t,F_2t,F_3t,n_discretization):
     #create all the F_lon<=0 constraint
     for i in range(n_discretization-1):                
         c_vec=np.zeros(2*n_discretization+(n_discretization-1))
-        c_vec[i] = -F_2t[i][0]
-        c_vec[i+1] = -F_1t[i][0]
+        c_vec[i] = -F_2t[i][0]/expansion_factor
+        c_vec[i+1] = -F_1t[i][0]/expansion_factor
         d = -F_3t[i][0]
         soc_constraints.append(cp.SOC(c_vec.T@x+d, cp.Constant(np.zeros(2))))
         
     for i in range(n_discretization-1):
         c_vec=np.zeros(2*n_discretization+(n_discretization-1))
-        c_vec[i] = -F_2t[i][3]
-        c_vec[i+1] = -F_1t[i][3]
+        c_vec[i] = -F_2t[i][3]/expansion_factor
+        c_vec[i+1] = -F_1t[i][3]/expansion_factor
         d = -F_3t[i][3]
         soc_constraints.append(cp.SOC(c_vec.T@x+d, cp.Constant(np.zeros(2))))
     return soc_constraints
@@ -142,7 +142,7 @@ def create_F_bounds(x,F_1t,F_2t,F_3t,n_discretization):
 
 
 #creates b/c cone constraint
-def create_b_c_cones(x,n_discretization):
+def create_b_c_cones(x,n_discretization,expansion_factor):
     
     #flattened vector coordinates
     c = n_discretization
@@ -155,14 +155,14 @@ def create_b_c_cones(x,n_discretization):
         
         #build the cone vector c_vec, which is 1 for b_k and 0 otherwise
         c_vec=np.zeros(2*n_discretization+(n_discretization-1))
-        c_vec[i] = 1
+        c_vec[i] = 1/expansion_factor
         
         
         #build the cone matrix A_matrix, which is 2 for c_k in the first 
         # line, 1 for b_k in thensecond line, and 0 otherwise
         A_matrix = sparse.lil_matrix((2,2*n_discretization+(n_discretization-1)))
         A_matrix[0,c+i]=2
-        A_matrix[1,i]=1
+        A_matrix[1,i]=1/expansion_factor
         
         
         #build the cone vector b_vec, which is -1 on the second line and 0 otherwise
@@ -244,7 +244,7 @@ def create_c_d_cones(x,n_discretization):
 
 
 #creates friction circle constraints
-def create_friction_circle_cones(x,F_1t,F_2t,F_3t,n_discretization,m,mu,n_wheels):
+def create_friction_circle_cones(x,F_1t,F_2t,F_3t,n_discretization,m,mu,n_wheels,expansion_factor):
 
     
     #create soc constraint vector
@@ -257,17 +257,17 @@ def create_friction_circle_cones(x,F_1t,F_2t,F_3t,n_discretization,m,mu,n_wheels
             #line and for u_2k on the second line,and 0 otherwise
             A_matrix = sparse.lil_matrix((2,2*n_discretization+(n_discretization-1)))
             b_vec = np.zeros(2)
-            A_matrix[0,i]=F_2t[i][3*j]
-            A_matrix[0,i+1]=F_1t[i][3*j]
+            A_matrix[0,i]=F_2t[i][3*j]/expansion_factor
+            A_matrix[0,i+1]=F_1t[i][3*j]/expansion_factor
             b_vec[0]=F_3t[i][3*j] 
-            A_matrix[1,i]=F_2t[i][3*j+1]
-            A_matrix[1,i+1]=F_1t[i][3*j+1]
+            A_matrix[1,i]=F_2t[i][3*j+1]/expansion_factor
+            A_matrix[1,i+1]=F_1t[i][3*j+1]/expansion_factor
             b_vec[1]=F_3t[i][3*j+1]
             
             #build the cone vector c_vec, which is mu for u_3k and d 
             c_vec = np.zeros(2*n_discretization+(n_discretization-1))
-            c_vec[i] = mu*F_2t[i][3*j+2]
-            c_vec[i+1] = mu*F_1t[i][3*j+2]
+            c_vec[i] = mu*F_2t[i][3*j+2]/expansion_factor
+            c_vec[i+1] = mu*F_1t[i][3*j+2]/expansion_factor
             d = mu*F_3t[i][3*j+2]
             
             soc_constraints.append(cp.SOC(c_vec.T @ x+d, A_matrix@x+b_vec))
@@ -294,6 +294,8 @@ def create_friction_circle_cones(x,F_1t,F_2t,F_3t,n_discretization,m,mu,n_wheels
 #M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
 def optimization_SOCP_b_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display):
+
+    expansion_factor=1e3
     
     #create the decision variables vector
     x = cp.Variable(2*n_discretization+(n_discretization-1))
@@ -305,23 +307,23 @@ def optimization_SOCP_b_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,disp
     
     F_1t, F_2t, F_3t = create_F_it(R_t,M_t,C_t,d_t,n_discretization)
     
-    f = create_objective_vector(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization)
+    f = create_objective_vector(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization,expansion_factor)
     
     
     
     #creating cone constraints
     soc_constraints = []
   
-    soc_constraints.extend(create_b_bounds(x,n_discretization))
-    soc_constraints.extend(create_F_bounds(x,F_1t,F_2t,F_3t,n_discretization))
-    soc_constraints.extend(create_b_c_cones(x,n_discretization))
+    soc_constraints.extend(create_b_bounds(x,n_discretization,expansion_factor))
+    soc_constraints.extend(create_F_bounds(x,F_1t,F_2t,F_3t,n_discretization,expansion_factor))
+    soc_constraints.extend(create_b_c_cones(x,n_discretization,expansion_factor))
     soc_constraints.extend(create_c_d_cones(x,n_discretization))
     
     mu=1 #friction coeficient
     mass=85 #mass of the vehicle
     
     soc_constraints.extend(create_friction_circle_cones(x,F_1t,F_2t,F_3t,\
-        n_discretization,mass,mu,n_wheels))
+        n_discretization,mass,mu,n_wheels,expansion_factor))
     
     
     #set the SOCP problem
@@ -332,4 +334,4 @@ def optimization_SOCP_b_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,disp
     if display:
         print("Optimization terminated successfully")
         print(f"The optimal value is, {prob.value:.4f}")
-    return  x.value
+    return  x.value/expansion_factor
