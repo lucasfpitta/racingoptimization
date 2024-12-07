@@ -15,33 +15,43 @@ from skopt.space import Real
 
 
 
-class BestResultTracker:
+class LivePlotter:
     def __init__(self):
-        self.best_value = 1e5  # Start with a high value for minimization
-        self.best_params = np.ones(8)         # To store the best parameters
+        self.iteration_data = []
+        self.cost_data = []
+        self.best_cost = []
+        
+        # Set up the plot
+        plt.ion()  # Interactive mode
+        self.fig, self.ax = plt.subplots()
+        self.line, = self.ax.plot([], [], label="Cost", color='blue', linewidth=2)
+        self.line2, = self.ax.plot([], [], label="Best Cost", color='red', linewidth=2)
+        self.ax.set_title("Optimization Convergence")
+        self.ax.set_xlabel("Iteration")
+        self.ax.set_ylabel("Cost")
+        self.ax.legend()
+        self.ax.grid()
 
-    def update(self, alfas, cost):
-        """
-        Updates the best result if the current cost is better.
-        :param alfas: Current parameters being evaluated
-        :param cost: Current objective function value (cost)
-        """
-        print(self.best_value)
-        print(cost)
-        print(self.best_value is None or cost < self.best_value)
-        if self.best_value is None or cost < self.best_value:
-            print(f"New Best value: {cost}")
-            self.best_value = cost
-            self.best_params = alfas
+    def update(self, iteration, cost):
+        # Update the data
+        self.iteration_data.append(iteration)
+        self.cost_data.append(cost)
+        
+        if len(self.best_cost)==0 or cost<self.best_cost[-1]:
+            self.best_cost.append(cost)
+        else:
+            self.best_cost.append(self.best_cost[-1])
 
-    def get_best(self):
-        """
-        Returns the best result so far.
-        :return: (best_params, best_value)
-        """
-        return self.best_params, self.best_value
+        # Update the plot
+        self.line.set_data(self.iteration_data, self.cost_data)
+        self.line2.set_data(self.iteration_data, self.best_cost)
+        self.ax.relim()  # Recalculate limits
+        self.ax.autoscale_view()  # Rescale view
+        plt.pause(0.01)  # Pause to refresh the plot
 
-
+    def finalize(self):
+        plt.ioff()
+        plt.show()
 
 
 
@@ -53,14 +63,19 @@ class BestResultTracker:
 
 def init_path_optimization(right,left,N_angle,n_discretization,m,mu,pho_air,A0,Cx,xsi,n_wheels):
 
-    def path_optimization(alfas):
+    def path_optimization(alfas, plotter=None):
         alfa_v = np.concatenate((alfas,[alfas[0]]))
         spline, derivative, angle, angle_derivative, angle_sec_derivative = \
         path_info(left, right, alfa_v,N_angle)
         R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,pho_air,A0,Cx)
         t1_SOCP_b=init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=False)
         cost = t1_SOCP_b[-1]
+
         print("current cost: ", cost)
+        if plotter is not None:
+            iteration = len(plotter.iteration_data)  # Determine current iteration
+            plotter.update(iteration, cost)
+
         return cost
     return path_optimization
 
@@ -77,11 +92,15 @@ def trajectory_optimization(external,internal,N_angle,n_discretization,m,mu,pho_
 
     objective = init_path_optimization(right,left,N_angle,n_discretization,m,mu,pho_air,A0,Cx,xsi,n_wheels)
     # Create an instance of the tracker
-    tracker = BestResultTracker()
+    #tracker = BestResultTracker()
+
+    plotter = LivePlotter()
+    def wrapped_objective(x):
+        return objective(x, plotter)
 
     # Run Bayesian optimization
     result_b = gp_minimize(
-        func=objective,  # Objective function to minimize
+        func=wrapped_objective,  # Objective function to minimize
         dimensions=space,         # Search space
         acq_func="EI",            # Acquisition function: Expected Improvement
         n_calls=200,               # Number of evaluations
@@ -91,6 +110,7 @@ def trajectory_optimization(external,internal,N_angle,n_discretization,m,mu,pho_
     # Print the results
     print("Best score Bayes:", result_b.fun)
     print("Best solution Bayes:", result_b.x)
+    np.savetxt('output_path_bayes.txt', result_b.x, fmt='%.3f', delimiter=',', header='Best PATH Bayes', comments='')
 
     new_bounds=[]
     for i in range(dimensions):
@@ -101,13 +121,13 @@ def trajectory_optimization(external,internal,N_angle,n_discretization,m,mu,pho_
 
     # Run Differential Evolution
     result_de = differential_evolution(
-        func=objective,
+        func=wrapped_objective,
         bounds=new_bounds,
         #init=initial_population,  # Use the valid population format
         strategy="best2bin",
         mutation=(0.5, 0.9),  # Mutation range for more diverse steps
         recombination=0.7,    # Default recombination
-        maxiter=1000,
+        maxiter=100,
         popsize=population_size,  # Ensure consistency with init size
         tol=1e-6,
         seed=42
@@ -117,15 +137,16 @@ def trajectory_optimization(external,internal,N_angle,n_discretization,m,mu,pho_
     print("Best score Differential Evolution:", result_de.fun)
     print("Best solution Differential Evolution:", result_de.x)
 
-
+    plotter.finalize()
     alfa_v = np.concatenate((result_de.x,[result_de.x[0]]))
+    np.savetxt('output_path.txt', alfa_v, fmt='%.3f', delimiter=',', header='Best PATH', comments='')
     print(alfa_v)
     spline, derivative, angle, angle_derivative, angle_sec_derivative = \
             path_info(left, right, alfa_v,N_angle)
     spline_points = spline(np.linspace(0,1,num = 1000))
     R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,pho_air,A0,Cx)
     t1_SOCP_b,decision_variables_SOCP_b=init_optimization_SOCP_b(R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
-
+    
     
 
     #Animates initial guess vs optimized solution

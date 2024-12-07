@@ -34,7 +34,7 @@ from Path_optimization.optimization_Bayes import trajectory_optimization
 
 
 #Optimization variables
-n_discretization=50 #number of path sections
+n_discretization=300 #number of path sections
 N_path_points=1000 #plotting discretization
 xsi = 1 #optimization scalar
 
@@ -44,8 +44,8 @@ xsi = 1 #optimization scalar
 path_name = "google_earth"
 
 #in case of google_earth specify the .kml
-external = 'Map_processing/Maps_kml/extHORTO.kml'
-internal = 'Map_processing/Maps_kml/intHORTO.kml'
+external = 'Map_processing/Maps_kml/Track2_EXT.kml'
+internal = 'Map_processing/Maps_kml/Track2_INT.kml'
 
 
 

@@ -1,14 +1,3 @@
-import numpy as np
-from Map_processing.mapreader import get_outline
-from splines.splines import path_info
-from Physics.model2 import model2
-from Simulation.optimization_main import init_optimization_SOCP_b
-import pyswarms as ps
-from pyswarms.utils.functions import single_obj
-from pyswarms.utils.plotters import plot_cost_history
-import matplotlib.pyplot as plt
-from Visualization.plots import animation_complete
-
 
 
 
@@ -45,6 +34,17 @@ class LivePlotter:
 
 
 
+
+import numpy as np
+from Map_processing.mapreader import get_outline
+from splines.splines import path_info
+from Physics.model2 import model2
+from Simulation.optimization_main import init_optimization_SOCP_b
+import pyswarms as ps
+from pyswarms.utils.functions import single_obj
+from pyswarms.utils.plotters import plot_cost_history
+import matplotlib.pyplot as plt
+from Visualization.plots import animation_complete
 
 
 
