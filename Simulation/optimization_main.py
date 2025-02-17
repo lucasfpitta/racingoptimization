@@ -7,6 +7,7 @@
 
 import numpy as np
 import timeit
+import matplotlib.pyplot as plt
 
 
 
@@ -930,9 +931,9 @@ def model_performance(Physical_model, models,results,N_computation_average,R_t, 
                }
      elif Physical_model == 4:
           Models_dict = {
-               #"Time abu": init_optimization_abu_4,
-               #"Time bu": init_optimization_bu_4,
-               #"Time b": init_optimization_b_4,
+               "Time abu": init_optimization_abu_4,
+               "Time bu": init_optimization_bu_4,
+               "Time b": init_optimization_b_4,
                "Time SOCP abu": init_optimization_SOCP_abu_4,
                "Time SOCP b": init_optimization_SOCP_b_4,
                "Time SQP abu": init_optimization_SQP_abu_4,
@@ -1045,6 +1046,19 @@ def controlled_path(model,R_t, M_t, C_t, A_t,n_discretization,
      controlled_path1 = control_system([forcex1, forcey1],x10,v10,t1,
                                        N_path_points)
 
-
      print("Real Path calculated successfully")
-     return controlled_path
+     
+     
+     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(8, 8))
+     ax1.set_title('Theoretical Path')
+     ax1.set_xlabel('X')
+     ax1.set_ylabel('Y')
+     ax2.set_title('Real path')
+     ax1.plot(spline_points[0],spline_points[1])
+     ax2.plot(controlled_path1[0],controlled_path1[1])
+     ax2.set_xlabel('X')
+     ax2.set_ylabel('Y')
+     ax1.grid()
+     ax2.grid()
+     plt.show()
+     return controlled_path1

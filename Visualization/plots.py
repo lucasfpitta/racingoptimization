@@ -335,9 +335,9 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
         if n_wheels==3:
             force.append((decision_variables[u+\
         3*i*(n_discretization-1):u+(3*i+1)*(n_discretization-1)]**2+decision_variables[u+\
-        (3*i+1)*(n_discretization-1):u+(3*i+2)*(n_discretization-1)]**2)**0.5)
+        (3*i+1)*(n_discretization-1):u+(3*i+2)*(n_discretization-1)]**2)**0.5*1e3)
             radii.append(mu*np.abs(decision_variables[u+\
-        (3*i+2)*(n_discretization-1):u+(3*i+3)*(n_discretization-1)]))
+        (3*i+2)*(n_discretization-1):u+(3*i+3)*(n_discretization-1)])*1e3)
             
         elif n_wheels==4:
             force.append((decision_variables[u+\
@@ -351,7 +351,6 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
             (n_discretization-1):u+2*(n_discretization-1)]**2)**0.5)
             radii.append(m*mu/n_wheels*9.81*np.ones(n_discretization-1))
 
-    
 
 
 

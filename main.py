@@ -7,10 +7,12 @@
 
 import numpy as np
 import faulthandler
+
 faulthandler.enable()
 
 #Internal functions
 
+import tests
 from Map_processing.choose_path import choose_path
 from Physics.model1 import model1
 from Physics.model2 import model2
@@ -25,82 +27,137 @@ from splines.splines import model4_extra_angles
 
 
 
+
+
+
+
 ##################################################################
 ###                     Problem definition                     ###
 ##################################################################
 
-
-#Optimization variables
-n_discretization=33 #number of path sections
-N_path_points=1000 #plotting discretization
-xsi = 1 #optimization scalar
-
-
-#choose path
-#options: "circle", "semi_circle", "oval", "eight", "google_earth"
-path_name = "eight"
-
-#in case of google_earth specify the .kml
-external = 'Map_processing/Maps_kml/extHORTO.kml'
-internal = 'Map_processing/Maps_kml/intHORTO.kml'
+class Config:
+    #Optimization variables
+    n_discretization=10 #number of path sections
+    N_path_points=1000 #plotting discretization
+    xsi = 1 #optimization scalar (1 for Time and 0 for Energy)
 
 
+    #choose path
+    #options: "circle", "semi_circle", "oval", "eight", "google_earth"
+    path_name = "circle"
 
-#Vehicle info
-m = 85 #vehicle mass
-J=10 #Moment of inertia
-mu = 1 #tyre friction coeficient 
-pho_air = 1.225 #air density
-A0 = 0.5 #frontal area of the car
-Cx = 0.5 #Drag coeficient
-width = 0.5 #car track width
-L = 1 #can wheelbase
-Wf=0.4 #position of the center of mass in relation to wheels
-h=0.1  #CG height
+    #in case of google_earth specify the .kml
+    external = 'Map_processing/Maps_kml/extHORTO.kml'
+    internal = 'Map_processing/Maps_kml/intHORTO.kml'
 
+
+    #Vehicle info
+    m = 85 #vehicle mass
+    J = 10 #Moment of inertia
+    mu = 1 #tyre friction coeficient 
+    pho_air = 1.225 #air density
+    A0 = 0.5 #frontal area of the car
+    Cx = 0.5 #Drag coeficient
+    width = 0.5 #car track width
+    L = 1 #can wheelbase
+    Wf = 0.4 #position of the center of mass in relation to wheels
+    h = 0.35  #CG height
 
 
 
+    #Model compatison info (if model comparison export desired)
+
+    #number of sections to access
+    discretizations = [3,6]
+
+    #number of timeit assessments
+    N_computation_average=2
+
+    #chose the filename
+    filename = "Comparison/Results/test"
+
+    #Physical model to compute the comparison and/or animation
+    Physical_model=4
+
+    #List of models to compare, possible values:
+    #"Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"
+    models_export = ["Time abu","Time bu","Time b","Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"]
+
+
+
+
+##################################################################
+###                      Simplified Testing                    ###
+##################################################################
+if __name__ == "__main__":
+     
+    tests.config = Config
+    
+    #uncomment to use the graphical interface mode
+    tests.screen()
+
+
+    #Model 1, point
+    #tests.test_model_1()
+
+    #Model 2, oriented point with drag
+    #tests.test_model_2()
+
+    #Model 3, 4 wheels with drag
+    #tests.test_model_3()
+
+    #Model 4, 3 wheels with drag and load transfer
+    #tests.test_model_4()
+    
+    #Model comparison export and plot
+    #tests.model_comparison_export()
+    
+    #Other plots
+    tests.plots()
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+##################################################################
+###                         Complete Code                      ###
+##################################################################
 
 
 ##################################################################
 ###                        Path Information                    ###
 ##################################################################
 
-
+"""
 
 #create path splines and path spline derivative, assess orientation angles 
 #over the sections, define outlines 
 spline, derivative, angle, angle_derivative,angle_sec_derivative, right,\
-    left = choose_path(path_name,external,
-internal,N_angle=n_discretization)
+    left = choose_path(Config.path_name,Config.external,
+Config.internal,N_angle=Config.n_discretization)
 
 
 #spline points for plotting
-spline_points = spline(np.linspace(0,1,num = N_path_points))
+spline_points = spline(np.linspace(0,1,num = Config.N_path_points))
+"""
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+"""
 
 
 ##################################################################
@@ -112,12 +169,12 @@ spline_points = spline(np.linspace(0,1,num = N_path_points))
 n_wheels=1 #number of wheels
 
 #Model 1, point
-# R_t, M_t, C_t, A_t = model1(spline,n_discretization,m,mu)
+R_t, M_t, C_t, A_t = model1(spline,Config.n_discretization,Config.m,Config.mu)
 
 
 #Model 2, oriented point with drag
-R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
-    pho_air,A0,Cx)
+#R_t, M_t, C_t, A_t = model2(spline,angle,Config.n_discretization,Config.m,Config.mu,\
+#    Config.pho_air,Config.A0,Config.Cx)
 
 
 
@@ -125,43 +182,43 @@ R_t, M_t, C_t, A_t = model2(spline,angle,n_discretization,m,mu,\
 
 #Model abu
 t1_abu=init_optimization_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
 #Model bu
 t1_bu=init_optimization_bu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 #Model b
 t1_b=init_optimization_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP abu
 t1_SOCP_abu=init_optimization_SOCP_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP b
 t1_SOCP_b=init_optimization_SOCP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 #Model SQP trust-constr abu
 t1_SQP_abu=init_optimization_SQP_abu(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 #Model SQP trust-constr b
 t1_SQP_b=init_optimization_SQP_b(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+
+
+"""
 
 
 
 
-
-
-
-
+"""
 ##################################################################
 ###                           Model 3                          ###
 ##################################################################
@@ -173,8 +230,8 @@ n_wheels=4 #number of wheels
 
 #Model 3, 4 wheels with drag
 R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
-    angle_sec_derivative,n_discretization,m,mu,\
-        pho_air,A0,Cx,J,width,L,Wf,n_wheels)
+    angle_sec_derivative,Config.n_discretization,Config.m,Config.mu,\
+        Config.pho_air,Config.A0,Config.Cx,Config.J,Config.width,Config.L,Config.Wf,n_wheels)
 
 
 
@@ -182,38 +239,40 @@ R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
 
 #Model abu
 t1_abu_3=init_optimization_abu_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
 #Model bu
 t1_bu_3=init_optimization_bu_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
 #Model b
 t1_b_3=init_optimization_b_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP abu
 t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 #Model SOCP b
 t1_SOCP_b_3=init_optimization_SOCP_b_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 
 #Model SQP abu
 t1_SQP_abu_3=init_optimization_SQP_abu_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 #Model SQP b
 t1_SQP_b_3=init_optimization_SQP_b_3(
-    R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+
+"""
 
 
 
@@ -230,9 +289,7 @@ t1_SQP_b_3=init_optimization_SQP_b_3(
 
 
 
-
-
-
+"""
 
 ##################################################################
 ###                           Model 4                          ###
@@ -248,12 +305,14 @@ n_wheels=3 #number of wheels
 
 #defines the wheels angles
 theta_r,theta_f0,theta_f1 = model4_extra_angles(spline.derivative(),\
-    spline.derivative().derivative(),n_discretization,Wf,L,width)
+    spline.derivative().derivative(),Config.n_discretization,Config.Wf,\
+    Config.L,Config.width)
 
 #defines the model's matrices
 R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
-    angle_sec_derivative,theta_r,theta_f0,theta_f1,n_discretization,\
-        m,mu,pho_air,A0,Cx,J,width,L,Wf,h,n_wheels)
+    angle_sec_derivative,theta_r,theta_f0,theta_f1,Config.n_discretization,\
+    Config.m,Config.mu,Config.pho_air,Config.A0,Config.Cx,Config.J,Config.width,\
+    Config.L,Config.Wf,Config.h,n_wheels)
 
         
 
@@ -261,42 +320,47 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 
 #Model abu
 t1_abu_4=init_optimization_abu_4(
-    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
 
 #Model bu
 t1_bu_4=init_optimization_bu_4(
-    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False) 
+    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
 
 #Model b
 t1_b_4=init_optimization_b_4(
-    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 
 #Model SOCP abu
 t1_SOCP_abu_4=init_optimization_SOCP_abu_4(
-    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 
 #Model SOCP b
 t1_SOCP_b_4=init_optimization_SOCP_b_4(
-    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 #Model SQP abu
 t1_SQP_abu_4=init_optimization_SQP_abu_4(
-    R_t, M_t, C_t, d_t, A_t, n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, d_t, A_t, Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 
 #Model SQP b
 t1_SQP_b_4=init_optimization_SQP_b_4(
-    R_t, M_t, C_t, d_t, A_t, n_discretization,xsi,n_wheels,display=True,plot=False)
+    R_t, M_t, C_t, d_t, A_t, Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+
+
+
+
+"""
 
 
 
@@ -306,21 +370,18 @@ t1_SQP_b_4=init_optimization_SQP_b_4(
 
 
 
-
-
-
-
-
-
+"""
 
 ##################################################################
 ###                 Model Performance Comparison              ###
 ##################################################################
 
+#The Comparison Export bellow is preferable, this is a shorter version
+
 #number of timeit assessments
 N_computation_average=1
 
-#Physical model to compute
+#Physical model to compute 1-4
 Physical_model=4
 
 #List to chose the models you do not want to time
@@ -329,18 +390,24 @@ Physical_model=4
 models = ["Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"]
 
 
-#Use same order as the models above
+#Use same order as the models above and pay attention to have the correct results 
+#i.e. t1_XX for model 1 & 2, t1_XX_3 for model 3, and t1_XX_4 for model 4
 #t1_abu[-1], t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1],t1_SQP_abu[-1],t1_SQP_b[-1]
 results = [t1_SOCP_abu_4[-1],t1_SOCP_b_4[-1],t1_SQP_abu_4[-1],t1_SQP_b_4[-1]]
 
 
-#Call the timeit
-#Pay attention to call with the correct physical matrices
+
+#Pay attention to call with the correct physical matrices 
+#That is, comment above the functions model1, model2, model3 and/or model4
+#from models not being used 
 
 #d_t = 0 #comment for model 4
 
 computation_time = model_performance(Physical_model,models,results,N_computation_average,
-            R_t, M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display=False)
+    R_t, M_t,C_t,d_t,A_t,Config.n_discretization,Config.xsi,n_wheels,display=False)
+
+
+"""
 
 
 
@@ -350,12 +417,7 @@ computation_time = model_performance(Physical_model,models,results,N_computation
 
 
 
-
-
-
-
-
-
+"""
 ##################################################################
 ###                       Comparison Export                   ###
 ##################################################################
@@ -378,7 +440,8 @@ Physical_model=4
 models_export = ["Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"]
 
 export_comparison_to_csv(Physical_model,models_export, discretizations,filename,
-    N_computation_average,xsi,spline,m,mu,pho_air,A0,Cx,J,width,L,Wf,h)
+    N_computation_average,Config.xsi,spline,Config.m,Config.mu,Config.pho_air,\
+    Config.A0,Config.Cx,Config.J,Config.width,Config.L,Config.Wf,Config.h)
 
 
 
@@ -397,7 +460,7 @@ models = ["Time SOCP abu","Time SOCP b","Time SQP abu","Time SQP b"]
 title = "Oriented point with drag"
 model_complexity(models,complexity,title)
 
-
+"""
 
 
 
@@ -413,8 +476,11 @@ model_complexity(models,complexity,title)
 
 
 #Only "Time abu" and "Time bu" available
-# controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,
-#         n_discretization,xsi,n_wheels,spline_points,derivative,N_path_points)
+#Remember to uncomment the first or second model and the framework 
+
+controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,
+         Config.n_discretization,Config.xsi,n_wheels,spline_points,\
+             derivative,Config.N_path_points)
 
 
 """
@@ -431,7 +497,7 @@ model_complexity(models,complexity,title)
 
 
 
-
+"""
 
 ##################################################################
 ###                            Plots                           ###
@@ -440,43 +506,46 @@ model_complexity(models,complexity,title)
 
 #Uncomment the plots you want
 
-# #solution general model
-# t1_abu,decision_variables_abu = init_optimization_abu_4(
-#     R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+#solution general model
+*_ ,decision_variables_abu  = init_optimization_abu(
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=False,plot=True)
 
 
-#  #Test if the circular path velocity is equal to the theoretical
-# circular_path_test(derivative,decision_variables_abu.x[0:n_discretization],n_discretization,m,mu,\
-#     pho_air,A0,Cx)
+#Test if the circular path velocity is equal to the theoretical
+circular_path_test(derivative,decision_variables_abu[0:Config.n_discretization],\
+    Config.n_discretization,Config.m,Config.mu,Config.pho_air,Config.A0,Config.Cx)
 
 
 
 
 
-#usar sempre o abu SOCP
-t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu_4(
-    R_t, M_t, C_t, d_t, A_t,n_discretization,xsi,n_wheels,display=False,plot=True)
+#Use only abu SOCP
+t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu(
+    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=False,plot=True)
 
-n_wheels = 3
+n_wheels = 1
 
 
 
 #Animates initial guess vs optimized solution
 animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
-               t1_SOCP_abu,n_discretization,m,mu,n_wheels)
+               t1_SOCP_abu,Config.n_discretization,Config.m,Config.mu,n_wheels)
 
 
-# #compares local max velocity and optimize velocity
-# local_max_v(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discretization-1],n_discretization,m,mu,\
-#     pho_air,A0,Cx)
+#compares local max velocity and optimize velocity
+local_max_v(derivative,decision_variables_SOCP_abu[Config.n_discretization-1:\
+    2*Config.n_discretization-1],Config.n_discretization,Config.m,Config.mu,\
+        Config.pho_air,Config.A0,Config.Cx)
 
 
-#  #Test if the circular path velocity is equal to the theoretical
-# circular_path_test(derivative,decision_variables_SOCP_abu[n_discretization-1:2*n_discretization-1],n_discretization,m,mu,\
-#     pho_air,A0,Cx)
+#Test if the circular path velocity is equal to the theoretical
+circular_path_test(derivative,decision_variables_SOCP_abu[Config.n_discretization-1:\
+    2*Config.n_discretization-1],Config.n_discretization,Config.m,Config.mu,\
+        Config.pho_air,Config.A0,Config.Cx)
 
 
 
 #Solution comparison plot
-#comparison_plot(derivative,R_t, M_t, C_t, A_t,n_discretization,xsi,n_wheels)
+comparison_plot(derivative,R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels)
 
+"""
