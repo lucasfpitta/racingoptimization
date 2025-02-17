@@ -827,7 +827,7 @@ def screen():
 
     # Create the scrollable frame inside root
     scroll_result_label = ScrollableFrame(root, width=500, height=1000)
-    scroll_result_label.grid(row=0, column=2, columnspan=4, padx=10, pady=10, sticky="nsew")
+    scroll_result_label.grid(row=0, column=2, rowspan=4, padx=10, pady=10, sticky="nsew")
 
     # Add a Text widget inside the scrollable frame
     result_text = tk.Text(scroll_result_label.scrollable_frame, wrap="word", width=100, height=100)
