@@ -37,7 +37,7 @@ from splines.splines import model4_extra_angles
 
 class Config:
     #Optimization variables
-    n_discretization=10 #number of path sections
+    n_discretization=15 #number of path sections
     N_path_points=1000 #plotting discretization
     xsi = 1 #optimization scalar (1 for Time and 0 for Energy)
 
@@ -89,12 +89,12 @@ class Config:
 ##################################################################
 ###                      Simplified Testing                    ###
 ##################################################################
-if __name__ == "__main__":
+#if __name__ == "__main__":
      
-    tests.config = Config
+    #tests.config = Config
     
     #uncomment to use the graphical interface mode
-    tests.screen()
+    #tests.screen()
 
 
     #Model 1, point
@@ -113,7 +113,7 @@ if __name__ == "__main__":
     #tests.model_comparison_export()
     
     #Other plots
-    tests.plots()
+    #tests.plots()
 
 
 
@@ -141,7 +141,7 @@ if __name__ == "__main__":
 ###                        Path Information                    ###
 ##################################################################
 
-"""
+
 
 #create path splines and path spline derivative, assess orientation angles 
 #over the sections, define outlines 
@@ -152,13 +152,13 @@ Config.internal,N_angle=Config.n_discretization)
 
 #spline points for plotting
 spline_points = spline(np.linspace(0,1,num = Config.N_path_points))
+
+
+
+
+
+
 """
-
-
-
-
-"""
-
 
 ##################################################################
 ###                         Model 1 & 2                        ###
@@ -185,40 +185,41 @@ t1_abu=init_optimization_abu(
     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
-#Model bu
-t1_bu=init_optimization_bu(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
+# #Model bu
+# t1_bu=init_optimization_bu(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
-#Model b
-t1_b=init_optimization_b(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
-
-
-#Model SOCP abu
-t1_SOCP_abu=init_optimization_SOCP_abu(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+# #Model b
+# t1_b=init_optimization_b(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
-#Model SOCP b
-t1_SOCP_b=init_optimization_SOCP_b(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+# #Model SOCP abu
+# t1_SOCP_abu=init_optimization_SOCP_abu(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
-#Model SQP trust-constr abu
-t1_SQP_abu=init_optimization_SQP_abu(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
-
-#Model SQP trust-constr b
-t1_SQP_b=init_optimization_SQP_b(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+# #Model SOCP b
+# t1_SOCP_b=init_optimization_SOCP_b(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
+# #Model SQP trust-constr abu
+# t1_SQP_abu=init_optimization_SQP_abu(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+
+# #Model SQP trust-constr b
+# t1_SQP_b=init_optimization_SQP_b(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+
+
+# print(t1_abu[-1],t1_bu[-1],t1_b[-1],t1_SOCP_abu[-1],t1_SOCP_b[-1],t1_SQP_abu[-1],t1_SQP_b[-1])
+
+print(t1_abu[-1])
 """
 
+""""
 
-
-
-"""
 ##################################################################
 ###                           Model 3                          ###
 ##################################################################
@@ -237,59 +238,59 @@ R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
 
 #Comment the models you dont want to compute
 
-#Model abu
-t1_abu_3=init_optimization_abu_3(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
+# #Model abu
+# t1_abu_3=init_optimization_abu_3(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
-#Model bu
-t1_bu_3=init_optimization_bu_3(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
+# #Model bu
+# t1_bu_3=init_optimization_bu_3(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
-#Model b
-t1_b_3=init_optimization_b_3(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+# #Model b
+# t1_b_3=init_optimization_b_3(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
-#Model SOCP abu
-t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+# #Model SOCP abu
+# t1_SOCP_abu_3=init_optimization_SOCP_abu_3(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
-#Model SOCP b
-t1_SOCP_b_3=init_optimization_SOCP_b_3(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
-
-
-
-#Model SQP abu
-t1_SQP_abu_3=init_optimization_SQP_abu_3(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
-
-
-#Model SQP b
-t1_SQP_b_3=init_optimization_SQP_b_3(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
-
-"""
+# #Model SOCP b
+# t1_SOCP_b_3=init_optimization_SOCP_b_3(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 
+# #Model SQP abu
+# t1_SQP_abu_3=init_optimization_SQP_abu_3(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
-
-
-
-
-
-
-
-
+# #Model SQP b
+# t1_SQP_b_3=init_optimization_SQP_b_3(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 
 """
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ##################################################################
 ###                           Model 4                          ###
@@ -318,15 +319,15 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 
 #Comment the models you dont want to compute
 
-#Model abu
-t1_abu_4=init_optimization_abu_4(
-    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
+# #Model abu
+# t1_abu_4=init_optimization_abu_4(
+#     R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
 
-#Model bu
-t1_bu_4=init_optimization_bu_4(
-    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
+# #Model bu
+# t1_bu_4=init_optimization_bu_4(
+#     R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False) 
 
 
 
@@ -336,31 +337,31 @@ t1_b_4=init_optimization_b_4(
 
 
 
-#Model SOCP abu
-t1_SOCP_abu_4=init_optimization_SOCP_abu_4(
-    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+# #Model SOCP abu
+# t1_SOCP_abu_4=init_optimization_SOCP_abu_4(
+#     R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 
-#Model SOCP b
-t1_SOCP_b_4=init_optimization_SOCP_b_4(
-    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+# #Model SOCP b
+# t1_SOCP_b_4=init_optimization_SOCP_b_4(
+#     R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
-#Model SQP abu
-t1_SQP_abu_4=init_optimization_SQP_abu_4(
-    R_t, M_t, C_t, d_t, A_t, Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
-
-
-
-#Model SQP b
-t1_SQP_b_4=init_optimization_SQP_b_4(
-    R_t, M_t, C_t, d_t, A_t, Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+# #Model SQP abu
+# t1_SQP_abu_4=init_optimization_SQP_abu_4(
+#     R_t, M_t, C_t, d_t, A_t, Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 
+# #Model SQP b
+# t1_SQP_b_4=init_optimization_SQP_b_4(
+#     R_t, M_t, C_t, d_t, A_t, Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
-"""
+
+
+
+print(t1_b_4[-1])
 
 
 

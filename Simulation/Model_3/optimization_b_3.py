@@ -46,7 +46,7 @@ def create_F_it(R_t,M_t,C_t,n_discretization):
 # vector A_t), F_1t and F_2t (2d array with n_discretization vector F_1t and 
 #vector F_2t), number of discretization
 #Output cost of the solution (scalar)
-def create_objective(xsi,A_t,F_1t,F_2t,n_discretization,expansion_factor):
+def create_objective(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization,expansion_factor):
     
     def objective_function(b):
         
@@ -64,6 +64,34 @@ def create_objective(xsi,A_t,F_1t,F_2t,n_discretization,expansion_factor):
         return cost
     
     return objective_function
+
+
+
+
+
+
+
+
+
+
+
+
+#defines gradient of the function at a linearization point
+def create_gradient_objective(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization,n_wheels,expansion_factor):
+    def Grad(t):
+        
+        #expand space to facilitate the solver
+        x= t/expansion_factor
+        
+        f = np.zeros(n_discretization)
+
+        for i in range(n_discretization-1):
+            f[i] += 2*xsi*(-1/(2*np.sqrt(x[i])*(np.sqrt(x[i+1])+np.sqrt(x[i]))**2))/T0+\
+                (1-xsi)/E0*np.transpose(F_2t[i])@A_t[i]
+            f[i+1] += 2*xsi*(-1/(2*np.sqrt(x[i+1])*(np.sqrt(x[i+1])+np.sqrt(x[i]))**2))/T0+\
+                (1-xsi)/E0*np.transpose(F_1t[i])@A_t[i]
+        return f/expansion_factor
+    return Grad
 
 
 
@@ -126,6 +154,36 @@ def create_constraint(mu,mass, F_1t, F_2t,n_discretization,n_wheels,expansion_fa
 
 
 
+
+
+#creates friction circle constraints gradient
+def create_constraint_jac(F_1t, F_2t,n_discretization,n_wheels,expansion_factor):
+    def constraint_jac(t):
+         #expand space to facilitate the solver
+        x = t/expansion_factor
+        B1=np.zeros((n_wheels*(n_discretization-1),n_discretization))
+        
+        #create all the frisction circle constraints
+        for i in range(n_discretization-1):
+            for j in range(n_wheels):
+                v = x[i+1]*F_1t[i][2*j:2*j+2]+x[i]*F_2t[i][2*j:2*j+2]
+                norm_v = np.linalg.norm(v)
+                if norm_v<1e-10:
+                    norm_v=1e-10
+                B1[i+j*(n_discretization-1),i] = -np.dot(F_2t[i][2*j:2*j+2],v)/norm_v
+                B1[i+j*(n_discretization-1),i+1] = -np.dot(F_1t[i][2*j:2*j+2],v)/norm_v
+        return B1/expansion_factor
+    return constraint_jac
+
+
+
+
+
+
+
+
+
+
 #Optimizer
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Power, Mass 
 # and Centrifugal A_t, M_t, C_t (2d array with n_discretizatio of vectors 
@@ -137,13 +195,16 @@ def optimization_b_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
         SystemExit
     
     expansion_factor = 1E4
+    T0=1
+    E0=1
     
     #Creating force matrices F_1t and F_2t
     F_1t, F_2t = create_F_it(R_t,M_t,C_t,n_discretization)
     
     #creating objective and constraints
     objective_function = create_objective(xsi,A_t, F_1t, F_2t,\
-        n_discretization,expansion_factor)
+        T0,E0,n_discretization,expansion_factor)
+    grad = create_gradient_objective(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization,n_wheels,expansion_factor)
     
     
     mu=1 #friction coeficient
@@ -151,10 +212,12 @@ def optimization_b_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
     
     constraint =create_constraint(mu,mass,F_1t, F_2t, n_discretization,
                                   n_wheels,expansion_factor)
+    constraint_jac =create_constraint_jac(F_1t, F_2t, n_discretization,
+                                  n_wheels,expansion_factor)
     bounds = create_b_bounds(n_discretization)
     
     cons = [
-    {'type': 'ineq', 'fun': constraint}  # Inequality friction circle
+    {'type': 'ineq', 'fun': constraint,'jac':constraint_jac}  # Inequality friction circle
         ]
     
     #optimizer options
@@ -180,7 +243,7 @@ def optimization_b_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
  
     #optimization    
     result = scp.optimize.minimize(objective_function, x0, method='SLSQP'
-                        , constraints=cons,bounds=bounds,options=options)#, callback = callback_func
+                        ,jac=grad,constraints=cons,bounds=bounds,options=options)#, callback = callback_func
     
     
     if display:

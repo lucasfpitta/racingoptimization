@@ -29,6 +29,28 @@ def create_objective(xsi, A_t,n_discretization):
 
 
 
+#defines gradient of the function at a linearization point
+def create_gradient_objective(xsi,A_t,T0,E0,n_discretization):
+    
+    #flattened vector coordinates
+    b=0
+    u1=n_discretization
+    u2=u1+n_discretization-1
+    
+    def Grad(x):
+
+        f = np.zeros(2*(n_discretization-1)+n_discretization)
+        
+        #for each path section
+        for i in range(n_discretization-1):
+            f[u1+i]=(1-xsi)*A_t[i][0]/E0
+            f[u2+i]=(1-xsi)*A_t[i][1]/E0
+
+        for i in range(n_discretization-1):
+            f[b+i] += 2*xsi*(-1/(2*np.sqrt(x[b+i])*(np.sqrt(x[b+i+1])+np.sqrt(x[b+i]))**2))/T0
+            f[b+i+1] += 2*xsi*(-1/(2*np.sqrt(x[b+i+1])*(np.sqrt(x[b+i+1])+np.sqrt(x[b+i]))**2))/T0
+        return f
+    return Grad
 
 
 
@@ -68,6 +90,57 @@ def create_constraint1(R_t,M_t,C_t,n_discretization):
                             
         return remainder
     return constraint1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#defines first equality constraint (dynamics) jacobian
+#Input Force R_t (3d array with n_discretizatio matrix R_t), Mass and Centrifugal
+#M_t, C_t (2d array with n_discretizatio of vectors M_t and C_t), number 
+#of discretization
+#Output 1d vector remainder, which goes to zero when the equality holds
+def create_constraint1_jac(R_t,M_t,C_t,n_discretization):
+    
+    #flattened vector coordinates
+    u1=n_discretization
+    u2=n_discretization+n_discretization-1
+    
+    #Remainder array tells if the constraint is respected
+    F = np.zeros((2*(n_discretization-1),n_discretization+2*
+                  (n_discretization-1)))
+
+        
+    for i in range(n_discretization-1):
+            
+        #first Cartesian coordinate dynamic constraint
+        F[i,i]=-C_t[i][0]/2+M_t[i][0]/(2*1/(n_discretization-1))
+        F[i,i+1]=-C_t[i][0]/2-M_t[i][0]/(2*1/(n_discretization-1))
+        F[i,u1+i]=R_t[i][0][0]
+        F[i,u2+i]=R_t[i][0][1]
+            
+            
+            #second Cartesian coordinate dynamic constraint
+        F[n_discretization-1+i,i]=-C_t[i][1]/2+M_t[i][1]/(2*1/(n_discretization-1))
+        F[n_discretization-1+i,i+1]=-C_t[i][1]/2-M_t[i][1]/(2*1/(n_discretization-1))
+        F[n_discretization-1+i,u1+i]=R_t[i][1][0]
+        F[n_discretization-1+i,u2+i]=R_t[i][1][1]
+        
+    def constraint1_jac(decision_variables):         
+        return F
+    return constraint1_jac
+
+
 
 
 
@@ -125,6 +198,27 @@ def create_constraint2(mu,mass,n_discretization):
 
 
 
+#defines innequality constraint (friction circle)
+#Input friction coef mu, mass of the vehicle m, number of discretizations
+#Output 1d vector remainder, which goes to zero when the inequality holds
+def create_constraint2_jac(n_discretization):
+    
+    #flattened vector coordinates
+    u1=n_discretization
+    u2=n_discretization+n_discretization-1
+    
+    
+    def constraint2_jac(x):
+        B1=np.zeros((n_discretization-1,n_discretization+2*(n_discretization-1)))
+        
+        #create all the frisction circle constraints
+        for i in range(n_discretization-1):
+            norm = np.sqrt(x[u1 + i]**2 + x[u2 + i]**2)
+            B1[i,u1+i] = -x[u1+i]/norm#/(x[u1+i]**2+x[u2+i]**2)**0.5
+            B1[i,u2+i] = -x[u2+i]/norm#/(x[u1+i]**2+x[u2+i]**2)**0.5
+        return B1
+    return constraint2_jac
+
 
 
 
@@ -173,9 +267,14 @@ def build_x0(b0, R_t,C_t,n_discretization):
 #Output scipy result and innitial guess x0
 def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
     
+    E0=1
+    T0=1
+    
     #creating objective and constraints
     objective_function = create_objective(xsi, A_t,n_discretization)
+    grad = create_gradient_objective(xsi,A_t,abs(T0),abs(E0),n_discretization)
     constraint1 = create_constraint1(R_t,M_t,C_t,n_discretization)
+    constraint1_jac = create_constraint1_jac(R_t,M_t,C_t,n_discretization)
     
     
     mu=1 #friction coeficient
@@ -183,12 +282,13 @@ def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
     
     
     constraint2 =create_constraint2(mu,mass,n_discretization)
+    constraint2_jac =create_constraint2_jac(n_discretization)
     bounds = create_b_bounds(n_discretization)
     
     
     cons = [
-    {'type': 'eq', 'fun': constraint1},  # Equality constraint 1
-    {'type': 'ineq', 'fun': constraint2}  # Inequality friction circle
+    {'type': 'eq', 'fun': constraint1,'jac':constraint1_jac},  # Equality constraint 1
+    {'type': 'ineq', 'fun': constraint2,'jac':constraint2_jac}  # Inequality friction circle
         ]
     
     
@@ -216,7 +316,7 @@ def optimization_bu(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
     
     #optimization    
     result = scp.optimize.minimize(objective_function, x0, method='SLSQP', 
-                        constraints=cons,bounds=bounds,options=options)#, callback = callback_func
+                        jac=grad,constraints=cons,bounds=bounds,options=options)#, callback = callback_func
     if display:
         print("Test friction circle", (constraint2(result.x)>= -1E-6).all())
         print("Test friction circle initial guess", (constraint2(x0)>= -1E-6).all())

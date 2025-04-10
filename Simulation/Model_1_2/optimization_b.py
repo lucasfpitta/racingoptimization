@@ -62,6 +62,28 @@ def create_objective(xsi, A_t, F_1t,F_2t,n_discretization,expansion_factor):
 
 
 
+#defines gradient of the function at a linearization point
+def create_gradient_objective(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization,expansion_factor):
+    def Grad(b):
+        
+        x = b/expansion_factor
+        f = np.zeros(n_discretization)
+
+        for i in range(n_discretization-1):
+            f[i] += 2*xsi*(-1/(2*np.sqrt(x[i])*(np.sqrt(x[i+1])+np.sqrt(x[i]))**2))/T0+\
+                (1-xsi)/E0*np.transpose(F_2t[i])@A_t[i]
+            f[i+1] += 2*xsi*(-1/(2*np.sqrt(x[i+1])*(np.sqrt(x[i+1])+np.sqrt(x[i]))**2))/T0+\
+                (1-xsi)/E0*np.transpose(F_1t[i])@A_t[i]
+        return f/expansion_factor
+    return Grad
+
+
+
+
+
+
+
+
 #creates bounds to b, forcing it to be positive
 def create_b_bounds(n_discretization):
     
@@ -108,6 +130,30 @@ def create_constraint(mu,mass, F_1t, F_2t, n_discretization,expansion_factor):
 
 
 
+#creates friction circle constraints gradient
+def create_constraint_jac(F_1t,F_2t,n_discretization,expansion_factor):
+    
+    def constraint_jac(b):
+        x = b/expansion_factor
+        B1=np.zeros((n_discretization-1,n_discretization))
+        
+        #create all the frisction circle constraints
+        for i in range(n_discretization-1):
+            A_i = x[i+1] * F_1t[i] + x[i] * F_2t[i]
+            norm_A_i = np.linalg.norm(A_i)
+            norm_grad = A_i / norm_A_i
+            B1[i,i] = -np.dot(norm_grad, F_2t[i])
+            B1[i,i+1] = -np.dot(norm_grad, F_1t[i])
+        return B1/expansion_factor
+    return constraint_jac
+
+
+
+
+
+
+
+
 #Optimizer
 #Input Force R_t (3d array with n_discretizatio matrix R_t), Power, Mass and 
 # Centrifugal, A_t, M_t, C_t (2d array with n_discretizatio of vectors A_t, 
@@ -116,6 +162,8 @@ def create_constraint(mu,mass, F_1t, F_2t, n_discretization,expansion_factor):
 def optimization_b(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     
     expansion_factor = 1E3
+    E0=1
+    T0=1
     
     
     #Creating force matrices F_1t and F_2t
@@ -125,6 +173,7 @@ def optimization_b(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     #creating objective and constraints
     objective_function = create_objective(xsi,A_t, F_1t, F_2t,
                                           n_discretization,expansion_factor)
+    grad=create_gradient_objective(xsi,A_t,F_1t,F_2t,T0,E0,n_discretization,expansion_factor)
 
     
     mu=1 #friction coeficient
@@ -132,12 +181,13 @@ def optimization_b(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     
     constraint =create_constraint(mu,mass,F_1t, F_2t, n_discretization,
                                   expansion_factor)
+    constraint_jac = create_constraint_jac(F_1t,F_2t,n_discretization,expansion_factor)
     bounds = create_b_bounds(n_discretization)
     
     
     cons = [
   
-    {'type': 'ineq', 'fun': constraint}  # Inequality friction circle
+    {'type': 'ineq', 'fun': constraint,'jac': constraint_jac}  # Inequality friction circle
         ]
     
     #optimizer options
@@ -160,10 +210,10 @@ def optimization_b(R_t,M_t,C_t,A_t,n_discretization,xsi,display):
     # spline velocity in half
     while not ((constraint(x0)>= -1E-6).all()):
         x0=x0/2
-    
+        
     #optimization    
     result = scp.optimize.minimize(objective_function, x0, method='SLSQP', 
-                        constraints=cons,bounds=bounds,options=options)#, callback = callback_func
+                        jac=grad,constraints=cons,bounds=bounds,options=options)#, callback = callback_func
     
     if display:
         print("Test friction circle", (constraint(result.x)>= -1E-6).all())
