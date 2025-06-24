@@ -41,7 +41,7 @@ def google_earth_path(external,internal,N_angle):
     
     
     #create a random path on the track
-    alfas = np.random.random_sample(len(right[0]))
+    alfas = np.ones(len(right[0]))*0.5#np.random.random_sample(len(right[0]))
     alfas[-1]=alfas[0]
     
     

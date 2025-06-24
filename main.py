@@ -37,14 +37,14 @@ from splines.splines import model4_extra_angles
 
 class Config:
     #Optimization variables
-    n_discretization=15 #number of path sections
-    N_path_points=1000 #plotting discretization
+    n_discretization=2000 #number of path sections
+    N_path_points=2000 #plotting discretization
     xsi = 1 #optimization scalar (1 for Time and 0 for Energy)
 
 
     #choose path
     #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-    path_name = "circle"
+    path_name = "google_earth"
 
     #in case of google_earth specify the .kml
     external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -61,7 +61,7 @@ class Config:
     width = 0.5 #car track width
     L = 1 #can wheelbase
     Wf = 0.4 #position of the center of mass in relation to wheels
-    h = 0.35  #CG height
+    h = 0.075  #CG height
 
 
 
@@ -331,9 +331,9 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 
 
 
-#Model b
-t1_b_4=init_optimization_b_4(
-    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
+# #Model b
+# t1_b_4=init_optimization_b_4(
+#     R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=True,plot=False)
 
 
 
@@ -361,7 +361,7 @@ t1_b_4=init_optimization_b_4(
 
 
 
-print(t1_b_4[-1])
+
 
 
 
@@ -498,7 +498,7 @@ controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,
 
 
 
-"""
+
 
 ##################################################################
 ###                            Plots                           ###
@@ -508,23 +508,23 @@ controlled_path = controlled_path("Time bu",R_t, M_t, C_t, A_t,
 #Uncomment the plots you want
 
 #solution general model
-*_ ,decision_variables_abu  = init_optimization_abu(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=False,plot=True)
+# *_ ,decision_variables_abu  = init_optimization_abu_4(
+#     R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=False,plot=True)
 
 
 #Test if the circular path velocity is equal to the theoretical
-circular_path_test(derivative,decision_variables_abu[0:Config.n_discretization],\
-    Config.n_discretization,Config.m,Config.mu,Config.pho_air,Config.A0,Config.Cx)
+# circular_path_test(derivative,decision_variables_abu[0:Config.n_discretization],\
+#     Config.n_discretization,Config.m,Config.mu,Config.pho_air,Config.A0,Config.Cx)
 
 
 
 
 
 #Use only abu SOCP
-t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu(
-    R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=False,plot=True)
+t1_SOCP_abu,decision_variables_SOCP_abu = init_optimization_SOCP_abu_4(
+    R_t, M_t, C_t, d_t, A_t,Config.n_discretization,Config.xsi,n_wheels,display=False,plot=True)
 
-n_wheels = 1
+n_wheels = 3
 
 
 
@@ -534,19 +534,18 @@ animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
 
 
 #compares local max velocity and optimize velocity
-local_max_v(derivative,decision_variables_SOCP_abu[Config.n_discretization-1:\
-    2*Config.n_discretization-1],Config.n_discretization,Config.m,Config.mu,\
-        Config.pho_air,Config.A0,Config.Cx)
+# local_max_v(derivative,decision_variables_SOCP_abu[Config.n_discretization-1:\
+#     2*Config.n_discretization-1],Config.n_discretization,Config.m,Config.mu,\
+#         Config.pho_air,Config.A0,Config.Cx)
 
 
 #Test if the circular path velocity is equal to the theoretical
-circular_path_test(derivative,decision_variables_SOCP_abu[Config.n_discretization-1:\
-    2*Config.n_discretization-1],Config.n_discretization,Config.m,Config.mu,\
-        Config.pho_air,Config.A0,Config.Cx)
+# circular_path_test(derivative,decision_variables_SOCP_abu[Config.n_discretization-1:\
+#     2*Config.n_discretization-1],Config.n_discretization,Config.m,Config.mu,\
+#         Config.pho_air,Config.A0,Config.Cx)
 
 
 
 #Solution comparison plot
-comparison_plot(derivative,R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels)
+# comparison_plot(derivative,R_t, M_t, C_t, A_t,Config.n_discretization,Config.xsi,n_wheels)
 
-"""
