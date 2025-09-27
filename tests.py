@@ -185,7 +185,7 @@ def test_model_3():
     
     
     #Define physics over the path. 
-    n_wheels=4 #number of wheels
+    n_wheels=3 #number of wheels
 
     #Model 3, 4 wheels with drag
     R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
@@ -398,7 +398,7 @@ def plots():
         spline_points = spline(np.linspace(0,1,num = config.N_path_points))
         
         #Define physics over the path. 
-        n_wheels=4 #number of wheels
+        n_wheels=3 #number of wheels
 
         #Model 3, 4 wheels with drag
         R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
@@ -446,7 +446,7 @@ def plots():
         
     #Animates initial guess vs optimized solution
     animation_complete(spline,right,left,spline_points,decision_variables_SOCP_abu,\
-                    t1_SOCP_abu,config.n_discretization,config.m,config.mu,n_wheels)
+                    t1_SOCP_abu,config.n_discretization,config.m,config.mu,n_wheels,config.Physical_model)
     
     #compares local max velocity and optimize velocity
     local_max_v(derivative,decision_variables_SOCP_abu[config.n_discretization-1:2*config.n_discretization-1]\

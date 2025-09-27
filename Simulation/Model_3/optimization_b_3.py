@@ -12,11 +12,11 @@ import matplotlib as plt
 # C_tM_t (2d array with n_discretization vector C_t), n_discretization
 # Output F_1t and F_2t (2d array with n_discretization vector F_1t and vector F_2t)
 
-def create_F_it(R_t,M_t,C_t,n_discretization):
+def create_F_it(R_t,M_t,C_t,n_discretization,n_wheels):
     
     #create the n_dicretization vectors F_1t and F_2t
-    F_1t, F_2t = np.zeros((n_discretization-1,8)),\
-        np.zeros((n_discretization-1,8))
+    F_1t, F_2t = np.zeros((n_discretization-1,2*n_wheels)),\
+        np.zeros((n_discretization-1,2*n_wheels))
     
     #loop to build the vectors
     for i in range(n_discretization-1):
@@ -190,8 +190,8 @@ def create_constraint_jac(F_1t, F_2t,n_discretization,n_wheels,expansion_factor)
 # A_t, M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
 def optimization_b_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
-    if n_wheels != 4:
-        print("Wrong optimization model. This one is specific for model3 (4 wheels)")
+    if n_wheels != 3:
+        print("Wrong optimization model. This one is specific for model3 (3 wheels)")
         SystemExit
     
     expansion_factor = 1E4
@@ -199,7 +199,7 @@ def optimization_b_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
     E0=1
     
     #Creating force matrices F_1t and F_2t
-    F_1t, F_2t = create_F_it(R_t,M_t,C_t,n_discretization)
+    F_1t, F_2t = create_F_it(R_t,M_t,C_t,n_discretization,n_wheels)
     
     #creating objective and constraints
     objective_function = create_objective(xsi,A_t, F_1t, F_2t,\

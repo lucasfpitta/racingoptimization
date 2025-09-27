@@ -9,11 +9,11 @@ from scipy import sparse
 # C_tM_t (2d array with n_discretization vector C_t), n_discretization
 # Output F_1t and F_2t (2d array with n_discretization vector F_1t and vector F_2t)
 
-def create_F_it(R_t,M_t,C_t,n_discretization):
+def create_F_it(R_t,M_t,C_t,n_discretization,n_wheels):
     
     #create the n_dicretization vectors F_1t and F_2t
-    F_1t, F_2t = np.zeros((n_discretization-1,8)),\
-        np.zeros((n_discretization-1,8))
+    F_1t, F_2t = np.zeros((n_discretization-1,2*n_wheels)),\
+        np.zeros((n_discretization-1,2*n_wheels))
     
     #loop to build the vectors
     for i in range(n_discretization-1):
@@ -259,7 +259,7 @@ def optimization_SOCP_b_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display)
     E0=1
     
     #Creating force matrices F_1t and F_2t
-    F_1t, F_2t = create_F_it(R_t,M_t,C_t,n_discretization)
+    F_1t, F_2t = create_F_it(R_t,M_t,C_t,n_discretization,n_wheels)
     
     f = create_objective_vector(xsi, A_t, F_1t, F_2t,T0,E0,n_discretization)
     

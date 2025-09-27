@@ -315,7 +315,7 @@ def animation_(spline,right,left,spline_points,forcex0,forcey0,forcex1,forcey1
 
 
 def animation_complete(spline,right,left,spline_points,decision_variables,\
-               t1,n_discretization,m,mu,n_wheels):
+               t1,n_discretization,m,mu,n_wheels,Physical_model):
     
     #spline discretization over sections 
     spline_points_animation = spline(np.linspace(0,1,num = n_discretization))
@@ -332,14 +332,14 @@ def animation_complete(spline,right,left,spline_points,decision_variables,\
     u=2*n_discretization-1
 
     for i in range(n_wheels):
-        if n_wheels==3:
+        if Physical_model==4:
             force.append((decision_variables[u+\
         3*i*(n_discretization-1):u+(3*i+1)*(n_discretization-1)]**2+decision_variables[u+\
         (3*i+1)*(n_discretization-1):u+(3*i+2)*(n_discretization-1)]**2)**0.5*1e3)
             radii.append(mu*np.abs(decision_variables[u+\
         (3*i+2)*(n_discretization-1):u+(3*i+3)*(n_discretization-1)])*1e3)
             
-        elif n_wheels==4:
+        elif Physical_model==3:
             force.append((decision_variables[u+\
         2*i*(n_discretization-1):u+(2*i+1)*(n_discretization-1)]**2+decision_variables[u+\
         (2*i+1)*(n_discretization-1):u+(2*i+2)*(n_discretization-1)]**2)**0.5)

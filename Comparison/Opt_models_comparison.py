@@ -116,18 +116,18 @@ def export_comparison_to_csv(Physical_model,models, discretizations,filename,
             #Define physics over the path
             R_t, M_t, C_t, A_t=model3(spline,angle,angle_derivative,\
                 angle_sec_derivative,discretizations[i],m,mu,\
-                pho_air,A0,Cx,J,width,L,Wf,n_wheels=4)   
+                pho_air,A0,Cx,J,width,L,Wf,n_wheels=3)   
             
             for name, func in Models_dict.items():
                 time_traverse_dict[name] = func(R_t, M_t, C_t, A_t,\
-                discretizations[i],xsi,n_wheels=4,display=False,plot=False)
+                discretizations[i],xsi,n_wheels=3,display=False,plot=False)
             
             Results1.append([time_traverse_dict[name][-1] for name in models])
             #Call the timeit and saves on the second list
             d_t=0
             mean,std = model_performance(Physical_model,models,Results1[i],
             N_computation_average,R_t, M_t, C_t,d_t,A_t,discretizations[i],\
-                xsi,n_wheels=4,display=False)
+                xsi,n_wheels=3,display=False)
                 
         if Physical_model == 4:
             #defines the wheels angles

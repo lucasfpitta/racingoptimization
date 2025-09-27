@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 #Force matrix R translated to the path - R_t. 
 #Input angle at midpoints
 def force_tilde(angles,n_wheels,width,L,Wf):
-    if n_wheels!=4:
+    if n_wheels!=3:
         print("incompatible number of wheels, check force_tilde at model3")
         SystemExit
         
     #torque line of the matrix    
     torque = np.array([-width/2, Wf*L, width/2, Wf*L,\
-        -width/2,-(1-Wf)*L, width/2, -(1-Wf)*L])
+        0,-(1-Wf)*L])
     
     R_t= np.array([[[np.cos(theta), -np.sin(theta)]*n_wheels, \
         [np.sin(theta), np.cos(theta)]*n_wheels,torque] for theta in angles])

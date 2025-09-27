@@ -390,8 +390,8 @@ def build_x0(b0,R_t,M_t,C_t,A_t,n_discretization,n_wheels,expansion_factor_ab,ex
 # A_t, M_t and C_t), number of discretization, xsi optimization scalar
 #Output scipy result and innitial guess x0
 def optimization_abu_3(R_t,M_t,C_t,A_t,n_discretization,xsi,n_wheels,display):
-    if n_wheels != 4:
-        print("Wrong optimization model. This one is specific for model3 (4 wheels)")
+    if n_wheels != 3:
+        print("Wrong optimization model. This one is specific for model3 (3 wheels)")
         SystemExit
         
     expansion_factor_ab = 1E0
