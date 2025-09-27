@@ -349,7 +349,7 @@ def create_friction_circle_cones(x,n_discretization,m,mu,n_wheels):
 #Output scipy result and innitial guess x0
 def optimization_SOCP_abu_4(R_t,M_t,C_t,d_t,A_t,n_discretization,xsi,n_wheels,display):
     
-    expansion_factor = 1E3
+    expansion_factor = 1E1
     
     #create the decision variables vector
     x = cp.Variable(2*n_discretization+(2+3*n_wheels)*(n_discretization-1))

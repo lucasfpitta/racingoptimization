@@ -37,14 +37,14 @@ from splines.splines import model4_extra_angles
 
 class Config:
     #Optimization variables
-    n_discretization=2000 #number of path sections
-    N_path_points=2000 #plotting discretization
+    n_discretization=1000 #number of path sections
+    N_path_points=20000 #plotting discretization
     xsi = 1 #optimization scalar (1 for Time and 0 for Energy)
 
 
     #choose path
     #options: "circle", "semi_circle", "oval", "eight", "google_earth"
-    path_name = "google_earth"
+    path_name = "circle"
 
     #in case of google_earth specify the .kml
     external = 'Map_processing/Maps_kml/extHORTO.kml'
@@ -57,18 +57,18 @@ class Config:
     mu = 1 #tyre friction coeficient 
     pho_air = 1.225 #air density
     A0 = 0.5 #frontal area of the car
-    Cx = 0.5 #Drag coeficient
+    Cx = 0.1 #Drag coeficient
     width = 0.5 #car track width
     L = 1 #can wheelbase
     Wf = 0.4 #position of the center of mass in relation to wheels
-    h = 0.075  #CG height
+    h = 0.35  #CG height
 
 
 
     #Model compatison info (if model comparison export desired)
 
     #number of sections to access
-    discretizations = [3,6]
+    discretizations = [10,17,32]
 
     #number of timeit assessments
     N_computation_average=2
@@ -371,8 +371,8 @@ R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
 
 
 
-"""
 
+"""
 ##################################################################
 ###                 Model Performance Comparison              ###
 ##################################################################
@@ -406,8 +406,6 @@ results = [t1_SOCP_abu_4[-1],t1_SOCP_b_4[-1],t1_SQP_abu_4[-1],t1_SQP_b_4[-1]]
 
 computation_time = model_performance(Physical_model,models,results,N_computation_average,
     R_t, M_t,C_t,d_t,A_t,Config.n_discretization,Config.xsi,n_wheels,display=False)
-
-
 """
 
 
@@ -419,15 +417,17 @@ computation_time = model_performance(Physical_model,models,results,N_computation
 
 
 """
+
+
 ##################################################################
 ###                       Comparison Export                   ###
 ##################################################################
 
 #number of sections to access
-discretizations = [10,18,33]
+discretizations = [10,18,32]
 
 #number of timeit assessments
-N_computation_average=50
+N_computation_average=1
 
 #chose the filename
 filename = "Comparison/Results/comparison_timeit_model4_eight_slide_update.csv"
