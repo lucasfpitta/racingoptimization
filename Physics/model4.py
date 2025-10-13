@@ -55,10 +55,10 @@ def force_tilde(angles,theta_r,theta_f0,theta_f1,n_wheels,width,L,Wf,h):
 #Mass matrix M translated to the path - M_t. 
 # Input is a scipy path derivative, angle derivative, a midpoint 
 # discretization vector over [0,1], and vehicle info
-def mass_tilde(derivative, angle_derivative, discretization,m,J):
+def mass_tilde(derivative, angle_derivative,theta_r_derivative,discretization,m,J):
     zero_lines = np.zeros(len(discretization))
     M_t = np.transpose(np.vstack((m*derivative(discretization),\
-        zero_lines,J*angle_derivative,zero_lines,zero_lines)))
+        zero_lines,J*(angle_derivative-theta_r_derivative),zero_lines,zero_lines)))
     return M_t
 
 
@@ -72,12 +72,13 @@ def mass_tilde(derivative, angle_derivative, discretization,m,J):
 # Input is a scipy path derivative and second derivative, angle second derivative,
 #a midpoint discretization vector over [0,1], vehicle info
 def centrifugal_tilde(derivative,secondderivative,angle_sec_derivative,\
-    discretization,m,J,pho_air,A0,Cx):
+    theta_r_sec_derivative,discretization,m,J,pho_air,A0,Cx):
     zero_lines = np.zeros(len(discretization))
     C_t = np.hstack((m*np.transpose(secondderivative(discretization))+pho_air*A0*Cx/2*\
         np.transpose(derivative(discretization))*(np.linalg.norm(np.transpose(\
             derivative(discretization)),axis=1)[:, np.newaxis]),
-        zero_lines.reshape(-1, 1),J*angle_sec_derivative.reshape(-1, 1),\
+        zero_lines.reshape(-1, 1),J*(angle_sec_derivative.reshape(-1, 1)-\
+            theta_r_sec_derivative.reshape(-1, 1)),\
             zero_lines.reshape(-1, 1),zero_lines.reshape(-1, 1)))
     return C_t
 
@@ -133,7 +134,7 @@ def power_tilde(derivative,angles, discretization,theta_r,theta_f0,theta_f1):
 #Input scipy spline
 #Output matrices
 def model4(spline,angles,angle_derivative,angle_sec_derivative,\
-    theta_r,theta_f0,theta_f1,\
+    theta_r,theta_r_derivative,theta_r_sec_derivative,theta_f0,theta_f1,\
     M,m,mu,pho_air,A0,Cx,J,width,L,Wf,h,n_wheels):
 
     
@@ -149,9 +150,9 @@ def model4(spline,angles,angle_derivative,angle_sec_derivative,\
     R_t = force_tilde(angles,theta_r,theta_f0,theta_f1,n_wheels,width,L,Wf,h)
     
     #Other matrices
-    M_t = mass_tilde(spline.derivative(),angle_derivative,discretization,m,J)
+    M_t = mass_tilde(spline.derivative(),angle_derivative,theta_r_derivative,discretization,m,J)
     C_t = centrifugal_tilde(spline.derivative(),spline.derivative().derivative(),\
-        angle_sec_derivative,discretization, m,J,pho_air,A0,Cx)
+        angle_sec_derivative,theta_r_sec_derivative,discretization, m,J,pho_air,A0,Cx)
     d_t = independent_tilde(discretization,m)
     A_t = power_tilde(spline.derivative(),angles,discretization,theta_r,theta_f0,theta_f1)
     return R_t, M_t, C_t, d_t, A_t

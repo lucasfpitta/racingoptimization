@@ -8,7 +8,7 @@ from Physics.model3 import model3
 from Physics.model4 import model4
 import numpy as np
 from scipy.stats import linregress
-from splines.splines import model4_extra_angles
+from splines.splines import extra_angles
 from splines.splines import find_angle
 
 
@@ -113,9 +113,15 @@ def export_comparison_to_csv(Physical_model,models, discretizations,filename,
                 
                 
         if Physical_model == 3:
+            
+            theta_r,theta_r_derivative,theta_r_second_derivative,theta_f0,theta_f1 = extra_angles(spline.derivative(),\
+                spline.derivative().derivative(),spline.derivative().derivative().derivative(),\
+                discretizations[i],Wf,L,width)
+            
             #Define physics over the path
             R_t, M_t, C_t, A_t=model3(spline,angle,angle_derivative,\
-                angle_sec_derivative,discretizations[i],m,mu,\
+                angle_sec_derivative,theta_r,theta_r_derivative,theta_r_second_derivative,\
+                    discretizations[i],m,mu,\
                 pho_air,A0,Cx,J,width,L,Wf,n_wheels=3)   
             
             for name, func in Models_dict.items():
@@ -131,12 +137,14 @@ def export_comparison_to_csv(Physical_model,models, discretizations,filename,
                 
         if Physical_model == 4:
             #defines the wheels angles
-            theta_r,theta_f0,theta_f1 = model4_extra_angles(spline.derivative(),\
-                spline.derivative().derivative(),discretizations[i],Wf,L,width)
+            theta_r,theta_r_derivative,theta_r_second_derivative,theta_f0,theta_f1 = extra_angles(spline.derivative(),\
+                spline.derivative().derivative(),spline.derivative().derivative().derivative(),\
+                discretizations[i],Wf,L,width)
 
             #defines the model's matrices
             R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
-                angle_sec_derivative,theta_r,theta_f0,theta_f1,discretizations[i],\
+                angle_sec_derivative,theta_r,theta_r_derivative,theta_r_second_derivative,\
+                    theta_f0,theta_f1,discretizations[i],\
                     m,mu,pho_air,A0,Cx,J,width,L,Wf,h,n_wheels=3)
             
             for name, func in Models_dict.items():

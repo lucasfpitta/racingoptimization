@@ -111,9 +111,69 @@ def find_angle(spline,N_angle):
 
 
 
+
+
+def theta_r_derivatives(spline_derivative,spline_sec_derivative,\
+    spline_third_derivative,n_discretization,Wf,L,w):
+    
+    #midpoints
+    delta = 1/(n_discretization-1)
+    discretization = np.linspace(delta/2,1-delta/2,num=n_discretization-1)
+    
+    
+    a = spline_derivative(discretization)[0]*spline_third_derivative(discretization)[1]-\
+        spline_derivative(discretization)[1]*spline_third_derivative(discretization)[0]
+        
+    a_derivative = spline_sec_derivative(discretization)[0]*spline_third_derivative(discretization)[1]-\
+        spline_sec_derivative(discretization)[1]*spline_third_derivative(discretization)[0]
+    
+    b = spline_derivative(discretization)[0]**2+spline_derivative(discretization)[1]**2
+    
+    b_derivative = 2*(spline_derivative(discretization)[0]*spline_sec_derivative(discretization)[0]+\
+        spline_derivative(discretization)[1]*spline_sec_derivative(discretization)[1])
+    
+    c = spline_derivative(discretization)[0]*spline_sec_derivative(discretization)[1]-\
+        spline_derivative(discretization)[1]*spline_sec_derivative(discretization)[0]
+        
+    c_derivative = spline_sec_derivative(discretization)[0]*spline_sec_derivative(discretization)[1]+\
+        spline_derivative(discretization)[0]*spline_third_derivative(discretization)[1]-(\
+        spline_sec_derivative(discretization)[1]*spline_sec_derivative(discretization)[0]+\
+        spline_derivative(discretization)[1]*spline_third_derivative(discretization)[0])
+    
+    d = spline_derivative(discretization)[0]*spline_sec_derivative(discretization)[0]+\
+        spline_derivative(discretization)[1]*spline_sec_derivative(discretization)[1]
+    
+    d_derivative = spline_sec_derivative(discretization)[0]**2+\
+        spline_derivative(discretization)[0]*spline_third_derivative(discretization)[0]+\
+        spline_sec_derivative(discretization)[1]**2+\
+        spline_derivative(discretization)[1]*spline_third_derivative(discretization)[1]
+    
+    e = (spline_derivative(discretization)[0]**2+spline_derivative(discretization)[1]**2)**(5/2)
+    
+    e_derivative = 5*(spline_derivative(discretization)[0]**2+spline_derivative(discretization)[1]**2)**(3/2)*\
+        (spline_derivative(discretization)[0]*spline_sec_derivative(discretization)[0]+\
+        spline_derivative(discretization)[1]*spline_sec_derivative(discretization)[1])
+        
+    
+    curvature = c/(spline_derivative(discretization)[0]**2+\
+        spline_derivative(discretization)[1]**2)**(3/2)
+    
+    curvature_derivative = (a*b-3*c*d)/e
+    
+    curvature_sec_derivative = ((a_derivative*b+a*b_derivative)*e-a*b*e_derivative-3*((\
+        c_derivative*d+c*d_derivative)*e-c*d*e_derivative))/(e**2)
+    
+    theta_r_derivative = (1-Wf)*L*curvature_derivative/np.sqrt(1-((1-Wf)*L*curvature)**2)
+    
+    theta_r_sec_derivative = (1-Wf)*L*curvature_sec_derivative/np.sqrt(1-((1-Wf)*L*curvature)**2)+\
+        ((1-Wf)*L)**3*curvature*curvature_derivative**2/((1-((1-Wf)*L*curvature)**2)**(3/2))
+    
+    return theta_r_derivative,theta_r_sec_derivative
+
+
 #defines the front and rear wheels angles in the trajectory
-def model4_extra_angles(spline_derivative,spline_sec_derivative,\
-    n_discretization,Wf,L,w):
+def extra_angles(spline_derivative,spline_sec_derivative,\
+    spline_third_derivative,n_discretization,Wf,L,w):
     
     #midpoints
     delta = 1/(n_discretization-1)
@@ -136,7 +196,11 @@ def model4_extra_angles(spline_derivative,spline_sec_derivative,\
     theta_f0 = np.arctan(L/(Rr-w/2))-theta_r
     theta_f1 = np.arctan(L/(Rr+w/2))-theta_r
     
-    return theta_r,theta_f0,theta_f1
+    theta_r_derivative,theta_r_second_derivative = theta_r_derivatives(\
+        spline_derivative,spline_sec_derivative,\
+    spline_third_derivative,n_discretization,Wf,L,w)
+    
+    return theta_r,theta_r_derivative,theta_r_second_derivative,theta_f0,theta_f1
     
 
 

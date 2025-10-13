@@ -10,7 +10,7 @@ from Physics.model1 import model1
 from Physics.model2 import model2
 from Physics.model3 import model3
 from Physics.model4 import model4
-from splines.splines import model4_extra_angles
+from splines.splines import extra_angles
 from Simulation.optimization_main import *
 from Comparison.Opt_models_comparison import *
 from Visualization.plots import *
@@ -186,10 +186,16 @@ def test_model_3():
     
     #Define physics over the path. 
     n_wheels=3 #number of wheels
+    
+    #defines the wheels angles
+    theta_r,theta_r_derivative,theta_r_second_derivative,theta_f0,theta_f1 = extra_angles(spline.derivative(),\
+        spline.derivative().derivative(),spline.derivative().derivative().derivative(),\
+            config.n_discretization,config.Wf,config.L,config.width)
 
     #Model 3, 4 wheels with drag
     R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
-        angle_sec_derivative,config.n_discretization,config.m,config.mu,\
+        angle_sec_derivative,theta_r,theta_r_derivative,theta_r_second_derivative,\
+        config.n_discretization,config.m,config.mu,\
         config.pho_air,config.A0,config.Cx,config.J,config.width,config.L,config.Wf,n_wheels)
 
 
@@ -266,12 +272,14 @@ def test_model_4():
     #Model 4, 3 wheels with drag and load transfer
 
     #defines the wheels angles
-    theta_r,theta_f0,theta_f1 = model4_extra_angles(spline.derivative(),\
-        spline.derivative().derivative(),config.n_discretization,config.Wf,config.L,config.width)
+    theta_r,theta_r_derivative,theta_r_second_derivative,theta_f0,theta_f1 = extra_angles(spline.derivative(),\
+        spline.derivative().derivative(),spline.derivative().derivative().derivative(),\
+            config.n_discretization,config.Wf,config.L,config.width)
 
     #defines the model's matrices
     R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
-        angle_sec_derivative,theta_r,theta_f0,theta_f1,config.n_discretization,\
+        angle_sec_derivative,theta_r,theta_r_derivative,theta_r_second_derivative,\
+    theta_f0,theta_f1,config.n_discretization,\
     config.m,config.mu,config.pho_air,config.A0,config.Cx,config.J,config.width,\
         config.L,config.Wf,config.h,n_wheels)
 
@@ -399,10 +407,16 @@ def plots():
         
         #Define physics over the path. 
         n_wheels=3 #number of wheels
+        
+        #defines the wheels angles
+        theta_r,theta_r_derivative,theta_r_second_derivative,theta_f0,theta_f1 = extra_angles(spline.derivative(),\
+            spline.derivative().derivative(),spline.derivative().derivative().derivative(),\
+            config.n_discretization,config.Wf,config.L,config.width)
 
         #Model 3, 4 wheels with drag
         R_t, M_t, C_t, A_t = model3(spline,angle,angle_derivative,\
-            angle_sec_derivative,config.n_discretization,config.m,config.mu,\
+            angle_sec_derivative,theta_r,theta_r_derivative,theta_r_second_derivative,\
+            config.n_discretization,config.m,config.mu,\
             config.pho_air,config.A0,config.Cx,config.J,config.width,config.L,config.Wf,n_wheels)
 
         #Model SOCP abu
@@ -427,12 +441,14 @@ def plots():
         n_wheels=3 #number of wheels
 
         #defines the wheels angles
-        theta_r,theta_f0,theta_f1 = model4_extra_angles(spline.derivative(),\
-            spline.derivative().derivative(),config.n_discretization,config.Wf,config.L,config.width)
+        theta_r,theta_r_derivative,theta_r_second_derivative,theta_f0,theta_f1 = extra_angles(spline.derivative(),\
+            spline.derivative().derivative(),spline.derivative().derivative().derivative(),\
+            config.n_discretization,config.Wf,config.L,config.width)
 
         #defines the model's matrices
         R_t, M_t, C_t, d_t, A_t = model4(spline,angle,angle_derivative,\
-            angle_sec_derivative,theta_r,theta_f0,theta_f1,config.n_discretization,\
+            angle_sec_derivative,theta_r,theta_r_derivative,theta_r_second_derivative,\
+            theta_f0,theta_f1,config.n_discretization,\
         config.m,config.mu,config.pho_air,config.A0,config.Cx,config.J,config.width,\
             config.L,config.Wf,config.h,n_wheels)
 
