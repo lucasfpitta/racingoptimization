@@ -26,19 +26,19 @@ def force_tilde(angles,theta_r,theta_f0,theta_f1,n_wheels,width,L,Wf,h):
              #third coordinate 
              [0,0,1,0,0,1,0,0,1],\
              #First angle
-             [-width/2*np.cos(theta_f0[i]+theta_r[i])+Wf*L*np.sin(theta_f0[i]+theta_r[i]),\
-              Wf*L*np.cos(theta_f0[i]+theta_r[i])+width/2*np.sin(theta_f0[i]+theta_r[i]),0,\
-             width/2*np.cos(theta_f1[i]+theta_r[i])+Wf*L*np.sin(theta_f1[i]+theta_r[i]),
-             Wf*L*np.cos(theta_f1[i]+theta_r[i])-width/2*np.sin(theta_f1[i]+theta_r[i]),0,\
+             [-(Wf*L*np.sin(angles[i]-theta_r[i])+width/2*np.cos(angles[i]-theta_r[i]))*np.cos(angles[i]+theta_f0[i])+(Wf*L*np.cos(angles[i]-theta_r[i])-width/2*np.sin(angles[i]-theta_r[i]))*np.sin(angles[i]+theta_f0[i]),\
+              (Wf*L*np.sin(angles[i]-theta_r[i])+width/2*np.cos(angles[i]-theta_r[i]))*np.sin(angles[i]+theta_f0[i])+(Wf*L*np.cos(angles[i]-theta_r[i])-width/2*np.sin(angles[i]-theta_r[i]))*np.cos(angles[i]+theta_f0[i]),0,\
+             -(Wf*L*np.sin(angles[i]-theta_r[i])-width/2*np.cos(angles[i]-theta_r[i]))*np.cos(angles[i]+theta_f1[i])+(Wf*L*np.cos(angles[i]-theta_r[i])+width/2*np.sin(angles[i]-theta_r[i]))*np.sin(angles[i]+theta_f1[i]),
+             (Wf*L*np.sin(angles[i]-theta_r[i])-width/2*np.cos(angles[i]-theta_r[i]))*np.sin(angles[i]+theta_f1[i])+(Wf*L*np.cos(angles[i]-theta_r[i])+width/2*np.sin(angles[i]-theta_r[i]))*np.cos(angles[i]+theta_f1[i]),0,\
                  0,-(1-Wf)*L,0],\
              #Second angle
-             [-h*np.cos(theta_f0[i]+theta_r[i]),h*np.sin(theta_f0[i]+theta_r[i]),-Wf*L,\
-              -h*np.cos(theta_f1[i]+theta_r[i]),h*np.sin(theta_f1[i]+theta_r[i]),-Wf*L,\
-                  -h,0,(1-Wf)*L],
+             [-h*np.cos(angles[i]+theta_f0[i]),h*np.sin(angles[i]+theta_f0[i]),-(Wf*L*np.cos(angles[i]-theta_r[i])-width/2*np.sin(angles[i]-theta_r[i])),\
+              -h*np.cos(angles[i]+theta_f1[i]),h*np.sin(angles[i]+theta_f1[i]),-(Wf*L*np.cos(angles[i]-theta_r[i])+width/2*np.sin(angles[i]-theta_r[i])),\
+            -h*np.cos(angles[i]-theta_r[i]),h*np.sin(angles[i]-theta_r[i]),(1-Wf)*L*np.cos(angles[i]-theta_r[i])],
              #Third angle           
-             [h*np.sin(theta_f0[i]+theta_r[i]),h*np.cos(theta_f0[i]+theta_r[i]),width/2,\
-              h*np.sin(theta_f1[i]+theta_r[i]),h*np.cos(theta_f1[i]+theta_r[i]),-width/2,\
-                  0,h,0]])
+             [h*np.sin(angles[i]+theta_f0[i]),h*np.cos(angles[i]+theta_f0[i]),(Wf*L*np.sin(angles[i]-theta_r[i])+width/2*np.cos(angles[i]-theta_r[i])),\
+              h*np.sin(angles[i]+theta_f1[i]),h*np.cos(angles[i]+theta_f1[i]),(Wf*L*np.sin(angles[i]-theta_r[i])-width/2*np.cos(angles[i]-theta_r[i])),\
+            h*np.sin(angles[i]-theta_r[i]),h*np.cos(angles[i]-theta_r[i]),-(1-Wf)*L*np.sin(angles[i]-theta_r[i])]])
     return R_t
 
 
